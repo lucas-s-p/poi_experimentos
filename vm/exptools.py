@@ -64,6 +64,25 @@ def cmd_hoststats(a):
     print(f"{s['mean']} {s['max']} {s['n_over_85']}" if s else "0 0 0")
 
 
+def host_power():
+    """Perfil de energia e fonte (afetam a frequência dos núcleos do host)."""
+    import glob
+    import subprocess
+    def read(path):
+        try:
+            return open(path).read().strip()
+        except OSError:
+            return None
+    try:
+        profile = subprocess.run(["powerprofilesctl", "get"], capture_output=True, text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        profile = None
+    ac = [read(p) for p in glob.glob("/sys/class/power_supply/A*/online")]
+    return {"power_profile": profile, "ac_online": ac[0] == "1" if ac else None,
+            "governor_cpu4": read("/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor"),
+            "epp_cpu4": read("/sys/devices/system/cpu/cpu4/cpufreq/energy_performance_preference")}
+
+
 def cmd_meta(a):
     meta = {
         "app": a.app, "scenario": a.scenario, "level_pct": a.level, "rep": a.rep,
@@ -76,6 +95,7 @@ def cmd_meta(a):
         "clock_note": "offset = relógio_VM - relógio_host (amostra de menor RTT via SSH)",
         "host_cpu_pct": host_stats(a.host_metrics),
         "host_metrics_file": "host_metrics.csv",
+        "host_power": host_power(),
     }
     with open(a.out, "w") as f:
         json.dump(meta, f, indent=2)
