@@ -1,0 +1,104 @@
+"""Auxiliares do host para os scripts de experimento (roda no env conda poi-analysis).
+
+  scenarios <provisioning.yaml> [--only ID]   linhas "id vcpus ram_mb disk_bw unit_extra" (disk_bw/unit_extra '-' se vazio)
+  config <provisioning.yaml> <demand.yaml> [--quick]   atribuições shell (eval) com app, porta e demanda
+  hoststats <host_metrics.csv>                 "mean max n_over_85" da CPU total do host
+  meta --out ... [opções]                      grava meta.json
+"""
+import argparse
+import csv
+import json
+import shlex
+import sys
+
+import yaml
+
+
+def load(path):
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+
+def cmd_scenarios(a):
+    prov = load(a.provisioning)
+    fixed = prov.get("fixed", {})
+    for s in prov["scenarios"]:
+        if a.only and s["id"] != a.only:
+            continue
+        s = {**fixed, **s}
+        extra = s.get("unit_extra") or "-"
+        print(s["id"], s["vcpus"], s["ram_mb"], s.get("disk_bw") or "-", extra.replace(" ", "\x1f"))
+
+
+def cmd_config(a):
+    prov, dem = load(a.provisioning), load(a.demand)
+    if a.quick:
+        dem = {**dem, **dem.get("quick", {})}
+    if dem.get("target_rps") in (None, 0) and not a.calib:
+        print("echo 'ERRO: target_rps não definido em load/demand.yaml (rode calibrate.sh)' >&2; exit 1")
+        return
+    out = {
+        "APP": prov["app"], "SERVICE": prov["service"], "PORT": prov["port"],
+        "QUERY": dem["query"], "TARGET_RPS": dem.get("target_rps") or 0,
+        "LEVELS": " ".join(str(x) for x in dem["levels_pct"]),
+        "WARMUP_S": dem["warmup_s"], "DURATION_S": dem["duration_s"], "REPS": dem["reps"],
+        "PAUSE_S": dem["pause_s"], "MAX_VUS": dem["max_vus"],
+    }
+    for k, v in out.items():
+        print(f"{k}={shlex.quote(str(v))}")
+
+
+def host_stats(path):
+    vals = []
+    with open(path) as f:
+        for r in csv.DictReader(f):
+            vals.append(float(r["cpu_pct"]))
+    if not vals:
+        return None
+    return {"mean": round(sum(vals) / len(vals), 1), "max": max(vals),
+            "n_over_85": sum(v > 85 for v in vals), "n": len(vals)}
+
+
+def cmd_hoststats(a):
+    s = host_stats(a.csv)
+    print(f"{s['mean']} {s['max']} {s['n_over_85']}" if s else "0 0 0")
+
+
+def cmd_meta(a):
+    meta = {
+        "app": a.app, "scenario": a.scenario, "level_pct": a.level, "rep": a.rep,
+        "target_rps": a.target_rps, "rate_rps": a.rate, "query": a.query,
+        "duration_s": a.duration, "quick": a.quick,
+        "vm": json.loads(a.vm_config),
+        "git_commit": a.commit,
+        "t_start": a.t_start, "t_end": a.t_end,
+        "clock_offset_s": a.clock_offset, "clock_rtt_s": a.clock_rtt,
+        "clock_note": "offset = relógio_VM - relógio_host (amostra de menor RTT via SSH)",
+        "host_cpu_pct": host_stats(a.host_metrics),
+        "host_metrics_file": "host_metrics.csv",
+    }
+    with open(a.out, "w") as f:
+        json.dump(meta, f, indent=2)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("scenarios"); p.add_argument("provisioning"); p.add_argument("--only")
+    p = sub.add_parser("config"); p.add_argument("provisioning"); p.add_argument("demand"); p.add_argument("--quick", action="store_true")
+    p.add_argument("--calib", action="store_true", help="aceita target_rps vazio")
+    p = sub.add_parser("hoststats"); p.add_argument("csv")
+    p = sub.add_parser("meta")
+    for k in ("out", "app", "scenario", "query", "vm_config", "commit", "host_metrics"):
+        p.add_argument("--" + k.replace("_", "-"), dest=k, required=True)
+    for k in ("level", "rep"):
+        p.add_argument("--" + k, type=int, required=True)
+    for k in ("target_rps", "rate", "duration", "t_start", "t_end", "clock_offset", "clock_rtt"):
+        p.add_argument("--" + k.replace("_", "-"), dest=k, type=float, required=True)
+    p.add_argument("--quick", action="store_true")
+    a = ap.parse_args()
+    {"scenarios": cmd_scenarios, "config": cmd_config, "hoststats": cmd_hoststats, "meta": cmd_meta}[a.cmd](a)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

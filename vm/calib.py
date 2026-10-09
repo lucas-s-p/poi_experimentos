@@ -1,0 +1,87 @@
+"""Cálculos da calibração (host, env poi-analysis).
+
+  measure <dir>        métricas de uma rodada (JSON): vazão, latência, utilização da VM, custos por requisição
+  propose-cpu ...      carga-alvo e "adequada" da cpu-bound a partir do custo de CPU por requisição
+"""
+import argparse
+import json
+import math
+import sys
+
+import pandas as pd
+
+
+def measure(d):
+    meta = json.load(open(f"{d}/meta.json"))
+    k6 = json.load(open(f"{d}/k6_summary.json"))["metrics"]
+    vm = pd.read_csv(f"{d}/vm_metrics.csv")
+    off = meta["clock_offset_s"]
+    # só as amostras dentro da janela do k6 (relógio da VM convertido para o do host)
+    t = vm.timestamp - off
+    w = vm[(t >= meta["t_start"] + 1) & (t <= meta["t_end"])]
+    dur = meta["t_end"] - meta["t_start"]
+    reqs = k6["http_reqs"]["values"]["count"]
+    lat = k6["http_req_duration"]["values"]
+    vcpus = meta["vm"]["vcpus"]
+    util = w.cpu_pct.mean() / 100
+    return {
+        "dir": d, "vcpus": vcpus, "ram_mb": meta["vm"]["ram_mb"],
+        "rate_rps": meta["rate_rps"], "throughput_rps": reqs / dur, "reqs": reqs,
+        "failed_rate": k6["http_req_failed"]["values"]["rate"],
+        "dropped": k6.get("dropped_iterations", {}).get("values", {}).get("count", 0),
+        "p50_ms": lat["p(50)"], "p95_ms": lat["p(95)"], "p99_ms": lat["p(99)"], "mean_ms": lat["avg"],
+        "vm_util": util, "app_cpu_pct": w.app_cpu_pct.mean(),
+        "cpu_s_per_req": util * vcpus * dur / reqs,
+        "app_cpu_s_per_req": w.app_cpu_pct.mean() / 100 * dur / reqs,
+        "mem_used_mb": w.mem_used_mb.mean(), "app_rss_mb": w.app_rss_mb.mean(),
+        "app_rss_max_mb": w.app_rss_mb.max(), "swap_max_mb": w.swap_used_mb.max(),
+        # Little: requisições em andamento = vazão × tempo médio de resposta
+        "inflight": reqs / dur * lat["avg"] / 1000,
+        "disk_mb_per_req": (w.disk_read_mb_s.sum() + w.disk_write_mb_s.sum()) / reqs,
+        "n_samples": len(w),
+    }
+
+
+def cmd_measure(a):
+    print(json.dumps(measure(a.dir)))
+
+
+def cmd_propose_cpu(a):
+    noload = measure(a.noload)
+    costs = [measure(d) for d in a.cost]
+    c = sum(m["cpu_s_per_req"] for m in costs) / len(costs)
+    s0 = noload["p50_ms"]
+    adeq = a.adequada_vcpus
+    target = a.util * adeq / c
+    target = math.floor(target * 2) / 2  # múltiplo de 0,5 req/s
+    levels = [int(x) for x in a.levels.split()]
+    scen = [int(x) for x in a.scenarios.split()]
+    pred = {v: {lv: round(target * lv / 100 * c / v, 2) for lv in levels} for v in scen}
+    out = {
+        "noload_p50_ms": round(s0, 1), "noload_p95_ms": round(noload["p95_ms"], 1),
+        "p95_limit_ms": round(2 * s0, 1),
+        "cost_runs": [{k: round(m[k], 4) if isinstance(m[k], float) else m[k]
+                       for k in ("rate_rps", "throughput_rps", "vm_util", "cpu_s_per_req", "app_cpu_s_per_req", "p95_ms")}
+                      for m in costs],
+        "cpu_s_per_req": round(c, 4),
+        "capacity_rps_per_vcpu": round(1 / c, 2),
+        "adequada_vcpus": adeq, "util_target": a.util, "target_rps": target,
+        "predicted_util": pred,
+    }
+    print(json.dumps(out))
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("measure"); p.add_argument("dir")
+    p = sub.add_parser("propose-cpu")
+    p.add_argument("--noload", required=True); p.add_argument("--cost", nargs="+", required=True)
+    p.add_argument("--adequada-vcpus", type=int, required=True); p.add_argument("--util", type=float, default=0.70)
+    p.add_argument("--levels", required=True); p.add_argument("--scenarios", required=True)
+    a = ap.parse_args()
+    {"measure": cmd_measure, "propose-cpu": cmd_propose_cpu}[a.cmd](a)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

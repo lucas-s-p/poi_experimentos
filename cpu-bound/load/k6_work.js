@@ -12,8 +12,8 @@ export const options = {
   scenarios: {
     work: {
       executor: 'constant-arrival-rate',
-      rate: RATE,
-      timeUnit: '1s',
+      rate: Math.round(RATE * 100),   // permite taxa fracionária (ex. 12.5 req/s)
+      timeUnit: '100s',
       duration: __ENV.DURATION || '30s',
       preAllocatedVUs: Math.min(MAX_VUS, Math.max(10, Math.ceil(RATE * 2))),
       maxVUs: MAX_VUS,
