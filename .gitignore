@@ -1,0 +1,12 @@
+# Discos de VM
+*.vdi
+*.vmdk
+# Configuração local
+.env
+# Ambientes conda / Python
+.conda/
+envs/
+__pycache__/
+*.pyc
+# Saídas temporárias
+*.log.tmp
