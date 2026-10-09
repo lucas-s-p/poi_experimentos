@@ -45,6 +45,7 @@ calib_run() {
 jget() { "$HOST_PY" -c 'import json,sys;print(json.loads(sys.argv[1])[sys.argv[2]])' "$1" "$2"; }
 
 log "=== Calibração $APP_NAME ($QUERY)"
+host_check_power || exit 1
 log "Super: $SUP_ID ($SUP_CPUS vCPU) | Adequada: $ADQ_ID ($ADQ_CPUS vCPU)"
 apply_scenario "$SUP_CPUS" "$SUP_MEM" "$SUP_BW" "$SUP_EXTRA"
 

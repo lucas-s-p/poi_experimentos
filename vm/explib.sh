@@ -112,7 +112,9 @@ run_k6() {
 collectors_start() {
     COL_REMOTE="/tmp/poi_${APP_NAME}_metrics.csv"
     COL_REMOTE_PID=$(vm_ssh "rm -f $COL_REMOTE; setsid nohup $REMOTE_PY $REMOTE_DIR/metrics/collector.py --out $COL_REMOTE --match '$APP_MATCH' >/dev/null 2>&1 < /dev/null & echo \$!")
-    "$HOST_PY" "$APP_DIR/metrics/collector.py" --out "$1/host_metrics.csv" --match "k6 run" &
+    # host: k6, processo da VM e o maior "outro" processo (ruído), fixado nos P-cores como o k6
+    taskset -c "$K6_CPUSET" "$HOST_PY" "$APP_DIR/metrics/collector.py" --out "$1/host_metrics.csv" \
+        --match "k6 run" --group "vm=VBoxHeadless --startvm $VM_NAME" --top &
     COL_HOST_PID=$!
     sleep 2   # primeira amostra
 }
@@ -176,6 +178,7 @@ experiment_main() {
     exec > >(tee -a "$RUN_LOG") 2>&1
     local commit; commit="$(git -C "$REPO_ROOT" rev-parse --short HEAD)$(git -C "$REPO_ROOT" diff --quiet HEAD -- "$APP_DIR" || echo '-dirty')"
     log "=== $APP_NAME: experimento ${quick:+(quick $only) }commit $commit; alvo $TARGET_RPS req/s; níveis $LEVELS %; $REPS × ${DURATION_S}s"
+    host_check_power || exit 1
 
     local scen=() line
     mapfile -t scen < <(exp_scenarios ${only:+--only "$only"})
@@ -193,6 +196,7 @@ experiment_main() {
         if (( pending == 0 )); then log "[$id] já concluído; pulando"; continue; fi
 
         log "[$id] cenário: ${cpus} vCPU, ${mem} MB, disco ${bw}"
+        host_check_power || exit 1
         apply_scenario "$cpus" "$mem" "$bw" "$extra"
         local vmcfg; vmcfg="$(vm_config_json)"
 
@@ -217,10 +221,13 @@ experiment_main() {
                     --t-start "$T_START" --t-end "$T_END" \
                     --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" \
                     --host-metrics "$rdir/host_metrics.csv" ${quick:+--quick}
-                read -r hmean hmax hover < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
+                read -r hmean hmax hover omax oover otop < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
                 log "[$id L$lvl r$rep] $(k6_brief "$rdir/k6_summary.json") | $(vm_brief "$rdir/vm_metrics.csv") | host_cpu=${hmean}% (máx ${hmax}%)"
                 if (( hover > 0 )); then
                     log "AVISO [$id L$lvl r$rep]: CPU do host passou de 85% em $hover amostra(s) (máx ${hmax}%); medição pode estar contaminada"
+                fi
+                if (( oover > 0 )); then
+                    log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam os E-cores com a VM"
                 fi
             done
         done

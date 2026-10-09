@@ -1,7 +1,9 @@
 """Coletor de métricas (roda na VM): amostra psutil a cada --interval s e grava CSV até SIGTERM/SIGINT.
 
-Colunas: timestamp (epoch), CPU total e por núcleo (%), memória e swap (MB), taxas de disco e rede
-(por segundo, calculadas entre amostras) e CPU/RSS somados dos processos da app (cmdline contém --match).
+Colunas: timestamp (epoch), CPU total e por núcleo (%), frequência por núcleo (MHz, se disponível),
+memória e swap (MB), taxas de disco e rede (por segundo, calculadas entre amostras), CPU/RSS somados dos
+processos da app (cmdline contém --match) e de cada --group nome=padrão. Com --top, o processo fora dos
+grupos que mais usou CPU no intervalo (para identificar ruído no host).
 """
 import argparse
 import csv
@@ -50,7 +52,14 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--interval", type=float, default=1.0)
     ap.add_argument("--match", default="uvicorn", help="substring do cmdline dos processos da app")
+    ap.add_argument("--group", action="append", default=[], metavar="NOME=PADRÃO",
+                    help="grupo extra de processos (colunas NOME_nproc, NOME_cpu_pct, NOME_rss_mb)")
+    ap.add_argument("--top", action="store_true", help="registra o processo fora dos grupos com mais CPU")
     args = ap.parse_args()
+    groups = {"app": args.match}
+    for g in args.group:
+        name, pat = g.split("=", 1)
+        groups[name] = pat
 
     signal.signal(signal.SIGTERM, _stop)
     signal.signal(signal.SIGINT, _stop)
@@ -62,13 +71,20 @@ def main():
         + ["cpu_iowait_pct", "mem_total_mb", "mem_used_mb", "mem_available_mb", "swap_used_mb",
            "swapin_mb_s", "swapout_mb_s",
            "disk_read_mb_s", "disk_write_mb_s", "disk_read_ops_s", "disk_write_ops_s",
-           "net_rx_mb_s", "net_tx_mb_s",
-           "app_nproc", "app_cpu_pct", "app_rss_mb"]
+           "net_rx_mb_s", "net_tx_mb_s"]
+        + [f"{g}_{c}" for g in groups for c in ("nproc", "cpu_pct", "rss_mb")]
     )
+    freqs = psutil.cpu_freq(percpu=True) or []
+    has_freq = len(freqs) == ncpu and any(f.current for f in freqs)
+    if has_freq:
+        header += [f"cpu{i}_mhz" for i in range(ncpu)]
+    if args.top:
+        header += ["top_other", "top_other_cpu_pct"]
+        others = {}
 
     psutil.cpu_percent(None, percpu=True)
     psutil.cpu_times_percent(None)
-    procs = app_processes(args.match, {})
+    procs = {g: app_processes(pat, {}) for g, pat in groups.items()}
     prev_t = time.time()
     prev_disk = psutil.disk_io_counters()
     prev_net = psutil.net_io_counters()
@@ -90,14 +106,36 @@ def main():
             disk = psutil.disk_io_counters()
             net = psutil.net_io_counters()
 
-            procs = app_processes(args.match, procs)
-            app_cpu = app_rss = 0.0
-            for p in list(procs.values()):
-                try:
-                    app_cpu += p.cpu_percent(None)
-                    app_rss += p.memory_info().rss
-                except psutil.Error:
-                    procs.pop(p.pid, None)
+            gcols = []
+            for g, pat in groups.items():
+                procs[g] = app_processes(pat, procs[g])
+                cpu = rss = 0.0
+                for p in list(procs[g].values()):
+                    try:
+                        cpu += p.cpu_percent(None)
+                        rss += p.memory_info().rss
+                    except psutil.Error:
+                        procs[g].pop(p.pid, None)
+                gcols += [len(procs[g]), f"{cpu:.1f}", f"{rss / MB:.1f}"]
+            extra = []
+            if has_freq:
+                extra += [f"{f.current:.0f}" for f in psutil.cpu_freq(percpu=True)]
+            if args.top:
+                grouped = {pid for d in procs.values() for pid in d}
+                best, best_cpu, alive = "", 0.0, {}
+                for p in psutil.process_iter(["name"]):
+                    if p.pid in grouped or p.pid == psutil.Process().pid:
+                        continue
+                    proc = others.get(p.pid, p)
+                    try:
+                        c = proc.cpu_percent(None) if p.pid in others else (proc.cpu_percent(None) and 0.0)
+                    except psutil.Error:
+                        continue
+                    alive[p.pid] = proc
+                    if c > best_cpu:
+                        best, best_cpu = p.info["name"], c
+                others = alive
+                extra += [best, f"{best_cpu:.1f}"]
 
             w.writerow(
                 [f"{now:.3f}", f"{sum(percpu) / len(percpu):.1f}"]
@@ -111,8 +149,8 @@ def main():
                    f"{(disk.read_count - prev_disk.read_count) / dt:.1f}",
                    f"{(disk.write_count - prev_disk.write_count) / dt:.1f}",
                    f"{(net.bytes_recv - prev_net.bytes_recv) / MB / dt:.3f}",
-                   f"{(net.bytes_sent - prev_net.bytes_sent) / MB / dt:.3f}",
-                   len(procs), f"{app_cpu:.1f}", f"{app_rss / MB:.1f}"]
+                   f"{(net.bytes_sent - prev_net.bytes_sent) / MB / dt:.3f}"]
+                + gcols + extra
             )
             f.flush()
             prev_t, prev_disk, prev_net, prev_swap = now, disk, net, sw

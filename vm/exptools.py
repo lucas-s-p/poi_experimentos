@@ -49,19 +49,35 @@ def cmd_config(a):
 
 
 def host_stats(path):
-    vals = []
+    """CPU total do host e CPU de "outros" processos (fora a VM e o k6), em % de 1 núcleo."""
+    vals, other, tops = [], [], {}
     with open(path) as f:
-        for r in csv.DictReader(f):
-            vals.append(float(r["cpu_pct"]))
+        rows = list(csv.DictReader(f))
+    ncpu = sum(1 for k in (rows[0] if rows else {}) if k.startswith("cpu") and k.endswith("_pct") and k[3:-4].isdigit())
+    for r in rows:
+        vals.append(float(r["cpu_pct"]))
+        if "vm_cpu_pct" in r:
+            other.append(max(0.0, float(r["cpu_pct"]) * ncpu - float(r["vm_cpu_pct"]) - float(r["app_cpu_pct"])))
+        if r.get("top_other"):
+            tops[r["top_other"]] = max(tops.get(r["top_other"], 0.0), float(r["top_other_cpu_pct"]))
     if not vals:
         return None
-    return {"mean": round(sum(vals) / len(vals), 1), "max": max(vals),
-            "n_over_85": sum(v > 85 for v in vals), "n": len(vals)}
+    out = {"mean": round(sum(vals) / len(vals), 1), "max": max(vals),
+           "n_over_85": sum(v > 85 for v in vals), "n": len(vals)}
+    if other:
+        out.update({"other_procs_mean_pct1core": round(sum(other) / len(other), 1),
+                    "other_procs_max_pct1core": round(max(other), 1),
+                    "n_other_over_100": sum(v > 100 for v in other),
+                    "top_other_peaks": dict(sorted(tops.items(), key=lambda kv: -kv[1])[:5])})
+    return out
 
 
 def cmd_hoststats(a):
     s = host_stats(a.csv)
-    print(f"{s['mean']} {s['max']} {s['n_over_85']}" if s else "0 0 0")
+    if not s:
+        print("0 0 0 0 0 -"); return
+    top = ",".join(f"{k}:{v:.0f}" for k, v in list(s.get("top_other_peaks", {}).items())[:3]) or "-"
+    print(f"{s['mean']} {s['max']} {s['n_over_85']} {s.get('other_procs_max_pct1core', 0)} {s.get('n_other_over_100', 0)} {top}")
 
 
 def host_power():

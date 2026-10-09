@@ -4,6 +4,8 @@
 
 Cenários (`provisioning.yaml`): variam só vCPU (1, 2, 3, 4, 6), RAM fixa em 2 GB.
 
+**Por que a Adequada roda a ~55–60% de CPU e não a 70%:** a carga-alvo é a maior taxa com p95 ≤ 2× o tempo sem carga. Dois efeitos fazem a latência subir antes de 70%: (1) o custo por requisição cresce com a carga (limite de potência de 15 W da CPU reduz o turbo dos E-cores, mais o overhead do VirtualBox); (2) cada worker do uvicorn tem fila própria e as conexões são distribuídas ao acaso, então um worker acumula fila enquanto outro fica ocioso. Detalhes em `calibration/`.
+
 ## Como rodar
 
 Pré-requisito: VM criada com `../vm/setup_vm.sh` (ver README da raiz).

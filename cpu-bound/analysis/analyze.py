@@ -150,7 +150,8 @@ def main():
     prov = yaml.safe_load((APP_DIR / "provisioning.yaml").read_text())
     scen = prov["scenarios"]
 
-    reps = [one_rep(p.parent) for p in sorted(res.glob("*/L*/r*/meta.json")) if p.parent.parts[-4] != "quick"]
+    # resultados de --quick ficam em results/quick/ (analisáveis com --results results/quick)
+    reps = [one_rep(p.parent) for p in sorted(res.glob("*/L*/r*/meta.json")) if p.relative_to(res).parts[0] != "quick"]
     if not reps:
         raise SystemExit(f"nenhum resultado em {res}")
     reps = pd.DataFrame(reps)
