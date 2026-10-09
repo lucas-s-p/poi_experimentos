@@ -98,7 +98,7 @@ export DEBIAN_FRONTEND=noninteractive
 sudo systemctl disable --now unattended-upgrades.service apt-daily.timer apt-daily-upgrade.timer >/dev/null 2>&1 || true
 sudo systemctl stop apt-daily.service apt-daily-upgrade.service >/dev/null 2>&1 || true
 need=""
-for p in rsync nginx curl; do dpkg -s "$p" >/dev/null 2>&1 || need="$need $p"; done
+for p in rsync nginx curl fio; do dpkg -s "$p" >/dev/null 2>&1 || need="$need $p"; done
 if [[ -n "$need" ]]; then
     sudo apt-get -o DPkg::Lock::Timeout=300 update -qq
     sudo apt-get -o DPkg::Lock::Timeout=300 install -y -qq $need >/dev/null
