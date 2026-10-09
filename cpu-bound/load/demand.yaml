@@ -1,0 +1,14 @@
+# Demanda do experimento. target_rps e a intensidade são definidos pela calibração (calibrate.sh).
+query: iterations=100000     # intensidade fixa de cada requisição
+target_rps: null             # carga-alvo (nível 100%)
+levels_pct: [25, 50, 75, 100, 125]
+warmup_s: 20
+duration_s: 60               # duração de cada repetição
+reps: 3
+pause_s: 10                  # pausa entre repetições
+max_vus: 500
+quick:                       # ./run_experiment.sh --quick <cenario>
+  levels_pct: [50, 125]
+  duration_s: 20
+  warmup_s: 5
+  reps: 1

@@ -1,0 +1,11 @@
+# Ambiente do host: orquestração (yaml/json) e análise. Mesmo nome nas 3 apps.
+name: poi-analysis
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pandas
+  - matplotlib
+  - scipy
+  - pyyaml
+  - psutil

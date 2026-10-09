@@ -1,0 +1,13 @@
+# Cenários de provisionamento da cpu-bound: varia vCPU, RAM fixa.
+# Valores iniciais; a "adequada" é ajustada pela calibração.
+app: cpu-bound
+service: poi-cpu
+port: 8001
+fixed:
+  ram_mb: 2048
+scenarios:
+  - {id: s1-sub,         name: Sub,                 vcpus: 1}
+  - {id: s2-sub-adeq,    name: Sub→Adequada,        vcpus: 2}
+  - {id: s3-adequada,    name: Adequada,            vcpus: 3}
+  - {id: s4-adeq-super,  name: Adequada→Super,      vcpus: 4}
+  - {id: s5-super,       name: Super,               vcpus: 6}
