@@ -185,6 +185,9 @@ def cmd_meta(a):
         "host_power": host_power(),
         "host_idle_check": json.loads(a.idle) if a.idle else None,
         "vm_events": json.load(open(a.events)) if a.events else None,
+        # swap logo após o reset entre rodadas (antes do warm-up); vm_events.swap_used_at_start_mb é o
+        # swap no início da medição, já depois do warm-up na mesma carga
+        "swap_after_reset_mb": a.swap_after_reset,
         "docker_running": docker_running(),
     }
     with open(a.out, "w") as f:
@@ -208,6 +211,8 @@ def main():
     p.add_argument("--quick", action="store_true")
     p.add_argument("--idle", help="JSON da checagem de host ocioso antes da rodada")
     p.add_argument("--events", help="vm_events.json da rodada (OOM, workers mortos, reinícios)")
+    p.add_argument("--swap-after-reset", dest="swap_after_reset", type=float,
+                   help="swap usado (MB) logo após o reset da rodada")
     p = sub.add_parser("events"); p.add_argument("path")
     p = sub.add_parser("idlecheck"); p.add_argument("--exclude", required=True)
     p.add_argument("--seconds", type=float, default=10)

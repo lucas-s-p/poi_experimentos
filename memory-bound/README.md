@@ -31,7 +31,7 @@ O supervisor do uvicorn faz ping em cada worker e, se ele não responde em 5 s (
 
 ## Reset entre rodadas
 
-Antes de cada rodada (`reset_between_reps: true` em `load/demand.yaml`): reinicia o serviço, `swapoff -a && swapon -a`, `drop_caches`, espera o `/health`; depois a checagem de host ocioso e um warm-up de 40 s logo antes da medição. Sem isso, o thrashing de uma rodada contaminaria a seguinte. O swap no início de cada rodada fica em `meta.json` (`vm_events.swap_used_at_start_mb`, esperado ~0) e gera aviso no `run.log` se passar de 50 MB.
+Antes de cada rodada (`reset_between_reps: true` em `load/demand.yaml`): reinicia o serviço, `swapoff -a && swapon -a`, `drop_caches`, espera o `/health`; depois a checagem de host ocioso e um warm-up de 40 s logo antes da medição. Sem isso, o thrashing de uma rodada contaminaria a seguinte. O swap logo após o reset fica em `meta.json` (`swap_after_reset_mb`, esperado ~0; aviso no `run.log` acima de 50 MB). `vm_events.swap_used_at_start_mb` é o swap no início da medição, já depois do warm-up na mesma carga (no Sub em sobrecarga, o warm-up já leva ao thrashing).
 
 ## Como rodar
 

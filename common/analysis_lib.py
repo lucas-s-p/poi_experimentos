@@ -84,7 +84,8 @@ def one_rep(d: Path):
         "oom_kills": ev.get("oom_kills", np.nan), "worker_deaths": ev.get("worker_deaths", np.nan),
         "worker_deaths_healthcheck": ev.get("worker_deaths_healthcheck", np.nan),
         "worker_deaths_oom": ev.get("worker_deaths_oom", np.nan),
-        "swap_at_start_mb": ev.get("swap_used_at_start_mb", np.nan),
+        "swap_after_reset_mb": meta.get("swap_after_reset_mb", np.nan) if meta.get("swap_after_reset_mb") is not None else np.nan,
+        "swap_at_measure_start_mb": ev.get("swap_used_at_start_mb", np.nan),
         "service_restarts": ev.get("service_restarts", np.nan),
         "host_cpu_mean": meta["host_cpu_pct"]["mean"], "host_cpu_max": meta["host_cpu_pct"]["max"],
     }
@@ -263,7 +264,7 @@ def main(app_dir):
     cols = ["scenario", "level_pct", "rate_rps", "n", "throughput_rps", "p50_ms", "p95_ms", "p95_ms_ci95", "p99_ms",
             "failed_rate", "vm_cpu_pct", "vm_mem_used_mb", "host_cpu_max"]
     if APP_DIR.name == "memory-bound":
-        cols += ["swap_at_start_mb", "swap_max_mb", "swap_io_pg_s", "pgmajfault_s", "oom_kills_total",
+        cols += ["swap_after_reset_mb", "swap_at_measure_start_mb", "swap_max_mb", "swap_io_pg_s", "pgmajfault_s", "oom_kills_total",
                  "worker_deaths_healthcheck_total", "worker_deaths_oom_total", "service_restarts_total"]
     elif APP_DIR.name == "io-bound":
         cols += ["disk_mb_s", "disk_util_pct", "iowait_pct"]

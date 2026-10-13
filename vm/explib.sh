@@ -173,7 +173,11 @@ vm_reset_state() {
             && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null"
     local i
     for i in $(seq 1 60); do
-        curl -fs "$BASE_URL/health" >/dev/null && return 0
+        if curl -fs "$BASE_URL/health" >/dev/null; then
+            # swap logo após o reset (antes do warm-up): mostra se a rodada anterior contaminou esta
+            SWAP_AFTER_RESET=$(vm_ssh "awk '/^SwapTotal/{t=\$2} /^SwapFree/{f=\$2} END{printf \"%.1f\", (t-f)/1024}' /proc/meminfo")
+            return 0
+        fi
         sleep 1
     done
     die "/health não respondeu em 60 s após o reset"
@@ -210,6 +214,8 @@ _run_rep() {
     if (( RESET )); then
         # estado limpo + warm-up próprio em cada rodada (as rodadas ficam independentes)
         vm_reset_state
+        (( ${SWAP_AFTER_RESET%.*} > 50 )) \
+            && log "AVISO [$id L$lvl r$rep]: swap após o reset = ${SWAP_AFTER_RESET} MB (esperado ~0)"
         host_wait_idle "$id L$lvl r$rep" || exit 3   # 3 = host não ficou ocioso (aborta o experimento)
         run_measure "$rdir" "$rate" "$DURATION_S" "$WARMUP_S"
     else
@@ -221,7 +227,8 @@ _run_rep() {
         --duration "$DURATION_S" --vm-config "$vmcfg" --commit "$commit" \
         --t-start "$T_START" --t-end "$T_END" \
         --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" \
-        --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" --events "$rdir/vm_events.json" ${quick:+--quick}
+        --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" --events "$rdir/vm_events.json" \
+        ${SWAP_AFTER_RESET:+--swap-after-reset "$SWAP_AFTER_RESET"} ${quick:+--quick}
     local hmean hmax hover omax oover otop
     read -r hmean hmax hover omax oover otop < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
     log "[$id L$lvl r$rep] $(k6_brief "$rdir/k6_summary.json") | $(vm_brief "$rdir/vm_metrics.csv") | host_cpu=${hmean}% (máx ${hmax}%)"
@@ -230,9 +237,6 @@ _run_rep() {
     fi
     local ev; ev="$("$HOST_PY" "$EXPTOOLS" events "$rdir/vm_events.json")"
     [[ -n "$ev" ]] && log "AVISO [$id L$lvl r$rep]: eventos na VM: $ev"
-    local swap0; swap0="$("$HOST_PY" -c 'import json,sys;print(json.load(open(sys.argv[1])).get("swap_used_at_start_mb"))' "$rdir/vm_events.json")"
-    (( RESET )) && [[ "$swap0" != "None" ]] && (( ${swap0%.*} > 50 )) \
-        && log "AVISO [$id L$lvl r$rep]: swap no início da rodada = ${swap0} MB (esperado ~0 após o reset)"
     if (( oover > 0 )); then
         log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam os E-cores com a VM"
     fi

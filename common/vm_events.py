@@ -9,7 +9,8 @@ Workers mortos são reiniciados pelo próprio uvicorn (o systemd não vê): cont
   - healthcheck: o worker não respondeu ao ping do supervisor do uvicorn em timeout_worker_healthcheck
     (5 s) e levou SIGKILL (ex.: travado em falhas de página sob thrashing). O uvicorn registra o mesmo
     "Child process died" nos dois casos.
-NRestarts conta reinícios do serviço inteiro pelo systemd. swap_used_mb no snapshot = swap no início da rodada.
+NRestarts conta reinícios do serviço inteiro pelo systemd. swap_used_mb no snapshot = swap no início da
+medição (já depois do warm-up); o swap logo após o reset fica em meta.json (swap_after_reset_mb).
 """
 import argparse
 import json
