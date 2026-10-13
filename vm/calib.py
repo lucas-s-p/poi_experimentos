@@ -132,13 +132,16 @@ def cmd_mem_search(a):
     """Maior taxa com média do p95 ≤ limite (sem descartes); pico de memória e banda de disco por taxa."""
     s0 = measure(f"{a.runs}/{a.noload}")["p50_ms"]
     limit = 2 * s0
+    crit = f"{a.metric}_ms"   # p95 (cpu, memória) ou p50 (io: a cauda do fsync impede o critério pelo p95)
     res = group_reps(a.runs, "search", a.rates.split(), a.reps)
     rows, best = [], None
     for r, ms in res.items():
         mean_p95 = sum(m["p95_ms"] for m in ms) / len(ms)
-        ok = mean_p95 <= limit and all(m["dropped"] == 0 for m in ms)
+        mean_crit = sum(m[crit] for m in ms) / len(ms)
+        ok = mean_crit <= limit and all(m["dropped"] == 0 for m in ms)
         rows.append({"rate_rps": float(r), "mean_p95_ms": round(mean_p95, 1), "ok": ok,
-                     "p95_ms": [round(m["p95_ms"]) for m in ms],
+                     "criterion": f"média do {a.metric} ≤ {round(limit, 1)} ms", "mean_crit_ms": round(mean_crit, 1),
+                     "p50_ms": [round(m["p50_ms"]) for m in ms], "p95_ms": [round(m["p95_ms"]) for m in ms],
                      "vm_util": round(sum(m["vm_util"] for m in ms) / len(ms), 3),
                      "mem_used_p95_mb": round(max(m["mem_used_p95_mb"] for m in ms)),
                      "app_rss_p95_mb": round(max(m["app_rss_p95_mb"] for m in ms)),
@@ -159,6 +162,7 @@ def main():
     p = sub.add_parser("mem-search")
     p.add_argument("--runs", required=True); p.add_argument("--rates", required=True)
     p.add_argument("--reps", type=int, default=3); p.add_argument("--noload", default="noload")
+    p.add_argument("--metric", choices=["p50", "p95"], default="p95")
     p = sub.add_parser("confirm")
     p.add_argument("--proposal", required=True); p.add_argument("--runs", required=True)
     p.add_argument("--rates", required=True); p.add_argument("--reps", type=int, default=3)

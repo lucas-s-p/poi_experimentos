@@ -4,10 +4,16 @@
 #   ./calibrate.sh --summary  refaz o resumo a partir das rodadas já medidas (sem medir)
 #   ./calibrate.sh --apply    grava target_rps (load/demand.yaml) e os limites de disco (provisioning.yaml)
 #
+#   ./calibrate.sh --resume   continua, reaproveitando as rodadas já medidas em calibration/runs
+#
+# CRITÉRIO PELO p50 (não p95, como nas outras apps): a latência do fsync no caminho VirtualBox → NVMe do host
+# tem p95 ≈ 3–4 × p50 mesmo com uma requisição por vez (calibration/DIAGNOSTICO_fsync.md), então
+# "p95 ≤ 2 × p50 sem carga" é inalcançável em qualquer carga. O p50 só sobe com fila. p95/p99 seguem reportados.
+#
 # 1. Disco sem limite: tempo sem carga (p50 de 60 requisições a 1 req/s) e carga-alvo = maior taxa candidata
-#    (CANDIDATES) com MÉDIA do p95 de 3 rodadas de 60 s ≤ 2 × tempo sem carga. B = banda de disco
+#    (CANDIDATES) com MÉDIA do p50 de 3 rodadas de 60 s ≤ 2 × tempo sem carga. B = banda de disco
 #    (leitura + escrita, MiB/s, medida na VM) na carga-alvo. O limite do VirtualBox vale para a soma.
-# 2. Adequada = B / 0,70; validada na carga-alvo (3 rodadas) contra 2 × o tempo sem carga DA PRÓPRIA Adequada
+# 2. Adequada = B / 0,70; validada na carga-alvo (3 rodadas, média do p50) contra 2 × o tempo sem carga DA PRÓPRIA Adequada
 #    (o limite de banda aumenta o tempo de serviço mesmo sem fila).
 # 3. Sub = 60% de B, medido uma vez a 125% (sem critério de aprovação). Sub→Adequada = ponto médio.
 # 4. Super = ~3 × Adequada (valor redondo), validado a 125%; Adequada→Super = ponto médio.
@@ -49,9 +55,10 @@ fi
 
 exp_config --calib
 SUMMARY_ONLY=""; [[ "${1:-}" == "--summary" ]] && SUMMARY_ONLY=1
+RESUME=""; [[ "${1:-}" == "--resume" ]] && RESUME=1
 if [[ -z "$SUMMARY_ONLY" ]]; then
-    mkdir -p "$CAL"; rm -rf "$CAL/runs"
-    exec > >(tee "$CAL/calibrate.log") 2>&1
+    mkdir -p "$CAL"; [[ -n "$RESUME" ]] || rm -rf "$CAL/runs"
+    exec > >(tee -a "$CAL/calibrate.log") 2>&1
 fi
 COMMIT="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
 read -r _ VCPUS RAM _ _ <<<"$(exp_scenarios | head -1)"
@@ -59,6 +66,8 @@ read -r _ VCPUS RAM _ _ <<<"$(exp_scenarios | head -1)"
 # calib_run <nome> <rate> <duração> [warm-up]: reset → host ocioso → [warm-up] → medição
 calib_run() {
     local name="$1" rate="$2" dur="$3" warm="${4:-0}" dir="$CAL/runs/$1"
+    if [[ -f "$dir/meta.json" ]]; then log "[$name] já medida; reaproveitando"; return 0; fi
+    rm -rf "$dir"
     vm_reset_state
     host_wait_idle "calib $name" || exit 1
     run_measure "$dir" "$rate" "$dur" "$warm"
@@ -102,40 +111,45 @@ def disk(d):
 val = [dict(pick(measure(f"adequada-r{k}"), K), **disk(f"adequada-r{k}")) for k in (1, 2, 3)]
 adq_limit = 2 * noload["s3-adequada"]["p50_ms"]
 mean_p95 = sum(v["p95_ms"] for v in val) / 3
+mean_p50 = sum(v["p50_ms"] for v in val) / 3
 subm = dict(pick(measure(f"sub-125"), K), **disk("sub-125"))
 supm = dict(pick(measure(f"super-125"), K), **disk("super-125"))
 prop = {
     "query": query, "search_noload_p50_ms": search["noload_p50_ms"], "search_p95_limit_ms": search["p95_limit_ms"],
     "search": search["search"], "target_rps": target, "disk_mb_s_at_target": round(B, 2),
     "disk_bw": ids, "noload_by_scenario": nl,
-    "adequada_validation": val, "adequada_p95_limit_ms": round(adq_limit, 1),
-    "adequada_mean_p95_ms": round(mean_p95, 1), "adequada_ok": mean_p95 <= adq_limit,
+    "criterion": "média do p50 de 3 rodadas ≤ 2 × p50 sem carga (cauda do fsync impede o critério pelo p95)",
+    "adequada_validation": val, "adequada_p50_limit_ms": round(adq_limit, 1),
+    "adequada_mean_p50_ms": round(mean_p50, 1), "adequada_mean_p95_ms": round(mean_p95, 1),
+    "adequada_ok": mean_p50 <= adq_limit,
     "sub_125pct": subm, "super_125pct": supm,
+    "super_p50_over_noload": round(supm["p50_ms"] / noload["s5-super"]["p50_ms"], 2),
     "super_p95_over_noload": round(supm["p95_ms"] / noload["s5-super"]["p50_ms"], 2),
 }
 json.dump(prop, open(out, "w"), indent=2, default=lambda o: o.item())
 
 print("\n================ PROPOSTA (não aplicada) ================")
 print(f"Intensidade: {query}")
-print(f"Disco sem limite: tempo sem carga p50 {search['noload_p50_ms']} ms → limite p95 {search['p95_limit_ms']} ms")
-print(f"{'taxa':>6} {'p95 (r1/r2/r3)':>18} {'média':>7} {'disco MiB/s':>11} {'MiB/req':>8} {'em andamento':>12}  ok")
+print(f"Critério: {prop['criterion']}")
+print(f"Disco sem limite: tempo sem carga p50 {search['noload_p50_ms']} ms → limite (p50) {search['p95_limit_ms']} ms")
+print(f"{'taxa':>6} {'p50 (r1/r2/r3)':>16} {'média p50':>9} {'p95 (r1/r2/r3)':>16} {'média p95':>9} {'disco MiB/s':>11} {'MiB/req':>8} {'em andamento':>12}  ok")
 for r in search["search"]:
-    print(f"{r['rate_rps']:>6} {'/'.join(map(str, r['p95_ms'])):>18} {r['mean_p95_ms']:>7} {r['disk_mb_s']:>11} {r['disk_mb_per_req']:>8} {r['inflight']:>12}  {'OK' if r['ok'] else '-'}")
+    print(f"{r['rate_rps']:>6} {'/'.join(map(str, r['p50_ms'])):>16} {r['mean_crit_ms']:>9} {'/'.join(map(str, r['p95_ms'])):>16} {r['mean_p95_ms']:>9} {r['disk_mb_s']:>11} {r['disk_mb_per_req']:>8} {r['inflight']:>12}  {'OK' if r['ok'] else '-'}")
 print(f"\nCarga-alvo: {target} req/s | banda de disco na carga-alvo (B): {B:.1f} MiB/s")
 print("Limites (MiB/s): " + ", ".join(f"{k} {v}" for k, v in ids.items()))
 print("\nTempo sem carga por cenário (p50 / p95 de ~60 req a 1 req/s):")
 for k, v in nl.items():
     print(f"  {k:14} {v['p50_ms']:7.1f} / {v['p95_ms']:7.1f} ms")
-print(f"\nValidação da Adequada ({adq} MiB/s) a {target} req/s, limite p95 = 2 × {noload['s3-adequada']['p50_ms']:.1f} = {adq_limit:.1f} ms:")
+print(f"\nValidação da Adequada ({adq} MiB/s) a {target} req/s, limite (média do p50) = 2 × {noload['s3-adequada']['p50_ms']:.1f} = {adq_limit:.1f} ms:")
 for k, m in enumerate(val, 1):
     print(f"  r{k}: vazão {m['throughput_rps']}, p50 {m['p50_ms']:.0f} / p95 {m['p95_ms']:.0f} / p99 {m['p99_ms']:.0f} ms, "
           f"disco {m['disk_mb_s']} MiB/s ({m['disk_mb_s']/adq:.0%} do limite), %util {m['disk_util_pct']}, iowait {m['iowait_pct']}%")
-print(f"  média do p95 = {prop['adequada_mean_p95_ms']} ms → {'OK' if prop['adequada_ok'] else 'FALHA'}")
+print(f"  média do p50 = {prop['adequada_mean_p50_ms']} ms → {'OK' if prop['adequada_ok'] else 'FALHA'} (média do p95 = {prop['adequada_mean_p95_ms']} ms, reportada)")
 for name, m, lim in (("Sub", subm, sub), ("Super", supm, sup)):
     print(f"\n{name} ({lim} MiB/s) a 125% ({m['rate_rps']} req/s): vazão {m['throughput_rps']}, p50 {m['p50_ms']:.0f} / p95 {m['p95_ms']:.0f} / p99 {m['p99_ms']:.0f} ms, "
           f"falhas {m['failed_rate']:.1%}, descartadas {m['dropped']}, disco {m['disk_mb_s']} MiB/s ({m['disk_mb_s']/lim:.0%} do limite), "
           f"%util {m['disk_util_pct']}, iowait {m['iowait_pct']}%, mortes healthcheck/OOM {m['worker_deaths_healthcheck']}/{m['worker_deaths_oom']}")
-print(f"Super: p95 a 125% ÷ tempo sem carga do Super = {prop['super_p95_over_noload']}")
+print(f"Super a 125% ÷ tempo sem carga do Super: p50 {prop['super_p50_over_noload']}×, p95 {prop['super_p95_over_noload']}×")
 print("\nPara aplicar: ./calibrate.sh --apply")
 EOF
 }
@@ -164,7 +178,7 @@ log "Busca da carga-alvo (disco sem limite): taxas $CANDIDATES req/s, 3 × 60 s 
 for rate in $CANDIDATES; do
     for rep in 1 2 3; do calib_run "search-$rate-r$rep" "$rate" 60 "$WARMUP_S"; done
 done
-$CALIB mem-search --runs "$CAL/runs" --rates "$CANDIDATES" --reps 3 --noload noload-sem-limite >"$CAL/search.json"
+$CALIB mem-search --runs "$CAL/runs" --rates "$CANDIDATES" --reps 3 --noload noload-sem-limite --metric p50 >"$CAL/search.json"
 derive
 log "Carga-alvo = $TARGET req/s; banda B = $B MiB/s → Sub $SUB, Sub→Adeq $S2, Adequada $ADQ, Adeq→Super $S4, Super $SUP MiB/s"
 
