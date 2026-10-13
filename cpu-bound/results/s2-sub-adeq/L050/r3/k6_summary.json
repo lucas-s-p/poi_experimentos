@@ -1,0 +1,232 @@
+{
+  "root_group": {
+    "checks": [
+      {
+        "path": "::status 200",
+        "id": "fad9fa412b86fcb03bee97c80dcd61f1",
+        "passes": 1351,
+        "fails": 0,
+        "name": "status 200"
+      }
+    ],
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": []
+  },
+  "options": {
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(50)",
+      "p(90)",
+      "p(95)",
+      "p(99)"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": true
+  },
+  "state": {
+    "isStdErrTTY": false,
+    "testRunDurationMs": 60036.753316,
+    "isStdOutTTY": false
+  },
+  "metrics": {
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(99)": 37.037224,
+        "avg": 34.437346743893414,
+        "min": 32.336887,
+        "med": 34.400393,
+        "max": 42.162176,
+        "p(50)": 34.400393,
+        "p(90)": 35.982996,
+        "p(95)": 36.3102565
+      }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0.0028381539600296083,
+        "min": 0,
+        "med": 0,
+        "max": 0.171458,
+        "p(50)": 0,
+        "p(90)": 0,
+        "p(95)": 0,
+        "p(99)": 0.118084
+      }
+    },
+    "iteration_duration": {
+      "contains": "time",
+      "values": {
+        "max": 42.236345,
+        "p(50)": 34.453171,
+        "p(90)": 36.046212,
+        "p(95)": 36.397799500000005,
+        "p(99)": 37.214742,
+        "avg": 34.501444626942984,
+        "min": 32.383216,
+        "med": 34.453171
+      },
+      "type": "trend"
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0.010502,
+        "med": 0.015807,
+        "max": 0.110437,
+        "p(50)": 0.015807,
+        "p(90)": 0.028207,
+        "p(95)": 0.033298499999999995,
+        "p(99)": 0.047858,
+        "avg": 0.01865576535899334
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(50)": 0.005779,
+        "p(90)": 0.010199,
+        "p(95)": 0.0133425,
+        "p(99)": 0.0294365,
+        "avg": 0.007020847520355302,
+        "min": 0.003833,
+        "med": 0.005779,
+        "max": 0.061718
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(90)": 0,
+        "p(95)": 0,
+        "p(99)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "max": 0,
+        "p(50)": 0
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 0,
+        "min": 0,
+        "max": 1
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "passes": 0,
+        "fails": 1351,
+        "rate": 0
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 276790,
+        "rate": 4610.3425770399635
+      }
+    },
+    "http_req_blocked": {
+      "contains": "time",
+      "values": {
+        "max": 0.204617,
+        "p(50)": 0.002199,
+        "p(90)": 0.003531,
+        "p(95)": 0.007035,
+        "p(99)": 0.1412365,
+        "avg": 0.006196555144337524,
+        "min": 0.001326,
+        "med": 0.002199
+      },
+      "type": "trend"
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(50)": 34.379014,
+        "p(90)": 35.957051,
+        "p(95)": 36.286463,
+        "p(99)": 37.000035499999996,
+        "avg": 34.41167013101405,
+        "min": 32.308507,
+        "med": 34.379014,
+        "max": 42.081127
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 124292,
+        "rate": 2070.265181493013
+      }
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 45,
+        "min": 45,
+        "max": 45
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 1351,
+        "fails": 0
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1351,
+        "rate": 22.502882407532752
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1351,
+        "rate": 22.502882407532752
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 32.336887,
+        "med": 34.400393,
+        "max": 42.162176,
+        "p(50)": 34.400393,
+        "p(90)": 35.982996,
+        "p(95)": 36.3102565,
+        "p(99)": 37.037224,
+        "avg": 34.437346743893414
+      }
+    }
+  }
+}

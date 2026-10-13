@@ -101,11 +101,33 @@ def demand_axis(ax, summ):
 
 
 def line(ax, d, col, color, marker, label, direct=True):
-    ax.errorbar(d.rate_rps, d[col], yerr=d[f"{col}_ci95"].fillna(0), color=color, marker=marker,
+    ci = d[f"{col}_ci95"].fillna(0)
+    lower = ci
+    if ax.get_yscale() == "log":
+        lower = np.minimum(ci, d[col] * 0.9)  # IC inferior ≤ 0 não existe em escala log
+    ax.errorbar(d.rate_rps, d[col], yerr=[lower, ci], color=color, marker=marker,
                 markersize=6, linewidth=2, capsize=3, elinewidth=1, label=label)
     if direct:
         last = d.iloc[-1]
-        ax.annotate(label, (last.rate_rps, last[col]), xytext=(6, 0), textcoords="offset points",
+        ax._direct_labels = getattr(ax, "_direct_labels", []) + [(label, last.rate_rps, last[col])]
+
+
+def place_direct_labels(ax, min_gap_pt=11):
+    """Rótulos no fim das linhas, afastados verticalmente para não se sobreporem."""
+    items = getattr(ax, "_direct_labels", [])
+    if not items:
+        return
+    fig = ax.figure
+    fig.canvas.draw()
+    to_px = ax.transData.transform
+    gap = min_gap_pt * fig.dpi / 72
+    pts = sorted(((to_px((x, y))[1], lab, x, y) for lab, x, y in items))
+    placed = []
+    for py, lab, x, y in pts:
+        py = max(py, placed[-1] + gap) if placed else py
+        placed.append(py)
+        dy_pt = (py - to_px((x, y))[1]) * 72 / fig.dpi
+        ax.annotate(lab, (x, y), xytext=(6, dy_pt), textcoords="offset points",
                     va="center", fontsize=8, color=INK2)
 
 
@@ -113,9 +135,10 @@ def plot_scenario(summ, sid, name, out):
     d = summ[summ.scenario == sid].sort_values("level_pct")
     fig, axes = plt.subplots(2, 2, figsize=(11, 8), constrained_layout=True)
     ax = axes[0, 0]
+    log_y(ax)
     for i, col in enumerate(("p50_ms", "p95_ms", "p99_ms")):
         line(ax, d, col, SERIES[i], MARKERS[i], col.split("_")[0])
-    log_y(ax); style(ax, "Latência", "ms (escala log)"); ax.legend(frameon=False, fontsize=8)
+    style(ax, "Latência", "ms (escala log)"); ax.legend(frameon=False, fontsize=8)
     ax = axes[0, 1]
     ax.plot(d.rate_rps, d.rate_rps, "--", color=INK2, linewidth=1, label="oferecida")
     line(ax, d, "throughput_rps", SERIES[0], MARKERS[0], "atingida", direct=False)
@@ -129,6 +152,9 @@ def plot_scenario(summ, sid, name, out):
     style(ax, "Memória", "MB"); ax.legend(frameon=False, fontsize=8); ax.set_ylim(bottom=0)
     for ax in axes.flat:
         demand_axis(ax, d)
+    for ax in axes.flat:
+        ax.margins(x=0.1)
+        place_direct_labels(ax)
     r = d.iloc[0]
     fig.suptitle(f"{APP_DIR.name} · {name} ({r.vcpus:g} vCPU, {r.ram_mb:g} MB) · média ± IC 95% (n={r.n:g})",
                  x=0.01, ha="left", fontsize=12, color=INK)
@@ -138,17 +164,20 @@ def plot_scenario(summ, sid, name, out):
 def plot_compare(summ, scen, cols, title, out, logy=()):
     fig, axes = plt.subplots(1, len(cols), figsize=(5.2 * len(cols), 4.6), constrained_layout=True)
     for ax, col in zip(np.atleast_1d(axes), cols):
+        label, unit = METRICS[col]
+        if col in logy:
+            log_y(ax); unit += " (escala log)"
         for i, s in enumerate(scen):
             d = summ[summ.scenario == s["id"]].sort_values("level_pct")
             if len(d):
                 line(ax, d, col, SERIES[i], MARKERS[i], s["name"])
-        label, unit = METRICS[col]
-        if col in logy:
-            log_y(ax); unit += " (escala log)"
         style(ax, label, unit)
         demand_axis(ax, summ)
     np.atleast_1d(axes)[0].legend(frameon=False, fontsize=8)
     fig.suptitle(f"{APP_DIR.name} · {title} · média ± IC 95%", x=0.01, ha="left", fontsize=12, color=INK)
+    for ax in np.atleast_1d(axes):
+        ax.margins(x=0.12)
+        place_direct_labels(ax)
     fig.savefig(out, dpi=130); plt.close(fig)
 
 

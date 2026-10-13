@@ -1,0 +1,59 @@
+{
+  "app": "cpu-bound",
+  "scenario": "s5-super",
+  "level_pct": 25,
+  "rep": 3,
+  "target_rps": 45.0,
+  "rate_rps": 11.25,
+  "query": "iterations=100000",
+  "duration_s": 60.0,
+  "quick": false,
+  "vm": {
+    "vcpus": 6,
+    "ram_mb": 2048,
+    "disk_bw_group": "none",
+    "disk_bw_bytes_per_sec": null,
+    "vm_affinity": "4-11",
+    "k6_affinity": "0-3"
+  },
+  "git_commit": "a1708d2",
+  "t_start": 1791904133.5276053,
+  "t_end": 1791904193.580459,
+  "clock_offset_s": 0.039076,
+  "clock_rtt_s": 0.009507,
+  "clock_note": "offset = rel\u00f3gio_VM - rel\u00f3gio_host (amostra de menor RTT via SSH)",
+  "host_cpu_pct": {
+    "mean": 3.9,
+    "max": 4.7,
+    "n_over_85": 0,
+    "n": 64,
+    "other_procs_mean_pct1core": 4.6,
+    "other_procs_max_pct1core": 12.4,
+    "n_other_over_100": 0,
+    "top_other_peaks": {
+      "claude": 4.0,
+      "kworker/6:1-events": 3.0,
+      "kworker/5:1-events": 3.0,
+      "irq/168-rtw89_pci": 2.0,
+      "gnome-shell": 2.0
+    }
+  },
+  "host_metrics_file": "host_metrics.csv",
+  "host_power": {
+    "power_profile": "performance",
+    "ac_online": true,
+    "unattended_upgrades": "active",
+    "apt_daily_timer": "active",
+    "apt_daily_upgrade_timer": "active",
+    "snap_refresh_hold": "n\u00e3o vis\u00edvel sem sudo",
+    "governor_cpu4": "powersave",
+    "epp_cpu4": "performance"
+  },
+  "host_idle_check": {
+    "attempts": 1,
+    "other_pct_1core": 5.0,
+    "top": "claude:2",
+    "threshold_pct_1core": 50
+  },
+  "docker_running": false
+}

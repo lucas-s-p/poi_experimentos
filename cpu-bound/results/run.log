@@ -1,0 +1,154 @@
+[2026-10-13 10:32:00] === cpu-bound: experimento commit a1708d2; alvo 45.0 req/s; níveis 25 50 75 100 125 %; 3 × 60s
+[2026-10-13 10:32:00] Energia ok: perfil performance, na tomada
+[2026-10-13 10:32:00] AVISO: unattended-upgrades ativo no host (registrado no meta.json)
+[2026-10-13 10:32:00] [s1-sub] cenário: 1 vCPU, 2048 MB, disco -
+[2026-10-13 10:32:00] Energia ok: perfil performance, na tomada
+[2026-10-13 10:32:00] Desligando poi-vm
+[2026-10-13 10:32:05] RAM do host ok: 12721 MB disponíveis (necessário 3584 MB)
+[2026-10-13 10:32:05] Recursos: 1 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 10:32:07] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 10:32:08] Aguardando SSH (até 180s)
+[2026-10-13 10:32:23] SSH ok (4s)
+[2026-10-13 10:32:23] Deploy de cpu-bound
+[2026-10-13 10:32:25] /health ok ({"status":"ok","app":"cpu-bound","pid":1024,"cpus":1})
+[2026-10-13 10:32:25] [s1-sub L25] warm-up 40s a 11.250 req/s
+[2026-10-13 10:34:20] [s1-sub L25 r1] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=34ms p99=39ms | vm_cpu=20% app_cpu=35% mem_used=360MB swap=0MB | host_cpu=3.8% (máx 4.5%)
+[2026-10-13 10:35:35] [s1-sub L25 r2] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=34ms p99=39ms | vm_cpu=24% app_cpu=35% mem_used=360MB swap=0MB | host_cpu=3.8% (máx 4.7%)
+[2026-10-13 10:36:51] [s1-sub L25 r3] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=34ms p99=39ms | vm_cpu=26% app_cpu=35% mem_used=359MB swap=0MB | host_cpu=3.8% (máx 7.3%)
+[2026-10-13 10:36:51] [s1-sub L50] warm-up 40s a 22.500 req/s
+[2026-10-13 10:38:46] [s1-sub L50 r1] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=38ms | vm_cpu=50% app_cpu=69% mem_used=357MB swap=0MB | host_cpu=6.5% (máx 7.4%)
+[2026-10-13 10:40:01] [s1-sub L50 r2] reqs=1350 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=33ms p99=38ms | vm_cpu=47% app_cpu=69% mem_used=357MB swap=0MB | host_cpu=6.5% (máx 7.6%)
+[2026-10-13 10:41:15] [s1-sub L50 r3] reqs=1350 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=38ms | vm_cpu=55% app_cpu=69% mem_used=356MB swap=0MB | host_cpu=6.4% (máx 7.2%)
+[2026-10-13 10:41:15] [s1-sub L75] warm-up 40s a 33.750 req/s
+[2026-10-13 10:43:16] [s1-sub L75 r1] reqs=1952 vazão=30.7/s falhas=0.0% drop=74 p50=2641ms p95=4240ms p99=4749ms | vm_cpu=95% app_cpu=94% mem_used=357MB swap=0MB | host_cpu=8.4% (máx 9.8%)
+[2026-10-13 10:44:35] [s1-sub L75 r2] reqs=1951 vazão=30.7/s falhas=0.0% drop=75 p50=2703ms p95=4217ms p99=4726ms | vm_cpu=94% app_cpu=94% mem_used=358MB swap=0MB | host_cpu=8.4% (máx 9.5%)
+[2026-10-13 10:45:54] [s1-sub L75 r3] reqs=1949 vazão=30.7/s falhas=0.0% drop=77 p50=2672ms p95=4208ms p99=4836ms | vm_cpu=94% app_cpu=94% mem_used=358MB swap=0MB | host_cpu=8.3% (máx 9.2%)
+[2026-10-13 10:45:54] [s1-sub L100] warm-up 40s a 45.000 req/s
+[2026-10-13 10:48:15] [s1-sub L100 r1] reqs=2309 vazão=30.6/s falhas=5.3% drop=391 p50=6201ms p95=30000ms p99=30001ms | vm_cpu=95% app_cpu=95% mem_used=361MB swap=0MB | host_cpu=8.5% (máx 9.7%)
+[2026-10-13 10:49:46] [s1-sub L100 r2] reqs=2300 vazão=30.6/s falhas=4.3% drop=401 p50=6584ms p95=28612ms p99=30001ms | vm_cpu=95% app_cpu=94% mem_used=362MB swap=0MB | host_cpu=8.4% (máx 9.5%)
+[2026-10-13 10:51:16] [s1-sub L100 r3] reqs=2302 vazão=30.5/s falhas=4.3% drop=399 p50=6489ms p95=29066ms p99=30001ms | vm_cpu=95% app_cpu=95% mem_used=363MB swap=0MB | host_cpu=8.5% (máx 10.2%)
+[2026-10-13 10:51:16] [s1-sub L125] warm-up 40s a 56.250 req/s
+[2026-10-13 10:53:49] [s1-sub L125 r1] reqs=2513 vazão=30.5/s falhas=17.7% drop=863 p50=5760ms p95=30001ms p99=30001ms | vm_cpu=96% app_cpu=95% mem_used=363MB swap=0MB | host_cpu=8.5% (máx 9.6%)
+[2026-10-13 10:55:27] [s1-sub L125 r2] reqs=2516 vazão=30.6/s falhas=17.2% drop=859 p50=5830ms p95=30001ms p99=30001ms | vm_cpu=95% app_cpu=95% mem_used=364MB swap=0MB | host_cpu=8.5% (máx 10.0%)
+[2026-10-13 10:57:04] [s1-sub L125 r3] reqs=2507 vazão=30.6/s falhas=16.4% drop=869 p50=6070ms p95=30001ms p99=30001ms | vm_cpu=96% app_cpu=96% mem_used=364MB swap=0MB | host_cpu=8.6% (máx 9.5%)
+[2026-10-13 10:57:04] [s2-sub-adeq] cenário: 2 vCPU, 2048 MB, disco -
+[2026-10-13 10:57:04] Energia ok: perfil performance, na tomada
+[2026-10-13 10:57:04] Desligando poi-vm
+[2026-10-13 10:57:08] RAM do host ok: 12722 MB disponíveis (necessário 3584 MB)
+[2026-10-13 10:57:08] Recursos: 2 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 10:57:10] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 10:57:11] Aguardando SSH (até 180s)
+[2026-10-13 10:57:26] SSH ok (4s)
+[2026-10-13 10:57:26] Deploy de cpu-bound
+[2026-10-13 10:57:28] /health ok ({"status":"ok","app":"cpu-bound","pid":1060,"cpus":2})
+[2026-10-13 10:57:28] [s2-sub-adeq L25] warm-up 40s a 11.250 req/s
+[2026-10-13 10:59:23] [s2-sub-adeq L25 r1] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=37ms p99=40ms | vm_cpu=10% app_cpu=36% mem_used=415MB swap=0MB | host_cpu=3.8% (máx 4.5%)
+[2026-10-13 11:00:38] [s2-sub-adeq L25 r2] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=10% app_cpu=36% mem_used=416MB swap=0MB | host_cpu=3.8% (máx 4.3%)
+[2026-10-13 11:01:53] [s2-sub-adeq L25 r3] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=9% app_cpu=36% mem_used=416MB swap=0MB | host_cpu=3.7% (máx 5.1%)
+[2026-10-13 11:01:53] [s2-sub-adeq L50] warm-up 40s a 22.500 req/s
+[2026-10-13 11:03:47] [s2-sub-adeq L50 r1] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=35ms p99=36ms | vm_cpu=25% app_cpu=70% mem_used=424MB swap=0MB | host_cpu=6.6% (máx 7.4%)
+[2026-10-13 11:05:02] [s2-sub-adeq L50 r2] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=35ms p95=36ms p99=37ms | vm_cpu=22% app_cpu=72% mem_used=425MB swap=0MB | host_cpu=6.7% (máx 7.7%)
+[2026-10-13 11:06:17] [s2-sub-adeq L50 r3] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=26% app_cpu=72% mem_used=434MB swap=0MB | host_cpu=6.7% (máx 7.8%)
+[2026-10-13 11:06:17] [s2-sub-adeq L75] warm-up 40s a 33.750 req/s
+[2026-10-13 11:08:12] [s2-sub-adeq L75 r1] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=35ms p95=65ms p99=90ms | vm_cpu=45% app_cpu=105% mem_used=436MB swap=0MB | host_cpu=9.4% (máx 10.7%)
+[2026-10-13 11:09:27] [s2-sub-adeq L75 r2] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=36ms p95=70ms p99=92ms | vm_cpu=45% app_cpu=107% mem_used=435MB swap=0MB | host_cpu=9.6% (máx 10.6%)
+[2026-10-13 11:10:43] [s2-sub-adeq L75 r3] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=34ms p95=43ms p99=66ms | vm_cpu=45% app_cpu=106% mem_used=436MB swap=0MB | host_cpu=9.9% (máx 14.3%)
+[2026-10-13 11:10:43] [s2-sub-adeq L100] warm-up 40s a 45.000 req/s
+[2026-10-13 11:12:39] [s2-sub-adeq L100 r1] reqs=2701 vazão=44.7/s falhas=0.0% drop=0 p50=184ms p95=748ms p99=1136ms | vm_cpu=68% app_cpu=141% mem_used=430MB swap=0MB | host_cpu=12.4% (máx 14.8%)
+[2026-10-13 11:13:54] [s2-sub-adeq L100 r2] reqs=2701 vazão=44.8/s falhas=0.0% drop=0 p50=68ms p95=269ms p99=430ms | vm_cpu=68% app_cpu=141% mem_used=431MB swap=0MB | host_cpu=12.4% (máx 14.5%)
+[2026-10-13 11:15:10] [s2-sub-adeq L100 r3] reqs=2701 vazão=44.8/s falhas=0.0% drop=0 p50=66ms p95=418ms p99=722ms | vm_cpu=68% app_cpu=140% mem_used=437MB swap=0MB | host_cpu=12.3% (máx 14.0%)
+[2026-10-13 11:15:10] [s2-sub-adeq L125] warm-up 40s a 56.250 req/s
+[2026-10-13 11:17:18] [s2-sub-adeq L125 r1] reqs=3077 vazão=45.2/s falhas=0.0% drop=298 p50=5063ms p95=8614ms p99=9704ms | vm_cpu=70% app_cpu=147% mem_used=445MB swap=0MB | host_cpu=12.9% (máx 14.5%)
+[2026-10-13 11:18:42] [s2-sub-adeq L125 r2] reqs=3076 vazão=45.1/s falhas=0.0% drop=300 p50=5033ms p95=8818ms p99=9974ms | vm_cpu=69% app_cpu=145% mem_used=448MB swap=0MB | host_cpu=12.8% (máx 14.6%)
+[2026-10-13 11:20:04] [s2-sub-adeq L125 r3] reqs=3073 vazão=45.2/s falhas=0.0% drop=303 p50=5055ms p95=8622ms p99=9607ms | vm_cpu=70% app_cpu=147% mem_used=450MB swap=0MB | host_cpu=12.9% (máx 14.6%)
+[2026-10-13 11:20:04] [s3-adequada] cenário: 3 vCPU, 2048 MB, disco -
+[2026-10-13 11:20:04] Energia ok: perfil performance, na tomada
+[2026-10-13 11:20:04] Desligando poi-vm
+[2026-10-13 11:20:08] RAM do host ok: 12732 MB disponíveis (necessário 3584 MB)
+[2026-10-13 11:20:09] Recursos: 3 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 11:20:11] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 11:20:22] Aguardando SSH (até 180s)
+[2026-10-13 11:20:23] SSH ok (0s)
+[2026-10-13 11:20:23] Deploy de cpu-bound
+[2026-10-13 11:20:25] /health ok ({"status":"ok","app":"cpu-bound","pid":1075,"cpus":3})
+[2026-10-13 11:20:25] [s3-adequada L25] warm-up 40s a 11.250 req/s
+[2026-10-13 11:22:20] [s3-adequada L25 r1] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=34ms | vm_cpu=12% app_cpu=35% mem_used=450MB swap=0MB | host_cpu=3.8% (máx 4.5%)
+[2026-10-13 11:23:35] [s3-adequada L25 r2] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=34ms | vm_cpu=11% app_cpu=34% mem_used=460MB swap=0MB | host_cpu=3.7% (máx 4.5%)
+[2026-10-13 11:24:50] [s3-adequada L25 r3] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=34ms | vm_cpu=11% app_cpu=35% mem_used=461MB swap=0MB | host_cpu=3.8% (máx 4.7%)
+[2026-10-13 11:24:50] [s3-adequada L50] warm-up 40s a 22.500 req/s
+[2026-10-13 11:26:46] [s3-adequada L50 r1] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=34ms | vm_cpu=22% app_cpu=68% mem_used=469MB swap=0MB | host_cpu=6.5% (máx 7.6%)
+[2026-10-13 11:28:01] [s3-adequada L50 r2] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=34ms | vm_cpu=23% app_cpu=68% mem_used=471MB swap=0MB | host_cpu=6.5% (máx 7.5%)
+[2026-10-13 11:29:16] [s3-adequada L50 r3] reqs=1350 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=34ms | vm_cpu=23% app_cpu=69% mem_used=472MB swap=0MB | host_cpu=6.6% (máx 7.5%)
+[2026-10-13 11:29:16] [s3-adequada L75] warm-up 40s a 33.750 req/s
+[2026-10-13 11:31:12] [s3-adequada L75 r1] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=33ms p95=54ms p99=68ms | vm_cpu=34% app_cpu=103% mem_used=474MB swap=0MB | host_cpu=9.3% (máx 11.4%)
+[2026-10-13 11:32:28] [s3-adequada L75 r2] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=34ms p95=47ms p99=57ms | vm_cpu=34% app_cpu=103% mem_used=472MB swap=0MB | host_cpu=9.6% (máx 14.1%)
+[2026-10-13 11:33:43] [s3-adequada L75 r3] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=33ms p95=37ms p99=42ms | vm_cpu=34% app_cpu=103% mem_used=479MB swap=0MB | host_cpu=9.3% (máx 10.7%)
+[2026-10-13 11:33:43] [s3-adequada L100] warm-up 40s a 45.000 req/s
+[2026-10-13 11:35:38] [s3-adequada L100 r1] reqs=2701 vazão=45.0/s falhas=0.0% drop=0 p50=33ms p95=35ms p99=45ms | vm_cpu=47% app_cpu=139% mem_used=480MB swap=0MB | host_cpu=12.3% (máx 13.9%)
+[2026-10-13 11:36:53] [s3-adequada L100 r2] reqs=2701 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=49ms p99=64ms | vm_cpu=47% app_cpu=140% mem_used=479MB swap=0MB | host_cpu=12.5% (máx 13.8%)
+[2026-10-13 11:38:08] [s3-adequada L100 r3] reqs=2701 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=54ms p99=66ms | vm_cpu=46% app_cpu=138% mem_used=473MB swap=0MB | host_cpu=12.3% (máx 13.7%)
+[2026-10-13 11:38:08] [s3-adequada L125] warm-up 40s a 56.250 req/s
+[2026-10-13 11:40:04] [s3-adequada L125 r1] reqs=3375 vazão=56.2/s falhas=0.0% drop=0 p50=43ms p95=111ms p99=148ms | vm_cpu=61% app_cpu=183% mem_used=475MB swap=0MB | host_cpu=16.1% (máx 20.7%)
+[2026-10-13 11:41:20] [s3-adequada L125 r2] reqs=3376 vazão=56.2/s falhas=0.0% drop=0 p50=35ms p95=48ms p99=73ms | vm_cpu=60% app_cpu=178% mem_used=473MB swap=0MB | host_cpu=15.5% (máx 17.7%)
+[2026-10-13 11:42:36] [s3-adequada L125 r3] reqs=3375 vazão=56.2/s falhas=0.0% drop=0 p50=36ms p95=88ms p99=128ms | vm_cpu=60% app_cpu=178% mem_used=480MB swap=0MB | host_cpu=15.6% (máx 19.0%)
+[2026-10-13 11:42:36] [s4-adeq-super] cenário: 4 vCPU, 2048 MB, disco -
+[2026-10-13 11:42:36] Energia ok: perfil performance, na tomada
+[2026-10-13 11:42:36] Desligando poi-vm
+[2026-10-13 11:42:40] RAM do host ok: 12769 MB disponíveis (necessário 3584 MB)
+[2026-10-13 11:42:40] Recursos: 4 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 11:42:42] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 11:42:43] Aguardando SSH (até 180s)
+[2026-10-13 11:42:58] SSH ok (4s)
+[2026-10-13 11:42:58] Deploy de cpu-bound
+[2026-10-13 11:43:00] /health ok ({"status":"ok","app":"cpu-bound","pid":1081,"cpus":4})
+[2026-10-13 11:43:00] [s4-adeq-super L25] warm-up 40s a 11.250 req/s
+[2026-10-13 11:44:55] [s4-adeq-super L25 r1] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=6% app_cpu=35% mem_used=489MB swap=0MB | host_cpu=3.8% (máx 4.6%)
+[2026-10-13 11:46:10] [s4-adeq-super L25 r2] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=5% app_cpu=36% mem_used=497MB swap=0MB | host_cpu=3.8% (máx 5.0%)
+[2026-10-13 11:47:25] [s4-adeq-super L25 r3] reqs=675 vazão=11.2/s falhas=0.0% drop=0 p50=35ms p95=37ms p99=39ms | vm_cpu=5% app_cpu=37% mem_used=503MB swap=0MB | host_cpu=3.9% (máx 4.7%)
+[2026-10-13 11:47:25] [s4-adeq-super L50] warm-up 40s a 22.500 req/s
+[2026-10-13 11:49:21] [s4-adeq-super L50 r1] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=36ms | vm_cpu=14% app_cpu=70% mem_used=506MB swap=0MB | host_cpu=6.7% (máx 8.1%)
+[2026-10-13 11:50:36] [s4-adeq-super L50 r2] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=36ms p99=36ms | vm_cpu=13% app_cpu=71% mem_used=504MB swap=0MB | host_cpu=6.8% (máx 7.8%)
+[2026-10-13 11:51:50] [s4-adeq-super L50 r3] reqs=1350 vazão=22.5/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=36ms | vm_cpu=12% app_cpu=71% mem_used=506MB swap=0MB | host_cpu=6.8% (máx 7.9%)
+[2026-10-13 11:51:50] [s4-adeq-super L75] warm-up 40s a 33.750 req/s
+[2026-10-13 11:53:46] [s4-adeq-super L75 r1] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=35ms p95=59ms p99=70ms | vm_cpu=22% app_cpu=106% mem_used=498MB swap=0MB | host_cpu=9.6% (máx 10.9%)
+[2026-10-13 11:55:01] [s4-adeq-super L75 r2] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=35ms p95=48ms p99=60ms | vm_cpu=23% app_cpu=107% mem_used=507MB swap=0MB | host_cpu=9.7% (máx 11.1%)
+[2026-10-13 11:56:17] [s4-adeq-super L75 r3] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=34ms p95=48ms p99=63ms | vm_cpu=23% app_cpu=105% mem_used=507MB swap=0MB | host_cpu=9.6% (máx 11.3%)
+[2026-10-13 11:56:17] [s4-adeq-super L100] warm-up 40s a 45.000 req/s
+[2026-10-13 11:58:12] [s4-adeq-super L100 r1] reqs=2701 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=49ms p99=66ms | vm_cpu=32% app_cpu=140% mem_used=515MB swap=0MB | host_cpu=12.5% (máx 13.9%)
+[2026-10-13 11:59:27] [s4-adeq-super L100 r2] reqs=2700 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=50ms p99=66ms | vm_cpu=32% app_cpu=142% mem_used=515MB swap=0MB | host_cpu=12.7% (máx 14.2%)
+[2026-10-13 12:00:42] [s4-adeq-super L100 r3] reqs=2700 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=54ms p99=71ms | vm_cpu=32% app_cpu=142% mem_used=515MB swap=0MB | host_cpu=12.7% (máx 14.5%)
+[2026-10-13 12:00:42] [s4-adeq-super L125] warm-up 40s a 56.250 req/s
+[2026-10-13 12:02:36] [s4-adeq-super L125 r1] reqs=3376 vazão=56.2/s falhas=0.0% drop=0 p50=36ms p95=53ms p99=71ms | vm_cpu=45% app_cpu=186% mem_used=516MB swap=0MB | host_cpu=16.5% (máx 22.4%)
+[2026-10-13 12:03:51] [s4-adeq-super L125 r2] reqs=3375 vazão=56.2/s falhas=0.0% drop=0 p50=36ms p95=59ms p99=82ms | vm_cpu=44% app_cpu=185% mem_used=509MB swap=0MB | host_cpu=16.3% (máx 19.0%)
+[2026-10-13 12:05:06] [s4-adeq-super L125 r3] reqs=3375 vazão=56.2/s falhas=0.0% drop=0 p50=37ms p95=66ms p99=96ms | vm_cpu=44% app_cpu=185% mem_used=502MB swap=0MB | host_cpu=16.3% (máx 19.3%)
+[2026-10-13 12:05:06] [s5-super] cenário: 6 vCPU, 2048 MB, disco -
+[2026-10-13 12:05:06] Energia ok: perfil performance, na tomada
+[2026-10-13 12:05:06] Desligando poi-vm
+[2026-10-13 12:05:10] RAM do host ok: 12794 MB disponíveis (necessário 3584 MB)
+[2026-10-13 12:05:10] Recursos: 6 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 12:05:12] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 12:05:13] Aguardando SSH (até 180s)
+[2026-10-13 12:05:28] SSH ok (4s)
+[2026-10-13 12:05:28] Deploy de cpu-bound
+[2026-10-13 12:05:30] /health ok ({"status":"ok","app":"cpu-bound","pid":1110,"cpus":6})
+[2026-10-13 12:05:30] [s5-super L25] warm-up 40s a 11.250 req/s
+[2026-10-13 12:07:25] [s5-super L25 r1] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=33ms p95=36ms p99=36ms | vm_cpu=4% app_cpu=36% mem_used=568MB swap=0MB | host_cpu=3.8% (máx 5.0%)
+[2026-10-13 12:08:41] [s5-super L25 r2] reqs=675 vazão=11.2/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=4% app_cpu=36% mem_used=577MB swap=0MB | host_cpu=3.9% (máx 5.2%)
+[2026-10-13 12:09:56] [s5-super L25 r3] reqs=676 vazão=11.3/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=4% app_cpu=37% mem_used=578MB swap=0MB | host_cpu=3.9% (máx 4.7%)
+[2026-10-13 12:09:56] [s5-super L50] warm-up 40s a 22.500 req/s
+[2026-10-13 12:11:51] [s5-super L50 r1] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=34ms p95=35ms p99=36ms | vm_cpu=9% app_cpu=70% mem_used=585MB swap=0MB | host_cpu=6.7% (máx 7.6%)
+[2026-10-13 12:13:07] [s5-super L50 r2] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=36ms | vm_cpu=9% app_cpu=70% mem_used=590MB swap=0MB | host_cpu=6.7% (máx 7.8%)
+[2026-10-13 12:14:22] [s5-super L50 r3] reqs=1351 vazão=22.5/s falhas=0.0% drop=0 p50=34ms p95=36ms p99=37ms | vm_cpu=9% app_cpu=72% mem_used=591MB swap=0MB | host_cpu=6.9% (máx 8.2%)
+[2026-10-13 12:14:22] [s5-super L75] warm-up 40s a 33.750 req/s
+[2026-10-13 12:16:17] [s5-super L75 r1] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=34ms p95=45ms p99=56ms | vm_cpu=15% app_cpu=105% mem_used=592MB swap=0MB | host_cpu=9.6% (máx 11.3%)
+[2026-10-13 12:17:33] [s5-super L75 r2] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=35ms p95=57ms p99=73ms | vm_cpu=15% app_cpu=105% mem_used=589MB swap=0MB | host_cpu=9.6% (máx 11.2%)
+[2026-10-13 12:18:48] [s5-super L75 r3] reqs=2026 vazão=33.7/s falhas=0.0% drop=0 p50=34ms p95=49ms p99=61ms | vm_cpu=15% app_cpu=107% mem_used=589MB swap=0MB | host_cpu=9.8% (máx 11.2%)
+[2026-10-13 12:18:48] [s5-super L100] warm-up 40s a 45.000 req/s
+[2026-10-13 12:20:43] [s5-super L100 r1] reqs=2700 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=46ms p99=58ms | vm_cpu=22% app_cpu=142% mem_used=589MB swap=0MB | host_cpu=12.7% (máx 14.3%)
+[2026-10-13 12:21:58] [s5-super L100 r2] reqs=2700 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=52ms p99=67ms | vm_cpu=21% app_cpu=140% mem_used=590MB swap=0MB | host_cpu=12.6% (máx 14.2%)
+[2026-10-13 12:23:14] [s5-super L100 r3] reqs=2700 vazão=45.0/s falhas=0.0% drop=0 p50=34ms p95=48ms p99=62ms | vm_cpu=21% app_cpu=140% mem_used=588MB swap=0MB | host_cpu=12.6% (máx 14.2%)
+[2026-10-13 12:23:14] [s5-super L125] warm-up 40s a 56.250 req/s
+[2026-10-13 12:25:09] [s5-super L125 r1] reqs=3376 vazão=56.2/s falhas=0.0% drop=0 p50=36ms p95=50ms p99=68ms | vm_cpu=29% app_cpu=185% mem_used=583MB swap=0MB | host_cpu=16.3% (máx 18.3%)
+[2026-10-13 12:26:23] [s5-super L125 r2] reqs=3376 vazão=56.2/s falhas=0.0% drop=0 p50=36ms p95=52ms p99=69ms | vm_cpu=29% app_cpu=186% mem_used=584MB swap=0MB | host_cpu=16.4% (máx 18.8%)
+[2026-10-13 12:27:39] [s5-super L125 r3] reqs=3376 vazão=56.2/s falhas=0.0% drop=0 p50=36ms p95=51ms p99=67ms | vm_cpu=29% app_cpu=182% mem_used=584MB swap=0MB | host_cpu=16.1% (máx 18.9%)
+[2026-10-13 12:27:39] === cpu-bound: concluído sem falhas. Resultados em /home/joaoramalho/poi/poi_experimentos/cpu-bound/results
