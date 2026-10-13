@@ -1,0 +1,14 @@
+# Cenários de provisionamento da memory-bound: varia RAM, vCPU fixo (2).
+# Valores iniciais; Sub, Sub→Adequada, Adequada e Adequada→Super são ajustados pela calibração.
+# O Super é limitado pela RAM livre do host (RAM da VM + 1,5 GB de folga, checado antes de cada cenário).
+app: memory-bound
+service: poi-mem
+port: 8002
+fixed:
+  vcpus: 2
+scenarios:
+  - {id: s1-sub,         name: Sub,                 ram_mb: 768}
+  - {id: s2-sub-adeq,    name: Sub→Adequada,        ram_mb: 1152}
+  - {id: s3-adequada,    name: Adequada,            ram_mb: 1536}
+  - {id: s4-adeq-super,  name: Adequada→Super,      ram_mb: 3072}
+  - {id: s5-super,       name: Super,               ram_mb: 4608}

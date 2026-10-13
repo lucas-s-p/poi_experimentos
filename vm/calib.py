@@ -3,6 +3,7 @@
   measure <dir>        métricas de uma rodada (JSON): vazão, latência, utilização da VM, custos por requisição
   propose-cpu ...      carga-alvo e "adequada" da cpu-bound a partir do custo de CPU por requisição
   confirm ...          maior taxa com média do p95 das rodadas ≤ limite (atualiza proposal.json)
+  mem-search ...       memory-bound: carga-alvo (média do p95 ≤ 2× sem carga) e pico de memória por taxa
 """
 import argparse
 import json
@@ -40,6 +41,13 @@ def measure(d):
         "inflight": reqs / dur * lat["avg"] / 1000,
         "disk_mb_per_req": (w.disk_read_mb_s.sum() + w.disk_write_mb_s.sum()) / reqs,
         "n_samples": len(w),
+        # memória: pico (p95 das amostras de 1 s) de memória usada (total - disponível), swap e eventos
+        "mem_used_p95_mb": w.mem_used_mb.quantile(0.95), "mem_total_mb": w.mem_total_mb.max(),
+        "app_rss_p95_mb": w.app_rss_mb.quantile(0.95),
+        "swap_io_pg_s": (w.pswpin_pg_s.mean() + w.pswpout_pg_s.mean()) if "pswpin_pg_s" in w else float("nan"),
+        "pgmajfault_s": w.pgmajfault_s.mean() if "pgmajfault_s" in w else float("nan"),
+        "oom_kills": (meta.get("vm_events") or {}).get("oom_kills", 0),
+        "worker_deaths": (meta.get("vm_events") or {}).get("worker_deaths", 0),
     }
 
 
@@ -102,10 +110,39 @@ def cmd_confirm(a):
     return 0 if best is not None else 1
 
 
+def group_reps(runs, prefix, rates, reps):
+    """{taxa: [medidas das rodadas]} para rodadas nomeadas <prefix>-<taxa>-r<k>."""
+    return {r: [measure(f"{runs}/{prefix}-{r}-r{k}") for k in range(1, reps + 1)] for r in rates}
+
+
+def cmd_mem_search(a):
+    """Maior taxa com média do p95 ≤ limite (sem descartes) e o pico de memória a essa taxa."""
+    s0 = measure(f"{a.runs}/noload")["p50_ms"]
+    limit = 2 * s0
+    res = group_reps(a.runs, "search", a.rates.split(), a.reps)
+    rows, best = [], None
+    for r, ms in res.items():
+        mean_p95 = sum(m["p95_ms"] for m in ms) / len(ms)
+        ok = mean_p95 <= limit and all(m["dropped"] == 0 for m in ms)
+        rows.append({"rate_rps": float(r), "mean_p95_ms": round(mean_p95, 1), "ok": ok,
+                     "p95_ms": [round(m["p95_ms"]) for m in ms],
+                     "vm_util": round(sum(m["vm_util"] for m in ms) / len(ms), 3),
+                     "mem_used_p95_mb": round(max(m["mem_used_p95_mb"] for m in ms)),
+                     "app_rss_p95_mb": round(max(m["app_rss_p95_mb"] for m in ms)),
+                     "inflight": round(sum(m["inflight"] for m in ms) / len(ms), 2)})
+        if ok:
+            best = rows[-1]
+    print(json.dumps({"noload_p50_ms": round(s0, 1), "p95_limit_ms": round(limit, 1), "search": rows,
+                      "target": best}))
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("measure"); p.add_argument("dir")
+    p = sub.add_parser("mem-search")
+    p.add_argument("--runs", required=True); p.add_argument("--rates", required=True)
+    p.add_argument("--reps", type=int, default=3)
     p = sub.add_parser("confirm")
     p.add_argument("--proposal", required=True); p.add_argument("--runs", required=True)
     p.add_argument("--rates", required=True); p.add_argument("--reps", type=int, default=3)
@@ -114,7 +151,8 @@ def main():
     p.add_argument("--adequada-vcpus", type=int, required=True); p.add_argument("--util", type=float, default=0.70)
     p.add_argument("--levels", required=True); p.add_argument("--scenarios", required=True)
     a = ap.parse_args()
-    return {"measure": cmd_measure, "propose-cpu": cmd_propose_cpu, "confirm": cmd_confirm}[a.cmd](a)
+    return {"measure": cmd_measure, "propose-cpu": cmd_propose_cpu, "confirm": cmd_confirm,
+            "mem-search": cmd_mem_search}[a.cmd](a)
 
 
 if __name__ == "__main__":

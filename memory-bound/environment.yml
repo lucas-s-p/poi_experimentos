@@ -1,0 +1,9 @@
+name: poi-mem
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - fastapi
+  - uvicorn
+  - psutil
+  - numpy
