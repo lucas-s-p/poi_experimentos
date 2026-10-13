@@ -1,5 +1,5 @@
 # Demanda do experimento. target_rps e a intensidade são definidos pela calibração (calibrate.sh).
-query: size_mb=128           # intensidade fixa de cada requisição (~160 MB de pico por requisição em andamento)
+query: size_mb=128&passes=4&hold_ms=400   # intensidade fixa: 128 MB retidos por ~400 ms, 4 passes aleatórios
 target_rps: null             # carga-alvo (nível 100%)
 levels_pct: [25, 50, 75, 100, 125]
 warmup_s: 40

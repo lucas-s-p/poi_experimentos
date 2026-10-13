@@ -13,6 +13,11 @@ import sys
 import pandas as pd
 
 
+def _py(o):
+    """Serializa escalares numpy (int64/float64) em JSON."""
+    return o.item()
+
+
 def measure(d):
     meta = json.load(open(f"{d}/meta.json"))
     k6 = json.load(open(f"{d}/k6_summary.json"))["metrics"]
@@ -45,6 +50,9 @@ def measure(d):
         "mem_used_p95_mb": w.mem_used_mb.quantile(0.95), "mem_total_mb": w.mem_total_mb.max(),
         "app_rss_p95_mb": w.app_rss_mb.quantile(0.95),
         "swap_io_pg_s": (w.pswpin_pg_s.mean() + w.pswpout_pg_s.mean()) if "pswpin_pg_s" in w else float("nan"),
+        "pswpin_pg_s": w.pswpin_pg_s.mean() if "pswpin_pg_s" in w else float("nan"),
+        "pswpout_pg_s": w.pswpout_pg_s.mean() if "pswpout_pg_s" in w else float("nan"),
+        "swap_used_max_mb": w.swap_used_mb.max(),
         "pgmajfault_s": w.pgmajfault_s.mean() if "pgmajfault_s" in w else float("nan"),
         "oom_kills": (meta.get("vm_events") or {}).get("oom_kills", 0),
         "worker_deaths": (meta.get("vm_events") or {}).get("worker_deaths", 0),
@@ -52,7 +60,7 @@ def measure(d):
 
 
 def cmd_measure(a):
-    print(json.dumps(measure(a.dir)))
+    print(json.dumps(measure(a.dir), default=_py))
 
 
 def cmd_propose_cpu(a):
@@ -77,7 +85,7 @@ def cmd_propose_cpu(a):
         "adequada_vcpus": adeq, "util_target": a.util, "target_rps": target,
         "predicted_util": pred,
     }
-    print(json.dumps(out))
+    print(json.dumps(out, default=_py))
 
 
 def cmd_confirm(a):
@@ -105,7 +113,7 @@ def cmd_confirm(a):
     if best is not None:
         prop.setdefault("target_rps_single_validation", prop["target_rps"])
         prop["target_rps"] = best
-    json.dump(prop, open(a.proposal, "w"), indent=2)
+    json.dump(prop, open(a.proposal, "w"), indent=2, default=_py)
     print(f"\nMaior taxa com média do p95 ({a.reps} rodadas) ≤ {limit} ms: {best if best is not None else 'nenhuma'}")
     return 0 if best is not None else 1
 
@@ -133,7 +141,7 @@ def cmd_mem_search(a):
         if ok:
             best = rows[-1]
     print(json.dumps({"noload_p50_ms": round(s0, 1), "p95_limit_ms": round(limit, 1), "search": rows,
-                      "target": best}))
+                      "target": best}, default=_py))
 
 
 def main():
