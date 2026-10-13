@@ -16,23 +16,24 @@
     "vm_affinity": "4-11",
     "k6_affinity": "0-3"
   },
-  "git_commit": "a1708d2",
-  "t_start": 1791898288.1185493,
-  "t_end": 1791898308.1804857,
-  "clock_offset_s": 0.288166,
-  "clock_rtt_s": 0.009507,
+  "git_commit": "546ef71-dirty",
+  "t_start": 1791910777.5489933,
+  "t_end": 1791910797.601782,
+  "clock_offset_s": -0.070022,
+  "clock_rtt_s": 0.009167,
   "clock_note": "offset = rel\u00f3gio_VM - rel\u00f3gio_host (amostra de menor RTT via SSH)",
   "host_cpu_pct": {
-    "mean": 14.5,
-    "max": 19.0,
+    "mean": 13.7,
+    "max": 17.2,
     "n_over_85": 0,
-    "n": 24,
-    "other_procs_mean_pct1core": 11.7,
-    "other_procs_max_pct1core": 33.0,
+    "n": 25,
+    "other_procs_mean_pct1core": 8.9,
+    "other_procs_max_pct1core": 15.6,
     "n_other_over_100": 0,
     "top_other_peaks": {
-      "claude": 21.0,
-      "gnome-shell": 2.0
+      "claude": 4.0,
+      "Xorg": 2.0,
+      "alacritty": 2.0
     }
   },
   "host_metrics_file": "host_metrics.csv",
@@ -48,9 +49,29 @@
   },
   "host_idle_check": {
     "attempts": 1,
-    "other_pct_1core": 11.1,
+    "other_pct_1core": 9.9,
     "top": "claude:3",
     "threshold_pct_1core": 50
+  },
+  "vm_events": {
+    "oom_kills": 0,
+    "oom_victims": [],
+    "worker_deaths": 0,
+    "service_restarts": 0,
+    "main_pid_changed": false,
+    "workers_before": [
+      1068,
+      1069,
+      1070,
+      1071
+    ],
+    "workers_after": [
+      1068,
+      1069,
+      1070,
+      1071
+    ],
+    "kernel_oom_lines": []
   },
   "docker_running": false
 }

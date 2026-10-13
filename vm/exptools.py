@@ -5,6 +5,7 @@
   hoststats <host_metrics.csv>                 "mean max n_over_85" da CPU total do host
   idlecheck --exclude PADRÃO [--seconds 10]   "outros_pct_1núcleo top docker(0/1)": CPU de todos os
                                                processos do host fora a VM (e este script) numa janela
+  events <vm_events.json>                      resumo de uma linha dos eventos da VM (OOM, reinícios)
   meta --out ... [opções]                      grava meta.json
 """
 import argparse
@@ -151,6 +152,19 @@ def cmd_idlecheck(a):
     print(f"{total:.1f} {top[0]}:{top[1]:.0f} {int(docker_running())}")
 
 
+def cmd_events(a):
+    """Resumo de uma linha dos eventos da VM (vazio se nada aconteceu)."""
+    e = json.load(open(a.path))
+    parts = []
+    if e["oom_kills"]:
+        parts.append(f"{e['oom_kills']} OOM kill(s) ({', '.join(v['name'] for v in e['oom_victims']) or '?'})")
+    if e["worker_deaths"]:
+        parts.append(f"{e['worker_deaths']} worker(s) morto(s) e reiniciado(s) pelo uvicorn")
+    if e["service_restarts"] or e["main_pid_changed"]:
+        parts.append(f"serviço reiniciado pelo systemd ({e['service_restarts']}x)")
+    print("; ".join(parts))
+
+
 def cmd_meta(a):
     meta = {
         "app": a.app, "scenario": a.scenario, "level_pct": a.level, "rep": a.rep,
@@ -165,6 +179,7 @@ def cmd_meta(a):
         "host_metrics_file": "host_metrics.csv",
         "host_power": host_power(),
         "host_idle_check": json.loads(a.idle) if a.idle else None,
+        "vm_events": json.load(open(a.events)) if a.events else None,
         "docker_running": docker_running(),
     }
     with open(a.out, "w") as f:
@@ -187,11 +202,13 @@ def main():
         p.add_argument("--" + k.replace("_", "-"), dest=k, type=float, required=True)
     p.add_argument("--quick", action="store_true")
     p.add_argument("--idle", help="JSON da checagem de host ocioso antes da rodada")
+    p.add_argument("--events", help="vm_events.json da rodada (OOM, workers mortos, reinícios)")
+    p = sub.add_parser("events"); p.add_argument("path")
     p = sub.add_parser("idlecheck"); p.add_argument("--exclude", required=True)
     p.add_argument("--seconds", type=float, default=10)
     a = ap.parse_args()
     {"scenarios": cmd_scenarios, "config": cmd_config, "hoststats": cmd_hoststats, "meta": cmd_meta,
-     "idlecheck": cmd_idlecheck}[a.cmd](a)
+     "idlecheck": cmd_idlecheck, "events": cmd_events}[a.cmd](a)
 
 
 if __name__ == "__main__":

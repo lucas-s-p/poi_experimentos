@@ -53,8 +53,8 @@ After=network.target
 [Service]
 User=$VM_USER
 WorkingDirectory=/home/$VM_USER/$REMOTE_DIR
-# um worker por vCPU (GIL)
-ExecStart=/bin/sh -c 'exec /home/$VM_USER/miniforge3/envs/$ENV_NAME/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers \$(nproc) --no-access-log --log-level warning'
+# um worker por vCPU (GIL); log info para registrar "Child process [pid] died" (worker reiniciado)
+ExecStart=/bin/sh -c 'exec /home/$VM_USER/miniforge3/envs/$ENV_NAME/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers \$(nproc) --no-access-log --log-level info'
 Restart=always
 RestartSec=1
 $extra_lines
@@ -152,11 +152,13 @@ run_measure() {
     local dir="$1" rate="$2" dur="$3"
     mkdir -p "$dir"
     CLOCK=$(clock_offset)
+    vm_ssh "$REMOTE_PY $REMOTE_DIR/metrics/vm_events.py snapshot --service $SERVICE > /tmp/poi_ev0.json"
     collectors_start "$dir"
     T_START=$(date +%s.%N)
     run_k6 "$rate" "$dur" "$dir/k6_summary.json" "$dir/k6_raw.csv.gz"
     T_END=$(date +%s.%N)
     collectors_stop "$dir"
+    vm_ssh "$REMOTE_PY $REMOTE_DIR/metrics/vm_events.py diff --service $SERVICE --before /tmp/poi_ev0.json" >"$dir/vm_events.json"
     [[ -s "$dir/k6_summary.json" ]] || die "k6 não gerou resumo em $dir"
 }
 
@@ -195,13 +197,15 @@ _run_rep() {
         --duration "$DURATION_S" --vm-config "$vmcfg" --commit "$commit" \
         --t-start "$T_START" --t-end "$T_END" \
         --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" \
-        --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" ${quick:+--quick}
+        --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" --events "$rdir/vm_events.json" ${quick:+--quick}
     local hmean hmax hover omax oover otop
     read -r hmean hmax hover omax oover otop < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
     log "[$id L$lvl r$rep] $(k6_brief "$rdir/k6_summary.json") | $(vm_brief "$rdir/vm_metrics.csv") | host_cpu=${hmean}% (máx ${hmax}%)"
     if (( hover > 0 )); then
         log "AVISO [$id L$lvl r$rep]: CPU do host passou de 85% em $hover amostra(s) (máx ${hmax}%); medição pode estar contaminada"
     fi
+    local ev; ev="$("$HOST_PY" "$EXPTOOLS" events "$rdir/vm_events.json")"
+    [[ -n "$ev" ]] && log "AVISO [$id L$lvl r$rep]: eventos na VM: $ev"
     if (( oover > 0 )); then
         log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam os E-cores com a VM"
     fi

@@ -31,7 +31,7 @@ vm_ssh() { ssh "${SSH_OPTS[@]}" "$VM_USER@127.0.0.1" "$@"; }
 # vm_rsync <origem...> <destino-remoto>  (destino relativo ao home do usuário da VM)
 vm_rsync() {
     local dest="${*: -1}"
-    rsync -a --delete -e "ssh ${SSH_OPTS[*]}" "${@:1:$#-1}" "$VM_USER@127.0.0.1:$dest"
+    rsync -a --copy-links --delete -e "ssh ${SSH_OPTS[*]}" "${@:1:$#-1}" "$VM_USER@127.0.0.1:$dest"
 }
 
 # vm_fetch <caminho-remoto> <destino-local>
@@ -53,13 +53,14 @@ vm_pid() {
 }
 
 # Liga em modo headless com o processo da VM (todas as threads) fixado em VM_CPUSET.
-# VBoxHeadless é iniciado diretamente (não via VBoxSVC) para herdar a afinidade.
+# VBoxHeadless é iniciado diretamente (não via VBoxSVC) para herdar a afinidade, e com setsid:
+# ele salva o estado da VM ao receber SIGHUP, o que aconteceria ao fechar o terminal/tmux de origem.
 vm_start() {
     if vm_running; then log "VM já está ligada"; vm_pin; return 0; fi
     log "Ligando $VM_NAME (headless, afinidade $VM_CPUSET)"
     local attempt i
     for attempt in 1 2 3; do
-        nohup taskset -c "$VM_CPUSET" VBoxHeadless --startvm "$VM_NAME" --vrde off \
+        setsid nohup taskset -c "$VM_CPUSET" VBoxHeadless --startvm "$VM_NAME" --vrde off \
             >"$VM_WORKDIR/headless.log" 2>&1 &
         for i in $(seq 1 30); do
             vm_running && break

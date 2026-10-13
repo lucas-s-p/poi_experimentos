@@ -1,18 +1,18 @@
-[2026-10-13 10:28:55] === cpu-bound: experimento (quick s3-adequada) commit a1708d2; alvo 45.0 req/s; níveis 50 125 %; 1 × 20s
-[2026-10-13 10:28:55] Energia ok: perfil performance, na tomada
-[2026-10-13 10:28:55] AVISO: unattended-upgrades ativo no host (registrado no meta.json)
-[2026-10-13 10:28:55] [s3-adequada] cenário: 3 vCPU, 2048 MB, disco -
-[2026-10-13 10:28:55] Energia ok: perfil performance, na tomada
-[2026-10-13 10:28:55] Desligando poi-vm
-[2026-10-13 10:29:01] RAM do host ok: 12735 MB disponíveis (necessário 3584 MB)
-[2026-10-13 10:29:01] Recursos: 3 vCPU, 2048 MB RAM, disco sem limite
-[2026-10-13 10:29:03] Ligando poi-vm (headless, afinidade 4-11)
-[2026-10-13 10:29:04] Aguardando SSH (até 180s)
-[2026-10-13 10:29:18] SSH ok (4s)
-[2026-10-13 10:29:18] Deploy de cpu-bound
-[2026-10-13 10:29:21] /health ok ({"status":"ok","app":"cpu-bound","pid":1063,"cpus":3})
-[2026-10-13 10:29:21] [s3-adequada L50] warm-up 40s a 22.500 req/s
-[2026-10-13 10:30:35] [s3-adequada L50 r1] reqs=451 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=35ms | vm_cpu=21% app_cpu=64% mem_used=451MB swap=0MB | host_cpu=6.5% (máx 8.2%)
-[2026-10-13 10:30:35] [s3-adequada L125] warm-up 40s a 56.250 req/s
-[2026-10-13 10:31:50] [s3-adequada L125 r1] reqs=1126 vazão=56.2/s falhas=0.0% drop=0 p50=37ms p95=91ms p99=126ms | vm_cpu=54% app_cpu=162% mem_used=454MB swap=0MB | host_cpu=14.5% (máx 19.0%)
-[2026-10-13 10:31:50] === cpu-bound: concluído sem falhas. Resultados em /home/joaoramalho/poi/poi_experimentos/cpu-bound/results/quick
+[2026-10-13 13:57:04] === cpu-bound: experimento (quick s3-adequada) commit 546ef71-dirty; alvo 45.0 req/s; níveis 50 125 %; 1 × 20s
+[2026-10-13 13:57:04] Energia ok: perfil performance, na tomada
+[2026-10-13 13:57:04] AVISO: unattended-upgrades ativo no host (registrado no meta.json)
+[2026-10-13 13:57:04] [s3-adequada] cenário: 3 vCPU, 2048 MB, disco -
+[2026-10-13 13:57:04] Energia ok: perfil performance, na tomada
+[2026-10-13 13:57:04] Desligando poi-vm
+[2026-10-13 13:57:10] RAM do host ok: 12741 MB disponíveis (necessário 3584 MB)
+[2026-10-13 13:57:10] Recursos: 3 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 13:57:12] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 13:57:13] Aguardando SSH (até 180s)
+[2026-10-13 13:57:28] SSH ok (4s)
+[2026-10-13 13:57:28] Deploy de cpu-bound
+[2026-10-13 13:57:30] /health ok ({"status":"ok","app":"cpu-bound","pid":1069,"cpus":3})
+[2026-10-13 13:57:30] [s3-adequada L50] warm-up 40s a 22.500 req/s
+[2026-10-13 13:58:45] [s3-adequada L50 r1] reqs=450 vazão=22.5/s falhas=0.0% drop=0 p50=33ms p95=34ms p99=35ms | vm_cpu=19% app_cpu=64% mem_used=450MB swap=0MB | host_cpu=6.4% (máx 7.9%)
+[2026-10-13 13:58:45] [s3-adequada L125] warm-up 40s a 56.250 req/s
+[2026-10-13 14:00:01] [s3-adequada L125 r1] reqs=1125 vazão=56.2/s falhas=0.0% drop=0 p50=34ms p95=69ms p99=88ms | vm_cpu=49% app_cpu=155% mem_used=459MB swap=0MB | host_cpu=13.7% (máx 17.2%)
+[2026-10-13 14:00:01] === cpu-bound: concluído sem falhas. Resultados em /home/joaoramalho/poi/poi_experimentos/cpu-bound/results/quick
