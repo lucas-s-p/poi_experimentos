@@ -1,0 +1,51 @@
+[2026-10-13 09:38:35] === Calibração cpu-bound (iterations=100000)
+[2026-10-13 09:38:35] Energia ok: perfil performance, na tomada
+[2026-10-13 09:38:35] Super: s5-super (6 vCPU) | Adequada: s3-adequada (3 vCPU)
+[2026-10-13 09:38:35] Desligando poi-vm
+[2026-10-13 09:38:41] RAM do host ok: 12752 MB disponíveis (necessário 3584 MB)
+[2026-10-13 09:38:41] Recursos: 6 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 09:38:43] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 09:38:45] Aguardando SSH (até 180s)
+[2026-10-13 09:38:59] SSH ok (4s)
+[2026-10-13 09:38:59] Deploy de cpu-bound
+[2026-10-13 09:39:03] /health ok ({"status":"ok","app":"cpu-bound","pid":1349,"cpus":6})
+[2026-10-13 09:39:55] [noload] 1 req/s: reqs=31 vazão=1.0/s falhas=0.0% drop=0 p50=35ms p95=47ms p99=49ms | vm_cpu=1% app_cpu=4% mem_used=571MB swap=0MB
+[2026-10-13 09:39:55] Tempo sem carga p50 = 34.537606 ms → capacidade estimada do Super ≈ 173.7 req/s
+[2026-10-13 09:41:01] [cost30] 52.1 req/s: reqs=2085 vazão=52.1/s falhas=0.0% drop=0 p50=35ms p95=55ms p99=69ms | vm_cpu=25% app_cpu=159% mem_used=583MB swap=0MB
+[2026-10-13 09:42:09] [cost50] 86.9 req/s: reqs=3477 vazão=86.8/s falhas=0.0% drop=0 p50=52ms p95=133ms p99=185ms | vm_cpu=47% app_cpu=284% mem_used=587MB swap=0MB
+[2026-10-13 09:42:09] CPU-s/req = 0.0334 → carga-alvo proposta = 62.5 req/s (70% de 3 vCPU)
+[2026-10-13 09:42:09] Desligando poi-vm
+[2026-10-13 09:42:15] RAM do host ok: 12752 MB disponíveis (necessário 3584 MB)
+[2026-10-13 09:42:15] Recursos: 3 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 09:42:17] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 09:42:18] Aguardando SSH (até 180s)
+[2026-10-13 09:42:33] SSH ok (4s)
+[2026-10-13 09:42:33] Deploy de cpu-bound
+[2026-10-13 09:42:36] /health ok ({"status":"ok","app":"cpu-bound","pid":1302,"cpus":3})
+[2026-10-13 09:43:18] [adequada-noload] 1 req/s: reqs=21 vazão=1.0/s falhas=0.0% drop=0 p50=34ms p95=35ms p99=42ms | vm_cpu=2% app_cpu=3% mem_used=453MB swap=0MB
+[2026-10-13 09:45:18] [adequada-1] 62.5 req/s: reqs=3699 vazão=59.7/s falhas=0.0% drop=52 p50=524ms p95=2971ms p99=3772ms | vm_cpu=69% app_cpu=207% mem_used=472MB swap=0MB
+[2026-10-13 09:45:18] p95 2971 ms > 69 ms; reduzindo carga-alvo em 10%
+[2026-10-13 09:47:16] [adequada-2] 56.2 req/s: reqs=3368 vazão=55.0/s falhas=0.0% drop=5 p50=1404ms p95=2837ms p99=3478ms | vm_cpu=65% app_cpu=197% mem_used=474MB swap=0MB
+[2026-10-13 09:47:17] p95 2837 ms > 69 ms; reduzindo carga-alvo em 10%
+[2026-10-13 09:49:14] [adequada-3] 50.5 req/s: reqs=3031 vazão=50.5/s falhas=0.0% drop=0 p50=36ms p95=68ms p99=91ms | vm_cpu=56% app_cpu=166% mem_used=470MB swap=0MB
+[2026-10-13 09:49:14] Validação ok: p95 68 ms ≤ 69 ms, utilização 59%
+
+================ PROPOSTA (não aplicada) ================
+Intensidade: iterations=100000
+Tempo sem carga (Super):    p50 34.5 ms, p95 46.5 ms
+Tempo sem carga (Adequada): p50 33.8 ms
+  custo @ 52.1 req/s: util VM 27%, 0.0312 CPU-s/req (app 0.0333)
+  custo @ 86.9 req/s: util VM 52%, 0.0357 CPU-s/req (app 0.036)
+Custo médio: 0.0334 CPU-s/req → 29.91 req/s por vCPU
+Adequada: 3 vCPU | carga-alvo (100%): 50.5 req/s
+Validação na Adequada: vazão 50.5 req/s, util 59%, p50 36 / p95 68 / p99 91 ms (limite p95 69.1 ms)
+
+Utilização prevista (ρ = taxa × custo / vCPU):
+vCPU       25%     50%     75%    100%    125%
+   1      0.42    0.84    1.27    1.69    2.11
+   2      0.21    0.42    0.63    0.84    1.05
+   3      0.14    0.28    0.42    0.56    0.70
+   4      0.11    0.21    0.32    0.42    0.53
+   6      0.07    0.14    0.21    0.28    0.35
+
+Para aplicar: ./calibrate.sh --apply

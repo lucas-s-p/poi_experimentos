@@ -4,7 +4,22 @@
 
 Cenários (`provisioning.yaml`): variam só vCPU (1, 2, 3, 4, 6), RAM fixa em 2 GB.
 
-**Por que a Adequada roda a ~55–60% de CPU e não a 70%:** a carga-alvo é a maior taxa com p95 ≤ 2× o tempo sem carga. Dois efeitos fazem a latência subir antes de 70%: (1) o custo por requisição cresce com a carga (limite de potência de 15 W da CPU reduz o turbo dos E-cores, mais o overhead do VirtualBox); (2) cada worker do uvicorn tem fila própria e as conexões são distribuídas ao acaso, então um worker acumula fila enquanto outro fica ocioso. Detalhes em `calibration/`.
+## Calibração (2026-10-13, perfil `performance`, host ocioso)
+
+| Item | Valor |
+|---|---|
+| Intensidade | `iterations=100000` |
+| Tempo sem carga (p50, 1 req/s) | 34,5 ms (Super), 33,8 ms (Adequada); p95 sem carga 46,5 ms |
+| Limite | p95 ≤ 2 × 34,5 = **69,1 ms** |
+| Critério | **média do p95 de 3 rodadas de 60 s** ≤ limite, sem descartes |
+| Adequada | 3 vCPU |
+| Carga-alvo (100%) | **45 req/s** (média do p95 67,8 ms; 48 req/s → 73,1 ms; 50,5 → 78,4 ms) |
+
+Média de n=3, e não cada rodada: o p95 de rodadas idênticas varia ±5 ms (a 48 req/s, de 66 a 83 ms), a mesma ordem da folga até o limite; por rodada, o resultado dependeria do acaso. Rodadas e logs em `calibration/` (`*_balanced*` e `*_performance_ruido*` são as tentativas anteriores, com outro perfil e com o host ruidoso).
+
+**Por que a Adequada roda a ~45–50% de CPU e não a 70%:** dois efeitos fazem a latência subir antes de 70%: (1) o custo por requisição cresce com a carga (0,031 → 0,036 CPU-s/req de 27% para 52% de utilização, pelo limite de potência de 15 W da CPU, que reduz o turbo dos E-cores, mais o overhead do VirtualBox); (2) cada worker do uvicorn tem fila própria e as conexões são distribuídas ao acaso, então um worker acumula fila enquanto outro fica ocioso.
+
+O experimento exige perfil `performance`, notebook na tomada e host ocioso (outros processos < 0,5 núcleo por 10 s antes de cada rodada); ver README da raiz.
 
 ## Como rodar
 

@@ -1,0 +1,48 @@
+[2026-10-13 09:51:49] === Confirmação cpu-bound na Adequada (3 vCPU): taxas 45 48 50.5; 3 × 60 s cada
+[2026-10-13 09:51:49] Energia ok: perfil performance, na tomada
+[2026-10-13 09:51:49] Desligando poi-vm
+[2026-10-13 09:51:53] RAM do host ok: 11910 MB disponíveis (necessário 3584 MB)
+[2026-10-13 09:51:53] Recursos: 3 vCPU, 2048 MB RAM, disco sem limite
+[2026-10-13 09:51:56] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 09:51:57] Aguardando SSH (até 180s)
+[2026-10-13 09:52:11] SSH ok (4s)
+[2026-10-13 09:52:11] Deploy de cpu-bound
+[2026-10-13 09:52:15] /health ok ({"status":"ok","app":"cpu-bound","pid":1303,"cpus":3})
+[2026-10-13 09:54:13] [confirm-45-r1] 45 req/s: reqs=2700 vazão=45.0/s falhas=0.0% drop=0 p50=36ms p95=66ms p99=88ms | vm_cpu=44% app_cpu=145% mem_used=461MB swap=0MB
+[2026-10-13 09:55:31] [confirm-45-r2] 45 req/s: reqs=2701 vazão=45.0/s falhas=0.0% drop=0 p50=36ms p95=67ms p99=86ms | vm_cpu=44% app_cpu=145% mem_used=472MB swap=0MB
+[2026-10-13 09:56:48] [confirm-45-r3] 45 req/s: reqs=2700 vazão=45.0/s falhas=0.0% drop=0 p50=37ms p95=71ms p99=96ms | vm_cpu=43% app_cpu=144% mem_used=481MB swap=0MB
+[2026-10-13 09:58:45] [confirm-48-r1] 48 req/s: reqs=2880 vazão=48.0/s falhas=0.0% drop=0 p50=38ms p95=83ms p99=125ms | vm_cpu=49% app_cpu=161% mem_used=479MB swap=0MB
+[2026-10-13 10:00:03] [confirm-48-r2] 48 req/s: reqs=2880 vazão=48.0/s falhas=0.0% drop=0 p50=37ms p95=70ms p99=94ms | vm_cpu=49% app_cpu=157% mem_used=475MB swap=0MB
+[2026-10-13 10:01:20] [confirm-48-r3] 48 req/s: reqs=2881 vazão=48.0/s falhas=0.0% drop=0 p50=37ms p95=66ms p99=88ms | vm_cpu=48% app_cpu=156% mem_used=478MB swap=0MB
+[2026-10-13 10:03:17] [confirm-50.5-r1] 50.5 req/s: reqs=3030 vazão=50.5/s falhas=0.0% drop=0 p50=39ms p95=87ms p99=114ms | vm_cpu=53% app_cpu=171% mem_used=480MB swap=0MB
+[2026-10-13 10:04:35] [confirm-50.5-r2] 50.5 req/s: reqs=3030 vazão=50.5/s falhas=0.0% drop=0 p50=38ms p95=74ms p99=104ms | vm_cpu=52% app_cpu=167% mem_used=481MB swap=0MB
+[2026-10-13 10:05:52] [confirm-50.5-r3] 50.5 req/s: reqs=3031 vazão=50.5/s falhas=0.0% drop=0 p50=37ms p95=74ms p99=104ms | vm_cpu=52% app_cpu=167% mem_used=480MB swap=0MB
+
+  taxa rep  vazão  util   p50    p95    p99 drop  ok
+    45   1   45.0   47%    36     66     88    0  ok
+    45   2   45.0   47%    36     67     86    0  ok
+    45   3   45.0   46%    37     71     96    0  FALHA
+    48   1   48.0   53%    38     83    125    0  FALHA
+    48   2   48.0   52%    37     70     94    0  FALHA
+    48   3   48.0   51%    37     66     88    0  ok
+  50.5   1   50.5   57%    39     87    114    0  FALHA
+  50.5   2   50.5   56%    38     74    104    0  FALHA
+  50.5   3   50.5   55%    37     74    104    0  FALHA
+
+Maior taxa com p95 ≤ 69.1 ms em todas as 3 rodadas: nenhuma
+
+  taxa rep  vazão  util   p50    p95    p99 drop  ok
+    45   1   45.0   47%    36     66     88    0  ok
+    45   2   45.0   47%    36     67     86    0  ok
+    45   3   45.0   46%    37     71     96    0  FALHA
+    45 méd                      67.8              OK (critério)
+    48   1   48.0   53%    38     83    125    0  FALHA
+    48   2   48.0   52%    37     70     94    0  FALHA
+    48   3   48.0   51%    37     66     88    0  ok
+    48 méd                      73.1              FALHA (critério)
+  50.5   1   50.5   57%    39     87    114    0  FALHA
+  50.5   2   50.5   56%    38     74    104    0  FALHA
+  50.5   3   50.5   55%    37     74    104    0  FALHA
+  50.5 méd                      78.4              FALHA (critério)
+
+Maior taxa com média do p95 (3 rodadas) ≤ 69.1 ms: 45.0

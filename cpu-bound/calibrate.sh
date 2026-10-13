@@ -3,7 +3,7 @@
 #   ./calibrate.sh          mede e grava a proposta em calibration/proposal.json (não altera a configuração)
 #   ./calibrate.sh --confirm "45 48 50.5" [reps=3]
 #                           confirma na Adequada: reps rodadas de 60 s por taxa; a carga-alvo passa a ser a
-#                           maior taxa com p95 ≤ limite em TODAS as rodadas (atualiza proposal.json)
+#                           maior taxa com MÉDIA do p95 das rodadas ≤ limite (atualiza proposal.json)
 #   ./calibrate.sh --apply  grava o target_rps da proposta em load/demand.yaml
 #
 # 1. Cenário Super: tempo sem carga (1 req/s) e custo de CPU por requisição (2 taxas, 30% e 50% da capacidade estimada).

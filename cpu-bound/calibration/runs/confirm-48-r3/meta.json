@@ -1,0 +1,55 @@
+{
+  "app": "cpu-bound",
+  "scenario": "calib-confirm-48-r3",
+  "level_pct": 0,
+  "rep": 1,
+  "target_rps": 0.0,
+  "rate_rps": 48.0,
+  "query": "iterations=100000",
+  "duration_s": 60.0,
+  "quick": false,
+  "vm": {
+    "vcpus": 3,
+    "ram_mb": 2048,
+    "disk_bw_group": "none",
+    "disk_bw_bytes_per_sec": null,
+    "vm_affinity": "4-11",
+    "k6_affinity": "0-3"
+  },
+  "git_commit": "67bd5a5",
+  "t_start": 1791896417.3184156,
+  "t_end": 1791896477.3828063,
+  "clock_offset_s": -3.348662,
+  "clock_rtt_s": 0.220672,
+  "clock_note": "offset = rel\u00f3gio_VM - rel\u00f3gio_host (amostra de menor RTT via SSH)",
+  "host_cpu_pct": {
+    "mean": 14.4,
+    "max": 16.4,
+    "n_over_85": 0,
+    "n": 64,
+    "other_procs_mean_pct1core": 9.9,
+    "other_procs_max_pct1core": 16.6,
+    "n_other_over_100": 0,
+    "top_other_peaks": {
+      "claude": 5.0,
+      "gnome-shell": 3.0,
+      "alacritty": 2.0,
+      "Xorg": 2.0,
+      "irq/168-rtw89_pci": 2.0
+    }
+  },
+  "host_metrics_file": "host_metrics.csv",
+  "host_power": {
+    "power_profile": "performance",
+    "ac_online": true,
+    "governor_cpu4": "powersave",
+    "epp_cpu4": "performance"
+  },
+  "host_idle_check": {
+    "attempts": 1,
+    "other_pct_1core": 10.4,
+    "top": "claude:5",
+    "threshold_pct_1core": 50
+  },
+  "docker_running": false
+}

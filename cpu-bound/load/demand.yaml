@@ -1,6 +1,6 @@
 # Demanda do experimento. target_rps e a intensidade são definidos pela calibração (calibrate.sh).
 query: iterations=100000     # intensidade fixa de cada requisição
-target_rps: null             # carga-alvo (nível 100%)
+target_rps: 45.0           # calibrate.sh 2026-10-13
 levels_pct: [25, 50, 75, 100, 125]
 warmup_s: 40                 # os picos iniciais duram ~20 s
 duration_s: 60               # duração de cada repetição
