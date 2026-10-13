@@ -10,7 +10,28 @@ Escolhas de projeto:
 - **Buffer preenchido com valor não nulo:** páginas de zeros iriam para o swap como blocos de zeros, que o disco virtual (VDI) não grava; a pressão de memória ficaria artificialmente barata.
 - **`MAX_INFLIGHT=8` requisições por worker (16 vagas com 2 workers, teto da app ~2 GB):** com endpoints síncronos, cada worker do uvicorn atenderia até 40 requisições simultâneas (pool padrão do AnyIO) e uma sobrecarga alocaria dezenas de buffers de uma vez. Com o limite, o excedente espera na fila do event loop sem memória alocada. Com 4 por worker, o limite já virava gargalo a 10 req/s com 256 MB; com 8, a carga-alvo e o nível de 125% ficam abaixo das 16 vagas.
 
-Cenários (`provisioning.yaml`): variam só RAM, 2 vCPU fixos. Super = 4608 MB (limitado pela RAM livre do host: RAM da VM + 1,5 GB de folga, checado antes de cada cenário; máximo viável medido ~10,7 GB). Sub, intermediários e Adequada vêm da calibração.
+Cenários (`provisioning.yaml`): variam só RAM, 2 vCPU fixos. Super = 4608 MB (limitado pela RAM livre do host: RAM da VM + 1,5 GB de folga, checado antes de cada cenário; máximo viável medido ~10,7 GB).
+
+## Calibração (2026-10-13, perfil `performance`, host ocioso)
+
+| Item | Valor |
+|---|---|
+| Tempo sem carga (p50, 0,5 req/s) | 408 ms → limite p95 = **815 ms** (critério: média do p95 de 3 rodadas, como na cpu-bound) |
+| Carga-alvo | **22 req/s** (candidatas 14/18/22 por concorrência; p95 415–417 ms; CPU da VM 24%) |
+| Memória usada na carga-alvo (WS) | 1780 MB (MemTotal − MemAvailable, p95 das amostras; RSS dos workers 1470 MB) |
+| RAM dos cenários | Sub 1152 · Sub→Adeq 1920 · **Adequada 2560** (WS/0,70) · Adeq→Super 3584 · Super 4608 MB |
+| Validação da Adequada | média do p95 439 ms; memória 68–72% ocupada; sem swap |
+| Sub a 125% (27,5 req/s) | colapso por thrashing: pswpin ~12,6 mil pág/s, falhas major ~12,6 mil/s, 75% de timeouts; 0 OOM kills, 2 workers mortos pelo healthcheck |
+
+Sub = 60% do WS: cabe a 25%, começa a fazer swap por volta de 50% e entra em thrashing acima disso. Não há critério de aprovação do Sub em sobrecarga: o colapso é o resultado esperado. Detalhes em `calibration/summary.txt`.
+
+## Mortes de workers: healthcheck × OOM
+
+O supervisor do uvicorn faz ping em cada worker e, se ele não responde em 5 s (`timeout_worker_healthcheck`, padrão mantido), manda SIGKILL e sobe outro. Sob thrashing o worker fica travado em falhas de página e é morto assim, sem nenhum OOM no kernel. O uvicorn registra "Child process died" nos dois casos; `vm_events` separa pela lista de vítimas do OOM killer (`journalctl -k`), e a análise mostra as duas contagens por cenário × nível.
+
+## Reset entre rodadas
+
+Antes de cada rodada (`reset_between_reps: true` em `load/demand.yaml`): reinicia o serviço, `swapoff -a && swapon -a`, `drop_caches`, espera o `/health`; depois a checagem de host ocioso e um warm-up de 40 s logo antes da medição. Sem isso, o thrashing de uma rodada contaminaria a seguinte. O swap no início de cada rodada fica em `meta.json` (`vm_events.swap_used_at_start_mb`, esperado ~0) e gera aviso no `run.log` se passar de 50 MB.
 
 ## Como rodar
 

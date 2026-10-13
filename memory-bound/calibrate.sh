@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Calibração da memory-bound (vCPU fixo, varia RAM).
 #   ./calibrate.sh          mede e grava a proposta em calibration/proposal.json (não altera a configuração)
+#   ./calibrate.sh --summary  refaz o resumo/proposal.json a partir das rodadas já medidas (sem medir)
 #   ./calibrate.sh --apply  grava target_rps (load/demand.yaml) e a RAM dos cenários 1-4 (provisioning.yaml)
 #
 # 1. Super: tempo sem carga (p50 a 0,5 req/s) e custo de CPU por requisição (2 taxas).
@@ -9,8 +10,9 @@
 #    carga (mesmo critério da cpu-bound). WS = pico de memória usada a essa taxa: p95 das amostras de 1 s
 #    de MemTotal − MemAvailable (sem page cache); a RSS dos workers é reportada junto.
 # 3. Adequada = WS / 0,70 (memória ~70% ocupada na carga-alvo), múltiplo de 128 MB.
-#    Sub = ~60% de WS (força swap perto da carga-alvo); validado a 125% da carga: sem OOM kill e sem
-#    worker morto; se houver, +128 MB e repete (até 3 vezes). Intermediários = pontos médios.
+#    Sub = ~60% de WS (força swap perto da carga-alvo), medido uma vez a 125% da carga para mostrar a
+#    pressão de memória (swap, falhas major, OOM, workers mortos). Sem critério de aprovação: o colapso
+#    em sobrecarga é o resultado esperado. Intermediários = pontos médios.
 # 4. Valida a Adequada na carga-alvo (3 rodadas): média do p95 ≤ limite e swap desprezível.
 # Antes de cada rodada espera o host ficar ocioso (host_wait_idle).
 set -euo pipefail
@@ -43,8 +45,11 @@ if [[ "${1:-}" == "--apply" ]]; then
 fi
 
 exp_config --calib
-mkdir -p "$CAL"; rm -rf "$CAL/runs"
-exec > >(tee "$CAL/calibrate.log") 2>&1
+SUMMARY_ONLY=""; [[ "${1:-}" == "--summary" ]] && SUMMARY_ONLY=1
+if [[ -z "$SUMMARY_ONLY" ]]; then
+    mkdir -p "$CAL"; rm -rf "$CAL/runs"
+    exec > >(tee "$CAL/calibrate.log") 2>&1
+fi
 COMMIT="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
 
 mapfile -t SCEN < <(exp_scenarios)
@@ -66,72 +71,12 @@ calib_run() {
     log "[$name] $rate req/s: $(k6_brief "$dir/k6_summary.json") | $(vm_brief "$dir/vm_metrics.csv")${ev:+ | EVENTOS: $ev}"
 }
 
-log "=== Calibração $APP_NAME ($QUERY), $VCPUS vCPU"
-host_check_power || exit 1
-
-# --- 1-2. Super ------------------------------------------------------------------
-log "Super: $SUP_ID ($SUP_MEM MB)"
-apply_scenario "$VCPUS" "$SUP_MEM" - -
-calib_run noload 0.5 60 10
-S0=$(jget "$($CALIB measure "$CAL/runs/noload")" p50_ms)
-log "Tempo sem carga p50 = $(printf %.0f "$S0") ms → limite p95 = $(printf %.0f "$(echo "2 * $S0" | bc -l)") ms"
-calib_run cost5 5 40 10
-calib_run cost10 10 40 10
-C=$("$HOST_PY" -c 'import json,sys,subprocess
-ms=[json.loads(subprocess.check_output([sys.executable,sys.argv[1],"measure",d])) for d in sys.argv[2:]]
-print(sum(m["cpu_s_per_req"] for m in ms)/len(ms))' "$REPO_ROOT/vm/calib.py" "$CAL/runs/cost5" "$CAL/runs/cost10")
-CAPC=$(echo "$VCPUS / $C" | bc -l)
-log "CPU-s/req = $(printf %.3f "$C") → capacidade de CPU ≈ $(printf %.2f "$CAPC") req/s"
-
-RATES="$CANDIDATES"
-log "Busca da carga-alvo no Super: taxas $RATES req/s, 3 × 60 s cada"
-for rate in $RATES; do
-    for rep in 1 2 3; do
-        warm=0; (( rep == 1 )) && warm="$WARMUP_S"
-        calib_run "search-$rate-r$rep" "$rate" 60 "$warm"
-    done
-done
-SEARCH=$($CALIB mem-search --runs "$CAL/runs" --rates "$RATES" --reps 3)
-echo "$SEARCH" >"$CAL/search.json"
-[[ "$(jget "$SEARCH" target)" != "None" ]] || die "nenhuma taxa candidata cumpriu o critério; ver $CAL/search.json"
-TARGET=$(jget "$SEARCH" target rate_rps); WS=$(jget "$SEARCH" target mem_used_p95_mb)
-LIMIT=$(jget "$SEARCH" p95_limit_ms)
-ADQ=$(round128 "$(echo "$WS / $UTIL_TARGET" | bc -l)")
-SUB=$(round128 "$(echo "$WS * $SUB_FRACTION" | bc -l)")
-log "Carga-alvo = $TARGET req/s; pico de memória usada (WS) = $WS MB → Adequada = $ADQ MB, Sub inicial = $SUB MB"
-
-# --- 3. Sub: swap sem OOM a 125% --------------------------------------------------------
-RATE125=$(printf %.2f "$(echo "$TARGET * 1.25" | bc -l)")
-SUB_OK=""
-for try in 1 2 3; do
-    log "Sub candidato: $SUB MB, a 125% ($RATE125 req/s)"
-    apply_scenario "$VCPUS" "$SUB" - -
-    calib_run "sub-$SUB" "$RATE125" 60 "$WARMUP_S"
-    M=$($CALIB measure "$CAL/runs/sub-$SUB")
-    if (( $(jget "$M" oom_kills) == 0 && $(jget "$M" worker_deaths) == 0 )); then
-        SUB_OK=1; log "Sub $SUB MB: sem OOM; swap in+out $(printf %.0f "$(jget "$M" swap_io_pg_s)") pág/s"
-        break
-    fi
-    log "Sub $SUB MB: OOM/worker morto; +128 MB"
-    SUB=$((SUB + 128))
-done
-[[ -n "$SUB_OK" ]] || log "AVISO: Sub com OOM nas 3 tentativas (último $SUB MB)"
-S2=$(round128 "$(echo "($SUB + $ADQ) / 2" | bc -l)")
-S4=$(round128 "$(echo "($ADQ + $SUP_MEM) / 2" | bc -l)")
-
-# --- 4. Validação da Adequada ------------------------------------------------------------
-log "Validação da Adequada: $ADQ MB a $TARGET req/s, 3 × 60 s"
-apply_scenario "$VCPUS" "$ADQ" - -
-for rep in 1 2 3; do
-    warm=0; (( rep == 1 )) && warm="$WARMUP_S"
-    calib_run "adequada-r$rep" "$TARGET" 60 "$warm"
-done
-
-"$HOST_PY" - "$CAL" "$PROPOSAL" "$SEARCH" "$TARGET" "$SUB" "$S2" "$ADQ" "$S4" "$SUP_MEM" "$C" "$QUERY" "${SUB_OK:-0}" <<'EOF'
+write_summary() {
+"$HOST_PY" - "$CAL" "$PROPOSAL" "$SEARCH" "$TARGET" "$SUB" "$S2" "$ADQ" "$S4" "$SUP_MEM" "$C" "$QUERY" <<'EOF'
 import json, subprocess, sys
 cal, out, search = sys.argv[1], sys.argv[2], json.loads(sys.argv[3])
 target = float(sys.argv[4]); sub, s2, adq, s4, sup = map(int, sys.argv[5:10]); c = float(sys.argv[10])
-query, sub_ok = sys.argv[11], sys.argv[12] == "1"
+query = sys.argv[11]
 measure = lambda d: json.loads(subprocess.check_output([sys.executable, cal + "/../../vm/calib.py", "measure", f"{cal}/runs/{d}"]))
 noload = measure("noload")
 val = [measure(f"adequada-r{k}") for k in (1, 2, 3)]
@@ -146,8 +91,8 @@ prop = {
     "sub_check_125pct": {k: round(subm[k], 2) if isinstance(subm[k], float) else subm[k]
                          for k in ("rate_rps", "throughput_rps", "p50_ms", "p95_ms", "p99_ms", "mem_used_p95_mb",
                                    "mem_total_mb", "app_rss_p95_mb", "swap_used_max_mb", "pswpin_pg_s", "pswpout_pg_s",
-                                   "pgmajfault_s", "oom_kills", "worker_deaths", "dropped", "failed_rate")},
-    "sub_ok": sub_ok,
+                                   "pgmajfault_s", "oom_kills", "worker_deaths", "worker_deaths_healthcheck", "worker_deaths_oom",
+                                   "dropped", "failed_rate")},
     "adequada_validation": [{k: round(m[k], 2) if isinstance(m[k], float) else m[k]
                              for k in ("throughput_rps", "vm_util", "p50_ms", "p95_ms", "p99_ms", "mem_used_p95_mb",
                                        "mem_total_mb", "swap_io_pg_s", "oom_kills", "dropped")} for m in val],
@@ -172,7 +117,8 @@ print(f"\nSub ({sub} MB) a 125% ({s['rate_rps']} req/s): vazão {s['throughput_r
 print(f"   memória usada p95 {s['mem_used_p95_mb']:.0f}/{s['mem_total_mb']:.0f} MB, RSS app p95 {s['app_rss_p95_mb']:.0f} MB, "
       f"swap usado (máx) {s['swap_used_max_mb']:.0f} MB")
 print(f"   pswpin {s['pswpin_pg_s']:.0f} pág/s, pswpout {s['pswpout_pg_s']:.0f} pág/s, falhas de página major {s['pgmajfault_s']:.0f}/s, "
-      f"OOM kills {s['oom_kills']}, workers mortos {s['worker_deaths']}")
+      f"OOM kills {s['oom_kills']}, workers mortos {s['worker_deaths']} "
+      f"(healthcheck {s['worker_deaths_healthcheck']}, OOM {s['worker_deaths_oom']})")
 print(f"\nValidação da Adequada ({adq} MB) a {target} req/s:")
 for k, m in enumerate(prop["adequada_validation"], 1):
     print(f"  r{k}: vazão {m['throughput_rps']}, util CPU {m['vm_util']:.0%}, p50 {m['p50_ms']:.0f} / p95 {m['p95_ms']:.0f} / p99 {m['p99_ms']:.0f} ms, "
@@ -180,3 +126,71 @@ for k, m in enumerate(prop["adequada_validation"], 1):
 print(f"  média do p95 = {prop['adequada_mean_p95_ms']} ms → {'OK' if prop['adequada_ok'] else 'FALHA'} (limite {limit} ms)")
 print("\nPara aplicar: ./calibrate.sh --apply")
 EOF
+}
+
+cost_mean() { "$HOST_PY" -c 'import json,sys,subprocess
+ms=[json.loads(subprocess.check_output([sys.executable,sys.argv[1],"measure",d])) for d in sys.argv[2:]]
+print(sum(m["cpu_s_per_req"] for m in ms)/len(ms))' "$REPO_ROOT/vm/calib.py" "$CAL/runs/cost5" "$CAL/runs/cost10"; }
+
+if [[ -n "$SUMMARY_ONLY" ]]; then
+    SEARCH="$(cat "$CAL/search.json")"
+    TARGET=$(jget "$SEARCH" target rate_rps); WS=$(jget "$SEARCH" target mem_used_p95_mb)
+    ADQ=$(round128 "$(echo "$WS / $UTIL_TARGET" | bc -l)")
+    SUB=$(round128 "$(echo "$WS * $SUB_FRACTION" | bc -l)")
+    S2=$(round128 "$(echo "($SUB + $ADQ) / 2" | bc -l)")
+    S4=$(round128 "$(echo "($ADQ + $SUP_MEM) / 2" | bc -l)")
+    C=$(cost_mean)
+    [[ -d "$CAL/runs/sub-$SUB" ]] || die "rodada do Sub ($SUB MB) não encontrada em $CAL/runs"
+    write_summary
+    exit 0
+fi
+
+log "=== Calibração $APP_NAME ($QUERY), $VCPUS vCPU"
+host_check_power || exit 1
+
+# --- 1-2. Super ------------------------------------------------------------------
+log "Super: $SUP_ID ($SUP_MEM MB)"
+apply_scenario "$VCPUS" "$SUP_MEM" - -
+calib_run noload 0.5 60 10
+S0=$(jget "$($CALIB measure "$CAL/runs/noload")" p50_ms)
+log "Tempo sem carga p50 = $(printf %.0f "$S0") ms → limite p95 = $(printf %.0f "$(echo "2 * $S0" | bc -l)") ms"
+calib_run cost5 5 40 10
+calib_run cost10 10 40 10
+C=$(cost_mean)
+CAPC=$(echo "$VCPUS / $C" | bc -l)
+log "CPU-s/req = $(printf %.3f "$C") → capacidade de CPU ≈ $(printf %.2f "$CAPC") req/s"
+
+RATES="$CANDIDATES"
+log "Busca da carga-alvo no Super: taxas $RATES req/s, 3 × 60 s cada"
+for rate in $RATES; do
+    for rep in 1 2 3; do
+        warm=0; (( rep == 1 )) && warm="$WARMUP_S"
+        calib_run "search-$rate-r$rep" "$rate" 60 "$warm"
+    done
+done
+SEARCH=$($CALIB mem-search --runs "$CAL/runs" --rates "$RATES" --reps 3)
+echo "$SEARCH" >"$CAL/search.json"
+[[ "$(jget "$SEARCH" target)" != "None" ]] || die "nenhuma taxa candidata cumpriu o critério; ver $CAL/search.json"
+TARGET=$(jget "$SEARCH" target rate_rps); WS=$(jget "$SEARCH" target mem_used_p95_mb)
+LIMIT=$(jget "$SEARCH" p95_limit_ms)
+ADQ=$(round128 "$(echo "$WS / $UTIL_TARGET" | bc -l)")
+SUB=$(round128 "$(echo "$WS * $SUB_FRACTION" | bc -l)")
+log "Carga-alvo = $TARGET req/s; pico de memória usada (WS) = $WS MB → Adequada = $ADQ MB, Sub inicial = $SUB MB"
+
+# --- 3. Sub a 125% (pressão de memória; sem critério de aprovação) -----------------------
+RATE125=$(printf %.2f "$(echo "$TARGET * 1.25" | bc -l)")
+log "Sub: $SUB MB, a 125% ($RATE125 req/s)"
+apply_scenario "$VCPUS" "$SUB" - -
+calib_run "sub-$SUB" "$RATE125" 60 "$WARMUP_S"
+S2=$(round128 "$(echo "($SUB + $ADQ) / 2" | bc -l)")
+S4=$(round128 "$(echo "($ADQ + $SUP_MEM) / 2" | bc -l)")
+
+# --- 4. Validação da Adequada ------------------------------------------------------------
+log "Validação da Adequada: $ADQ MB a $TARGET req/s, 3 × 60 s"
+apply_scenario "$VCPUS" "$ADQ" - -
+for rep in 1 2 3; do
+    warm=0; (( rep == 1 )) && warm="$WARMUP_S"
+    calib_run "adequada-r$rep" "$TARGET" 60 "$warm"
+done
+
+write_summary

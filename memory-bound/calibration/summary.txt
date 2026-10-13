@@ -1,0 +1,25 @@
+
+================ PROPOSTA (não aplicada) ================
+Intensidade: size_mb=128&passes=4&hold_ms=400 | tempo sem carga p50 407.6 ms (p95 428.2) → limite p95 815.3 ms
+CPU-s/req 0.0245
+
+Busca da carga-alvo no Super (3 × 60 s por taxa):
+  taxa     p95 (r1/r2/r3)  média  util mem usada p95 RSS app p95 em andamento  ok
+  14.0        432/431/431  431.4   13%       1395 MB     1085 MB         5.72  OK
+  18.0        416/416/416  416.3   20%       1626 MB     1296 MB         7.34  OK
+  22.0        415/417/415  415.8   24%       1780 MB     1470 MB         8.94  OK
+
+Carga-alvo: 22.0 req/s | memória usada na carga-alvo (WS, MemTotal−MemAvailable p95): 1780 MB | RSS dos workers p95: 1470 MB
+RAM proposta: s1-sub 1152 MB, s2-sub-adeq 1920 MB, s3-adequada 2560 MB, s4-adeq-super 3584 MB, s5-super 4608 MB
+
+Sub (1152 MB) a 125% (27.5 req/s): vazão 12.14 req/s, p50 23840 / p95 30001 / p99 30001 ms, falhas 75.0%, descartadas 574
+   memória usada p95 1085/1096 MB, RSS app p95 891 MB, swap usado (máx) 1960 MB
+   pswpin 12648 pág/s, pswpout 8081 pág/s, falhas de página major 12621/s, OOM kills 0, workers mortos 2 (healthcheck 2, OOM 0)
+
+Validação da Adequada (2560 MB) a 22.0 req/s:
+  r1: vazão 21.86, util CPU 29%, p50 404 / p95 431 / p99 444 ms, mem 1711/2479 MB (69%), swap 0 pág/s, OOM 0
+  r2: vazão 21.86, util CPU 31%, p50 404 / p95 443 / p99 445 ms, mem 1680/2479 MB (68%), swap 0 pág/s, OOM 0
+  r3: vazão 21.86, util CPU 31%, p50 404 / p95 443 / p99 446 ms, mem 1778/2479 MB (72%), swap 0 pág/s, OOM 0
+  média do p95 = 439.2 ms → OK (limite 815.3 ms)
+
+Para aplicar: ./calibrate.sh --apply

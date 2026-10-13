@@ -1,0 +1,120 @@
+{
+  "query": "size_mb=128&passes=4&hold_ms=400",
+  "noload_p50_ms": 407.6,
+  "noload_p95_ms": 428.2,
+  "p95_limit_ms": 815.3,
+  "cpu_s_per_req": 0.0245,
+  "search": [
+    {
+      "rate_rps": 14.0,
+      "mean_p95_ms": 431.4,
+      "ok": true,
+      "p95_ms": [
+        432,
+        431,
+        431
+      ],
+      "vm_util": 0.13,
+      "mem_used_p95_mb": 1395,
+      "app_rss_p95_mb": 1085,
+      "inflight": 5.72
+    },
+    {
+      "rate_rps": 18.0,
+      "mean_p95_ms": 416.3,
+      "ok": true,
+      "p95_ms": [
+        416,
+        416,
+        416
+      ],
+      "vm_util": 0.2,
+      "mem_used_p95_mb": 1626,
+      "app_rss_p95_mb": 1296,
+      "inflight": 7.34
+    },
+    {
+      "rate_rps": 22.0,
+      "mean_p95_ms": 415.8,
+      "ok": true,
+      "p95_ms": [
+        415,
+        417,
+        415
+      ],
+      "vm_util": 0.24,
+      "mem_used_p95_mb": 1780,
+      "app_rss_p95_mb": 1470,
+      "inflight": 8.94
+    }
+  ],
+  "target_rps": 22.0,
+  "working_set_mb": 1780,
+  "ram_mb": {
+    "s1-sub": 1152,
+    "s2-sub-adeq": 1920,
+    "s3-adequada": 2560,
+    "s4-adeq-super": 3584,
+    "s5-super": 4608
+  },
+  "sub_check_125pct": {
+    "rate_rps": 27.5,
+    "throughput_rps": 12.14,
+    "p50_ms": 23839.93,
+    "p95_ms": 30000.75,
+    "p99_ms": 30000.95,
+    "mem_used_p95_mb": 1085.46,
+    "mem_total_mb": 1096,
+    "app_rss_p95_mb": 890.94,
+    "swap_used_max_mb": 1960.1,
+    "pswpin_pg_s": 12648.04,
+    "pswpout_pg_s": 8080.6,
+    "pgmajfault_s": 12620.87,
+    "oom_kills": 0,
+    "worker_deaths": 2,
+    "worker_deaths_healthcheck": 2,
+    "worker_deaths_oom": 0,
+    "dropped": 574,
+    "failed_rate": 0.75
+  },
+  "adequada_validation": [
+    {
+      "throughput_rps": 21.86,
+      "vm_util": 0.29,
+      "p50_ms": 404.14,
+      "p95_ms": 430.93,
+      "p99_ms": 443.7,
+      "mem_used_p95_mb": 1711.31,
+      "mem_total_mb": 2479,
+      "swap_io_pg_s": 0.0,
+      "oom_kills": 0,
+      "dropped": 0
+    },
+    {
+      "throughput_rps": 21.86,
+      "vm_util": 0.31,
+      "p50_ms": 404.18,
+      "p95_ms": 443.34,
+      "p99_ms": 445.26,
+      "mem_used_p95_mb": 1680.11,
+      "mem_total_mb": 2479,
+      "swap_io_pg_s": 0.0,
+      "oom_kills": 0,
+      "dropped": 0
+    },
+    {
+      "throughput_rps": 21.86,
+      "vm_util": 0.31,
+      "p50_ms": 404.06,
+      "p95_ms": 443.47,
+      "p99_ms": 445.57,
+      "mem_used_p95_mb": 1778.18,
+      "mem_total_mb": 2479,
+      "swap_io_pg_s": 0.0,
+      "oom_kills": 0,
+      "dropped": 0
+    }
+  ],
+  "adequada_mean_p95_ms": 439.2,
+  "adequada_ok": true
+}

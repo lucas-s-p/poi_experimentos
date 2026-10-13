@@ -1,0 +1,96 @@
+[2026-10-13 14:25:00] === Calibração memory-bound (size_mb=128&passes=4&hold_ms=400), 2 vCPU
+[2026-10-13 14:25:00] Energia ok: perfil performance, na tomada
+[2026-10-13 14:25:00] Super: s5-super (4608 MB)
+[2026-10-13 14:25:00] Desligando poi-vm
+[2026-10-13 14:25:05] RAM do host ok: 13007 MB disponíveis (necessário 6144 MB)
+[2026-10-13 14:25:05] Recursos: 2 vCPU, 4608 MB RAM, disco sem limite
+[2026-10-13 14:25:07] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 14:25:08] Aguardando SSH (até 180s)
+[2026-10-13 14:25:23] SSH ok (4s)
+[2026-10-13 14:25:23] Deploy de memory-bound
+[2026-10-13 14:25:25] /health ok ({"status":"ok","app":"memory-bound","pid":1070,"cpus":2,"max_inflight_per_worker":8})
+[2026-10-13 14:26:51] [noload] 0.5 req/s: reqs=31 vazão=0.5/s falhas=0.0% drop=0 p50=408ms p95=428ms p99=472ms | vm_cpu=1% app_cpu=2% mem_used=659MB swap=0MB
+[2026-10-13 14:26:51] Tempo sem carga p50 = 408 ms → limite p95 = 815 ms
+[2026-10-13 14:27:57] [cost5] 5 req/s: reqs=201 vazão=5.0/s falhas=0.0% drop=0 p50=407ms p95=420ms p99=423ms | vm_cpu=5% app_cpu=15% mem_used=851MB swap=0MB
+[2026-10-13 14:29:02] [cost10] 10 req/s: reqs=400 vazão=9.9/s falhas=0.0% drop=0 p50=408ms p95=416ms p99=424ms | vm_cpu=12% app_cpu=30% mem_used=1071MB swap=0MB
+[2026-10-13 14:29:03] CPU-s/req = 0.024 → capacidade de CPU ≈ 81.79 req/s
+[2026-10-13 14:29:03] Busca da carga-alvo no Super: taxas 14 18 22 req/s, 3 × 60 s cada
+[2026-10-13 14:30:59] [search-14-r1] 14 req/s: reqs=840 vazão=13.9/s falhas=0.0% drop=0 p50=410ms p95=432ms p99=434ms | vm_cpu=13% app_cpu=39% mem_used=1291MB swap=0MB
+[2026-10-13 14:32:15] [search-14-r2] 14 req/s: reqs=841 vazão=13.9/s falhas=0.0% drop=0 p50=407ms p95=431ms p99=435ms | vm_cpu=12% app_cpu=39% mem_used=1316MB swap=0MB
+[2026-10-13 14:33:31] [search-14-r3] 14 req/s: reqs=841 vazão=13.9/s falhas=0.0% drop=0 p50=409ms p95=431ms p99=437ms | vm_cpu=12% app_cpu=39% mem_used=1331MB swap=0MB
+[2026-10-13 14:35:27] [search-18-r1] 18 req/s: reqs=1081 vazão=17.9/s falhas=0.0% drop=0 p50=410ms p95=416ms p99=426ms | vm_cpu=19% app_cpu=50% mem_used=1474MB swap=0MB
+[2026-10-13 14:36:43] [search-18-r2] 18 req/s: reqs=1081 vazão=17.9/s falhas=0.0% drop=0 p50=410ms p95=416ms p99=429ms | vm_cpu=19% app_cpu=51% mem_used=1487MB swap=0MB
+[2026-10-13 14:37:59] [search-18-r3] 18 req/s: reqs=1080 vazão=17.9/s falhas=0.0% drop=0 p50=410ms p95=416ms p99=428ms | vm_cpu=19% app_cpu=51% mem_used=1479MB swap=0MB
+[2026-10-13 14:39:55] [search-22-r1] 22 req/s: reqs=1321 vazão=21.9/s falhas=0.0% drop=0 p50=408ms p95=415ms p99=424ms | vm_cpu=23% app_cpu=62% mem_used=1670MB swap=0MB
+[2026-10-13 14:41:11] [search-22-r2] 22 req/s: reqs=1321 vazão=21.9/s falhas=0.0% drop=0 p50=407ms p95=417ms p99=430ms | vm_cpu=23% app_cpu=62% mem_used=1651MB swap=0MB
+[2026-10-13 14:42:27] [search-22-r3] 22 req/s: reqs=1321 vazão=21.9/s falhas=0.0% drop=0 p50=407ms p95=415ms p99=424ms | vm_cpu=23% app_cpu=62% mem_used=1659MB swap=0MB
+[2026-10-13 14:42:27] Carga-alvo = 22.0 req/s; pico de memória usada (WS) = 1780 MB → Adequada = 2560 MB, Sub inicial = 1152 MB
+[2026-10-13 14:42:27] Sub candidato: 1152 MB, a 125% (27.50 req/s)
+[2026-10-13 14:42:27] Desligando poi-vm
+[2026-10-13 14:42:31] RAM do host ok: 12606 MB disponíveis (necessário 2688 MB)
+[2026-10-13 14:42:31] Recursos: 2 vCPU, 1152 MB RAM, disco sem limite
+[2026-10-13 14:42:33] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 14:42:35] Aguardando SSH (até 180s)
+[2026-10-13 14:42:49] SSH ok (4s)
+[2026-10-13 14:42:49] Deploy de memory-bound
+[2026-10-13 14:42:51] /health ok ({"status":"ok","app":"memory-bound","pid":1052,"cpus":2,"max_inflight_per_worker":8})
+[2026-10-13 14:45:47] [sub-1152] 27.50 req/s: reqs=1077 vazão=12.1/s falhas=74.9% drop=574 p50=23840ms p95=30001ms p99=30001ms | vm_cpu=48% app_cpu=54% mem_used=1002MB swap=1960MB | EVENTOS: 2 worker(s) morto(s) e reiniciado(s) pelo uvicorn
+[2026-10-13 14:45:47] Sub 1152 MB: OOM/worker morto; +128 MB
+[2026-10-13 14:45:47] Sub candidato: 1280 MB, a 125% (27.50 req/s)
+[2026-10-13 14:45:47] Desligando poi-vm
+[2026-10-13 14:45:54] RAM do host ok: 12715 MB disponíveis (necessário 2816 MB)
+[2026-10-13 14:45:54] Recursos: 2 vCPU, 1280 MB RAM, disco sem limite
+[2026-10-13 14:45:56] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 14:45:57] Aguardando SSH (até 180s)
+[2026-10-13 14:46:12] SSH ok (4s)
+[2026-10-13 14:46:12] Deploy de memory-bound
+[2026-10-13 14:46:14] /health ok ({"status":"ok","app":"memory-bound","pid":1049,"cpus":2,"max_inflight_per_worker":8})
+[2026-10-13 14:49:11] [sub-1280] 27.50 req/s: reqs=977 vazão=10.9/s falhas=83.4% drop=673 p50=30000ms p95=30001ms p99=30001ms | vm_cpu=62% app_cpu=86% mem_used=1108MB swap=1588MB | EVENTOS: 1 worker(s) morto(s) e reiniciado(s) pelo uvicorn
+[2026-10-13 14:49:12] Sub 1280 MB: OOM/worker morto; +128 MB
+[2026-10-13 14:49:12] Sub candidato: 1408 MB, a 125% (27.50 req/s)
+[2026-10-13 14:49:12] Desligando poi-vm
+[2026-10-13 14:49:20] RAM do host ok: 12718 MB disponíveis (necessário 2944 MB)
+[2026-10-13 14:49:20] Recursos: 2 vCPU, 1408 MB RAM, disco sem limite
+[2026-10-13 14:49:22] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 14:49:23] Aguardando SSH (até 180s)
+[2026-10-13 14:49:38] SSH ok (4s)
+[2026-10-13 14:49:38] Deploy de memory-bound
+[2026-10-13 14:49:40] /health ok ({"status":"ok","app":"memory-bound","pid":1052,"cpus":2,"max_inflight_per_worker":8})
+[2026-10-13 14:52:36] [sub-1408] 27.50 req/s: reqs=940 vazão=10.4/s falhas=100.0% drop=711 p50=30000ms p95=30001ms p99=30001ms | vm_cpu=56% app_cpu=79% mem_used=1251MB swap=1383MB | EVENTOS: 1 worker(s) morto(s) e reiniciado(s) pelo uvicorn
+[2026-10-13 14:52:36] Sub 1408 MB: OOM/worker morto; +128 MB
+[2026-10-13 14:52:36] AVISO: Sub com OOM nas 3 tentativas (último 1536 MB)
+[2026-10-13 14:52:36] Validação da Adequada: 2560 MB a 22.0 req/s, 3 × 60 s
+[2026-10-13 14:52:36] Desligando poi-vm
+[2026-10-13 14:52:46] RAM do host ok: 12748 MB disponíveis (necessário 4096 MB)
+[2026-10-13 14:52:46] Recursos: 2 vCPU, 2560 MB RAM, disco sem limite
+[2026-10-13 14:52:48] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 14:52:49] Aguardando SSH (até 180s)
+[2026-10-13 14:53:04] SSH ok (4s)
+[2026-10-13 14:53:04] Deploy de memory-bound
+[2026-10-13 14:53:06] /health ok ({"status":"ok","app":"memory-bound","pid":1066,"cpus":2,"max_inflight_per_worker":8})
+[2026-10-13 14:55:03] [adequada-r1] 22.0 req/s: reqs=1321 vazão=21.9/s falhas=0.0% drop=0 p50=404ms p95=431ms p99=444ms | vm_cpu=27% app_cpu=61% mem_used=1581MB swap=0MB
+[2026-10-13 14:56:19] [adequada-r2] 22.0 req/s: reqs=1321 vazão=21.9/s falhas=0.0% drop=0 p50=404ms p95=443ms p99=445ms | vm_cpu=29% app_cpu=64% mem_used=1594MB swap=0MB
+[2026-10-13 14:57:33] [adequada-r3] 22.0 req/s: reqs=1321 vazão=21.9/s falhas=0.0% drop=0 p50=404ms p95=443ms p99=446ms | vm_cpu=29% app_cpu=64% mem_used=1572MB swap=0MB
+Traceback (most recent call last):
+  File "/home/joaoramalho/poi/poi_experimentos/memory-bound/calibration/../../vm/calib.py", line 167, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/joaoramalho/poi/poi_experimentos/memory-bound/calibration/../../vm/calib.py", line 162, in main
+    return {"measure": cmd_measure, "propose-cpu": cmd_propose_cpu, "confirm": cmd_confirm,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joaoramalho/poi/poi_experimentos/memory-bound/calibration/../../vm/calib.py", line 63, in cmd_measure
+    print(json.dumps(measure(a.dir), default=_py))
+                     ^^^^^^^^^^^^^^
+  File "/home/joaoramalho/poi/poi_experimentos/memory-bound/calibration/../../vm/calib.py", line 22, in measure
+    meta = json.load(open(f"{d}/meta.json"))
+                     ^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/joaoramalho/poi/poi_experimentos/memory-bound/calibration/runs/sub-1536/meta.json'
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+  File "<stdin>", line 5, in <lambda>
+  File "/home/joaoramalho/miniforge3/envs/poi-analysis/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joaoramalho/miniforge3/envs/poi-analysis/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/joaoramalho/miniforge3/envs/poi-analysis/bin/python', '/home/joaoramalho/poi/poi_experimentos/memory-bound/calibration/../../vm/calib.py', 'measure', '/home/joaoramalho/poi/poi_experimentos/memory-bound/calibration/runs/sub-1536']' returned non-zero exit status 1.

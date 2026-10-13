@@ -33,6 +33,8 @@ METRICS = {  # coluna: (rótulo, unidade)
     "swap_max_mb": ("Swap usado na VM (máx.)", "MB"), "swap_io_pg_s": ("Swap in + out", "páginas/s"),
     "pgmajfault_s": ("Falhas de página major", "por s"), "oom_kills": ("OOM kills por rodada", "eventos"),
     "worker_deaths": ("Workers reiniciados por rodada", "eventos"),
+    "worker_deaths_healthcheck": ("Workers mortos pelo healthcheck", "por rodada"),
+    "worker_deaths_oom": ("Workers mortos por OOM", "por rodada"),
     "disk_util_pct": ("Disco ocupado (%util)", "%"), "iowait_pct": ("iowait", "% da CPU"),
     "disk_mb_s": ("Disco (leitura + escrita)", "MB/s"),
 }
@@ -40,7 +42,8 @@ METRICS = {  # coluna: (rótulo, unidade)
 # Painéis extras do gráfico por cenário e métrica extra do comparativo de recursos, por app
 EXTRA = {
     "memory-bound": {"panels": [("Pressão de memória", "por s", ["swap_io_pg_s", "pgmajfault_s"], False),
-                                ("Eventos na VM (média por rodada)", "eventos", ["oom_kills", "worker_deaths"], False)],
+                                ("Eventos na VM (média por rodada)", "eventos",
+                                 ["worker_deaths_healthcheck", "worker_deaths_oom", "oom_kills"], False)],
                      "compare": ["swap_max_mb", "swap_io_pg_s"]},
     "io-bound": {"panels": [("Disco", "%", ["disk_util_pct", "iowait_pct"], False),
                             ("Taxa de disco", "MB/s", ["disk_mb_s"], False)],
@@ -79,6 +82,9 @@ def one_rep(d: Path):
         "swap_io_pg_s": col_mean(w, "pswpin_pg_s") + col_mean(w, "pswpout_pg_s"),
         "pgmajfault_s": col_mean(w, "pgmajfault_s"),
         "oom_kills": ev.get("oom_kills", np.nan), "worker_deaths": ev.get("worker_deaths", np.nan),
+        "worker_deaths_healthcheck": ev.get("worker_deaths_healthcheck", np.nan),
+        "worker_deaths_oom": ev.get("worker_deaths_oom", np.nan),
+        "swap_at_start_mb": ev.get("swap_used_at_start_mb", np.nan),
         "service_restarts": ev.get("service_restarts", np.nan),
         "host_cpu_mean": meta["host_cpu_pct"]["mean"], "host_cpu_max": meta["host_cpu_pct"]["max"],
     }
@@ -97,7 +103,9 @@ def summarize(reps: pd.DataFrame):
     g = reps.groupby(["scenario", "level_pct"])
     mean = g[cols].mean()
     ci = g[cols].agg(ci95).add_suffix("_ci95")
-    out = pd.concat([g[["rate_rps", "vcpus", "ram_mb"]].first(), g.size().rename("n"), mean, ci], axis=1)
+    events = [c for c in ("oom_kills", "worker_deaths_healthcheck", "worker_deaths_oom", "service_restarts") if c in reps]
+    totals = g[events].sum(min_count=1).add_suffix("_total")   # contagens somadas nas repetições
+    out = pd.concat([g[["rate_rps", "vcpus", "ram_mb"]].first(), g.size().rename("n"), mean, ci, totals], axis=1)
     return out.reset_index()
 
 
@@ -255,7 +263,8 @@ def main(app_dir):
     cols = ["scenario", "level_pct", "rate_rps", "n", "throughput_rps", "p50_ms", "p95_ms", "p95_ms_ci95", "p99_ms",
             "failed_rate", "vm_cpu_pct", "vm_mem_used_mb", "host_cpu_max"]
     if APP_DIR.name == "memory-bound":
-        cols += ["swap_max_mb", "swap_io_pg_s", "pgmajfault_s", "oom_kills", "worker_deaths", "service_restarts"]
+        cols += ["swap_at_start_mb", "swap_max_mb", "swap_io_pg_s", "pgmajfault_s", "oom_kills_total",
+                 "worker_deaths_healthcheck_total", "worker_deaths_oom_total", "service_restarts_total"]
     elif APP_DIR.name == "io-bound":
         cols += ["disk_mb_s", "disk_util_pct", "iowait_pct"]
     with pd.option_context("display.width", 200, "display.max_rows", 200):

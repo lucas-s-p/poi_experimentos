@@ -147,19 +147,36 @@ collectors_stop() {
     vm_fetch "$COL_REMOTE" "$1/vm_metrics.csv"
 }
 
-# run_measure <dir> <rate> <duração_s>: coletor on → k6 → coletor off → copia. Exporta T_START/T_END/CLOCK.
+# run_measure <dir> <rate> <duração_s> [warm-up_s]: coletores on → [warm-up] → k6 → coletores off → copia.
+# Com warm-up, ele roda logo antes da medição (só o snapshot de eventos, ~0,2 s, fica no meio); as amostras
+# do warm-up ficam nos CSVs, mas a análise usa só a janela [T_START, T_END]. Exporta T_START/T_END/CLOCK.
 run_measure() {
-    local dir="$1" rate="$2" dur="$3"
+    local dir="$1" rate="$2" dur="$3" warm="${4:-0}"
     mkdir -p "$dir"
     CLOCK=$(clock_offset)
-    vm_ssh "$REMOTE_PY $REMOTE_DIR/metrics/vm_events.py snapshot --service $SERVICE > /tmp/poi_ev0.json"
     collectors_start "$dir"
+    (( warm > 0 )) && run_k6 "$rate" "$warm"
+    vm_ssh "$REMOTE_PY $REMOTE_DIR/metrics/vm_events.py snapshot --service $SERVICE > /tmp/poi_ev0.json"
     T_START=$(date +%s.%N)
     run_k6 "$rate" "$dur" "$dir/k6_summary.json" "$dir/k6_raw.csv.gz"
     T_END=$(date +%s.%N)
     collectors_stop "$dir"
     vm_ssh "$REMOTE_PY $REMOTE_DIR/metrics/vm_events.py diff --service $SERVICE --before /tmp/poi_ev0.json" >"$dir/vm_events.json"
     [[ -s "$dir/k6_summary.json" ]] || die "k6 não gerou resumo em $dir"
+}
+
+# vm_reset_state: estado limpo antes de uma rodada (reset_between_reps no demand.yaml): reinicia o
+# serviço (libera a memória da app), esvazia o swap, descarta o page cache e espera o /health.
+# Sem isso, o thrashing de uma rodada contamina a seguinte.
+vm_reset_state() {
+    vm_ssh "sudo systemctl restart $SERVICE && sudo swapoff -a && sudo swapon -a && sync \
+            && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null"
+    local i
+    for i in $(seq 1 60); do
+        curl -fs "$BASE_URL/health" >/dev/null && return 0
+        sleep 1
+    done
+    die "/health não respondeu em 60 s após o reset"
 }
 
 # Resumo de uma rodada para o log: "reqs falhas% p50 p95 p99 vazão"
@@ -190,8 +207,15 @@ _run_rep() {
     rm -rf "$rdir"
     # a checagem de host ocioso (10 s) faz parte da pausa entre repetições
     (( PAUSE_S > 10 )) && sleep $((PAUSE_S - 10))
-    host_wait_idle "$id L$lvl r$rep" || exit 3   # 3 = host não ficou ocioso (aborta o experimento)
-    run_measure "$rdir" "$rate" "$DURATION_S"
+    if (( RESET )); then
+        # estado limpo + warm-up próprio em cada rodada (as rodadas ficam independentes)
+        vm_reset_state
+        host_wait_idle "$id L$lvl r$rep" || exit 3   # 3 = host não ficou ocioso (aborta o experimento)
+        run_measure "$rdir" "$rate" "$DURATION_S" "$WARMUP_S"
+    else
+        host_wait_idle "$id L$lvl r$rep" || exit 3
+        run_measure "$rdir" "$rate" "$DURATION_S"
+    fi
     "$HOST_PY" "$EXPTOOLS" meta --out "$rdir/meta.json" --app "$APP_NAME" --scenario "$id" \
         --level "$lvl" --rep "$rep" --target-rps "$TARGET_RPS" --rate "$rate" --query "$QUERY" \
         --duration "$DURATION_S" --vm-config "$vmcfg" --commit "$commit" \
@@ -206,6 +230,9 @@ _run_rep() {
     fi
     local ev; ev="$("$HOST_PY" "$EXPTOOLS" events "$rdir/vm_events.json")"
     [[ -n "$ev" ]] && log "AVISO [$id L$lvl r$rep]: eventos na VM: $ev"
+    local swap0; swap0="$("$HOST_PY" -c 'import json,sys;print(json.load(open(sys.argv[1])).get("swap_used_at_start_mb"))' "$rdir/vm_events.json")"
+    (( RESET )) && [[ "$swap0" != "None" ]] && (( ${swap0%.*} > 50 )) \
+        && log "AVISO [$id L$lvl r$rep]: swap no início da rodada = ${swap0} MB (esperado ~0 após o reset)"
     if (( oover > 0 )); then
         log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam os E-cores com a VM"
     fi
@@ -271,8 +298,12 @@ experiment_main() {
             for rep in $(seq 1 "$REPS"); do [[ -f "$ldir/r$rep/meta.json" ]] || done_all=0; done
             (( done_all )) && { log "[$id L$lvl] já concluído"; continue; }
 
-            log "[$id L$lvl] warm-up ${WARMUP_S}s a $rate req/s"
-            run_k6 "$rate" "$WARMUP_S"
+            if (( RESET )); then
+                log "[$id L$lvl] $rate req/s (reset + warm-up de ${WARMUP_S}s antes de cada rodada)"
+            else
+                log "[$id L$lvl] warm-up ${WARMUP_S}s a $rate req/s"
+                run_k6 "$rate" "$WARMUP_S"
+            fi
             for rep in $(seq 1 "$REPS"); do
                 [[ -f "$ldir/r$rep/meta.json" ]] && continue
                 ( _run_rep "$base" "$id" "$lvl" "$rep" "$rate" "$vmcfg" "$commit" "$quick" ) & pid=$!

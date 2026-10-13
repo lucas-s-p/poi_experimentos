@@ -1,8 +1,9 @@
 # Demanda do experimento. target_rps e a intensidade são definidos pela calibração (calibrate.sh).
 query: size_mb=128&passes=4&hold_ms=400   # intensidade fixa: 128 MB retidos por ~400 ms, 4 passes aleatórios
-target_rps: null             # carga-alvo (nível 100%)
+target_rps: 22.0             # calibrate.sh 2026-10-13
 levels_pct: [25, 50, 75, 100, 125]
-warmup_s: 40
+reset_between_reps: true     # antes de cada rodada: reinicia o serviço, swapoff/swapon, drop_caches
+warmup_s: 40                 # por rodada (logo antes da medição, após o reset)
 duration_s: 60               # duração de cada repetição
 reps: 3
 pause_s: 10                  # pausa entre repetições (inclui a checagem de host ocioso, 10 s)

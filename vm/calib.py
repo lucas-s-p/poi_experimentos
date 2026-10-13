@@ -56,6 +56,11 @@ def measure(d):
         "pgmajfault_s": w.pgmajfault_s.mean() if "pgmajfault_s" in w else float("nan"),
         "oom_kills": (meta.get("vm_events") or {}).get("oom_kills", 0),
         "worker_deaths": (meta.get("vm_events") or {}).get("worker_deaths", 0),
+        # rodadas antigas (antes da separação): mortes sem vítima de OOM correspondente = healthcheck
+        "worker_deaths_oom": (meta.get("vm_events") or {}).get("worker_deaths_oom", 0),
+        "worker_deaths_healthcheck": (meta.get("vm_events") or {}).get(
+            "worker_deaths_healthcheck",
+            (meta.get("vm_events") or {}).get("worker_deaths", 0) - (meta.get("vm_events") or {}).get("oom_kills", 0)),
     }
 
 

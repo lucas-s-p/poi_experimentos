@@ -46,6 +46,7 @@ def cmd_config(a):
         "LEVELS": " ".join(str(x) for x in dem["levels_pct"]),
         "WARMUP_S": dem["warmup_s"], "DURATION_S": dem["duration_s"], "REPS": dem["reps"],
         "PAUSE_S": dem["pause_s"], "MAX_VUS": dem["max_vus"],
+        "RESET": int(bool(dem.get("reset_between_reps", False))),
     }
     for k, v in out.items():
         print(f"{k}={shlex.quote(str(v))}")
@@ -158,7 +159,11 @@ def cmd_events(a):
     parts = []
     if e["oom_kills"]:
         parts.append(f"{e['oom_kills']} OOM kill(s) ({', '.join(v['name'] for v in e['oom_victims']) or '?'})")
-    if e["worker_deaths"]:
+    if e.get("worker_deaths_healthcheck"):
+        parts.append(f"{e['worker_deaths_healthcheck']} worker(s) morto(s) pelo healthcheck do uvicorn (sem resposta em 5 s)")
+    if e.get("worker_deaths_oom"):
+        parts.append(f"{e['worker_deaths_oom']} worker(s) morto(s) por OOM")
+    if e["worker_deaths"] and "worker_deaths_oom" not in e:
         parts.append(f"{e['worker_deaths']} worker(s) morto(s) e reiniciado(s) pelo uvicorn")
     if e["service_restarts"] or e["main_pid_changed"]:
         parts.append(f"serviço reiniciado pelo systemd ({e['service_restarts']}x)")
