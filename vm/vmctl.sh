@@ -169,8 +169,8 @@ host_check_ram() {
     log "RAM do host ok: ${avail} MB disponíveis (necessário $((need + margin)) MB)"
 }
 
-# host_check_power: exige perfil de energia "performance" e fonte na tomada (AC).
-# Ambos afetam a frequência dos núcleos e, portanto, o custo por requisição.
+# host_check_power [quiet]: exige perfil de energia "performance" e fonte na tomada (AC).
+# Ambos afetam a frequência dos núcleos e, portanto, o custo por requisição. Com "quiet", só loga falhas.
 host_check_power() {
     local profile ac f ok=0
     profile="$(powerprofilesctl get 2>/dev/null || echo desconhecido)"
@@ -178,6 +178,6 @@ host_check_power() {
     for f in /sys/class/power_supply/A*/online; do [[ -r "$f" ]] && ac="$(cat "$f")"; done
     [[ "$profile" == "performance" ]] || { log "ERRO: perfil de energia é '$profile'; rode: powerprofilesctl set performance"; ok=1; }
     [[ "$ac" == "1" ]] || { log "ERRO: notebook fora da tomada (AC=$ac); conecte o carregador"; ok=1; }
-    (( ok == 0 )) && log "Energia ok: perfil $profile, na tomada"
+    (( ok == 0 )) && [[ "${1:-}" != quiet ]] && log "Energia ok: perfil $profile, na tomada"
     return "$ok"
 }

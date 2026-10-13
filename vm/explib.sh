@@ -209,6 +209,7 @@ _run_rep() {
     local base="$1" id="$2" lvl="$3" rep="$4" rate="$5" vmcfg="$6" commit="$7" quick="$8"
     local rdir="$base/$id/$(printf 'L%03d' "$lvl")/r$rep"
     rm -rf "$rdir"
+    host_check_power quiet || exit 4             # 4 = energia fora do exigido (aborta o experimento)
     # a checagem de host ocioso (10 s) faz parte da pausa entre repetições
     (( PAUSE_S > 10 )) && sleep $((PAUSE_S - 10))
     if (( RESET )); then
@@ -313,6 +314,7 @@ experiment_main() {
                 ( _run_rep "$base" "$id" "$lvl" "$rep" "$rate" "$vmcfg" "$commit" "$quick" ) & pid=$!
                 rc=0; wait "$pid" || rc=$?
                 (( rc == 3 )) && { log "ERRO: host não ficou ocioso em 10 min; abortando"; exit 1; }
+                (( rc == 4 )) && { log "ERRO: energia fora do exigido antes de [$id L$lvl r$rep]; abortando (rode de novo para retomar)"; exit 1; }
                 if (( rc != 0 )); then
                     log "FALHA [$id L$lvl r$rep] (código $rc); seguindo"
                     fails+=("$id L$lvl r$rep")
