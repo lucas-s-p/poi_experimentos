@@ -18,7 +18,10 @@ BW_GROUP="io_limit"
 
 SSH_OPTS=(-i "$SSH_KEY" -p "$SSH_PORT" -o BatchMode=yes -o ConnectTimeout=5
           -o StrictHostKeyChecking=no -o UserKnownHostsFile="$VM_KNOWN_HOSTS"
-          -o LogLevel=ERROR)
+          -o LogLevel=ERROR
+          # conexão SSH reaproveitada: RTT de ms em vez de ~200 ms (medição do offset de relógio)
+          -o ControlMaster=auto -o ControlPath="$VM_WORKDIR/ssh-%C" -o ControlPersist=120
+          -o ServerAliveInterval=5 -o ServerAliveCountMax=3)
 
 log() { echo "[$(date '+%F %T')] $*" >&2; }
 die() { log "ERRO: $*"; exit 1; }
@@ -93,6 +96,7 @@ vm_stop() {
     log "Desligando $VM_NAME"
     vm_ssh 'sudo systemctl poweroff' >/dev/null 2>&1 \
         || VBoxManage controlvm "$VM_NAME" acpipowerbutton >/dev/null 2>&1 || true
+    ssh "${SSH_OPTS[@]}" -O exit "$VM_USER@127.0.0.1" >/dev/null 2>&1 || true   # fecha a conexão mestre
     local i
     for i in $(seq 1 60); do
         vm_running || break

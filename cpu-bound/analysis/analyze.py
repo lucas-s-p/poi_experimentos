@@ -11,6 +11,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.ticker import FuncFormatter  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import yaml  # noqa: E402
@@ -71,6 +72,15 @@ def summarize(reps: pd.DataFrame):
     return out.reset_index()
 
 
+def log_y(ax):
+    """Escala log com rótulos numéricos simples (30, 100, 400) em vez de 4×10²."""
+    ax.set_yscale("log")
+    fmt = FuncFormatter(lambda v, _: f"{v:g}")
+    ax.yaxis.set_major_formatter(fmt)
+    ax.yaxis.set_minor_formatter(fmt)
+    ax.tick_params(axis="y", which="minor", labelsize=7)
+
+
 def style(ax, title, unit):
     ax.set_title(title, loc="left", fontsize=11, color=INK)
     ax.set_ylabel(unit, color=INK2)
@@ -105,7 +115,7 @@ def plot_scenario(summ, sid, name, out):
     ax = axes[0, 0]
     for i, col in enumerate(("p50_ms", "p95_ms", "p99_ms")):
         line(ax, d, col, SERIES[i], MARKERS[i], col.split("_")[0])
-    ax.set_yscale("log"); style(ax, "Latência", "ms (escala log)"); ax.legend(frameon=False, fontsize=8)
+    log_y(ax); style(ax, "Latência", "ms (escala log)"); ax.legend(frameon=False, fontsize=8)
     ax = axes[0, 1]
     ax.plot(d.rate_rps, d.rate_rps, "--", color=INK2, linewidth=1, label="oferecida")
     line(ax, d, "throughput_rps", SERIES[0], MARKERS[0], "atingida", direct=False)
@@ -134,7 +144,7 @@ def plot_compare(summ, scen, cols, title, out, logy=()):
                 line(ax, d, col, SERIES[i], MARKERS[i], s["name"])
         label, unit = METRICS[col]
         if col in logy:
-            ax.set_yscale("log"); unit += " (escala log)"
+            log_y(ax); unit += " (escala log)"
         style(ax, label, unit)
         demand_axis(ax, summ)
     np.atleast_1d(axes)[0].legend(frameon=False, fontsize=8)
