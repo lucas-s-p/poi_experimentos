@@ -129,8 +129,8 @@ def group_reps(runs, prefix, rates, reps):
 
 
 def cmd_mem_search(a):
-    """Maior taxa com média do p95 ≤ limite (sem descartes) e o pico de memória a essa taxa."""
-    s0 = measure(f"{a.runs}/noload")["p50_ms"]
+    """Maior taxa com média do p95 ≤ limite (sem descartes); pico de memória e banda de disco por taxa."""
+    s0 = measure(f"{a.runs}/{a.noload}")["p50_ms"]
     limit = 2 * s0
     res = group_reps(a.runs, "search", a.rates.split(), a.reps)
     rows, best = [], None
@@ -142,7 +142,10 @@ def cmd_mem_search(a):
                      "vm_util": round(sum(m["vm_util"] for m in ms) / len(ms), 3),
                      "mem_used_p95_mb": round(max(m["mem_used_p95_mb"] for m in ms)),
                      "app_rss_p95_mb": round(max(m["app_rss_p95_mb"] for m in ms)),
-                     "inflight": round(sum(m["inflight"] for m in ms) / len(ms), 2)})
+                     "inflight": round(sum(m["inflight"] for m in ms) / len(ms), 2),
+                     # banda de disco (leitura + escrita, MiB/s) medida na VM
+                     "disk_mb_s": round(sum(m["throughput_rps"] * m["disk_mb_per_req"] for m in ms) / len(ms), 2),
+                     "disk_mb_per_req": round(sum(m["disk_mb_per_req"] for m in ms) / len(ms), 3)})
         if ok:
             best = rows[-1]
     print(json.dumps({"noload_p50_ms": round(s0, 1), "p95_limit_ms": round(limit, 1), "search": rows,
@@ -155,7 +158,7 @@ def main():
     p = sub.add_parser("measure"); p.add_argument("dir")
     p = sub.add_parser("mem-search")
     p.add_argument("--runs", required=True); p.add_argument("--rates", required=True)
-    p.add_argument("--reps", type=int, default=3)
+    p.add_argument("--reps", type=int, default=3); p.add_argument("--noload", default="noload")
     p = sub.add_parser("confirm")
     p.add_argument("--proposal", required=True); p.add_argument("--runs", required=True)
     p.add_argument("--rates", required=True); p.add_argument("--reps", type=int, default=3)

@@ -154,6 +154,16 @@ def cmd_idlecheck(a):
     print(f"{total:.1f} {top[0]}:{top[1]:.0f} {int(docker_running())}")
 
 
+def cmd_written(a):
+    """Total gravado no disco da VM (MB) somando os meta.json de um diretório de resultados."""
+    import glob
+    tot = 0.0
+    for p in glob.glob(f"{a.results}/s*/L*/r*/meta.json"):
+        w = json.load(open(p)).get("vm_disk_written") or {}
+        tot += w.get("with_warmup_mb", 0.0)
+    print(f"{tot / 1024:.1f}")
+
+
 def cmd_events(a):
     """Resumo de uma linha dos eventos da VM (vazio se nada aconteceu)."""
     e = json.load(open(a.path))
@@ -169,6 +179,24 @@ def cmd_events(a):
     if e["service_restarts"] or e["main_pid_changed"]:
         parts.append(f"serviço reiniciado pelo systemd ({e['service_restarts']}x)")
     print("; ".join(parts))
+
+
+def vm_disk_written(path, t_start, t_end, offset):
+    """MB gravados no disco da VM: na janela da medição e no CSV inteiro (inclui o warm-up)."""
+    with open(path) as f:
+        rows = list(csv.DictReader(f))
+    if not rows:
+        return None
+    total = window = 0.0
+    prev = float(rows[0]["timestamp"])
+    for r in rows[1:]:
+        t = float(r["timestamp"])
+        mb = float(r["disk_write_mb_s"]) * (t - prev)
+        total += mb
+        if t_start <= t - offset <= t_end + 1:
+            window += mb
+        prev = t
+    return {"measure_mb": round(window, 1), "with_warmup_mb": round(total, 1)}
 
 
 def cmd_meta(a):
@@ -189,6 +217,7 @@ def cmd_meta(a):
         # swap logo após o reset entre rodadas (antes do warm-up); vm_events.swap_used_at_start_mb é o
         # swap no início da medição, já depois do warm-up na mesma carga
         "swap_after_reset_mb": a.swap_after_reset,
+        "vm_disk_written": vm_disk_written(a.vm_metrics, a.t_start, a.t_end, a.clock_offset) if a.vm_metrics else None,
         "docker_running": docker_running(),
     }
     with open(a.out, "w") as f:
@@ -212,14 +241,16 @@ def main():
     p.add_argument("--quick", action="store_true")
     p.add_argument("--idle", help="JSON da checagem de host ocioso antes da rodada")
     p.add_argument("--events", help="vm_events.json da rodada (OOM, workers mortos, reinícios)")
+    p.add_argument("--vm-metrics", dest="vm_metrics", help="vm_metrics.csv (bytes gravados na VM)")
     p.add_argument("--swap-after-reset", dest="swap_after_reset", type=float,
                    help="swap usado (MB) logo após o reset da rodada")
     p = sub.add_parser("events"); p.add_argument("path")
+    p = sub.add_parser("written"); p.add_argument("results")
     p = sub.add_parser("idlecheck"); p.add_argument("--exclude", required=True)
     p.add_argument("--seconds", type=float, default=10)
     a = ap.parse_args()
     {"scenarios": cmd_scenarios, "config": cmd_config, "hoststats": cmd_hoststats, "meta": cmd_meta,
-     "idlecheck": cmd_idlecheck, "events": cmd_events}[a.cmd](a)
+     "idlecheck": cmd_idlecheck, "events": cmd_events, "written": cmd_written}[a.cmd](a)
 
 
 if __name__ == "__main__":

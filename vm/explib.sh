@@ -233,6 +233,7 @@ _run_rep() {
         --t-start "$T_START" --t-end "$T_END" \
         --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" \
         --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" --events "$rdir/vm_events.json" \
+        --vm-metrics "$rdir/vm_metrics.csv" \
         ${SWAP_AFTER_RESET:+--swap-after-reset "$SWAP_AFTER_RESET"} ${quick:+--quick}
     local hmean hmax hover omax oover otop
     read -r hmean hmax hover omax oover otop < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
@@ -327,6 +328,7 @@ experiment_main() {
             done
         done
     done
+    log "Gravado no disco da VM (soma das rodadas, com warm-up): $("$HOST_PY" "$EXPTOOLS" written "$base") GB"
     if (( ${#fails[@]} )); then
         log "=== $APP_NAME: concluído com ${#fails[@]} falha(s): ${fails[*]}"
         log "Rode de novo o mesmo comando para refazer só as combinações que faltaram."
