@@ -37,6 +37,7 @@ METRICS = {  # coluna: (rótulo, unidade)
     "worker_deaths_oom": ("Workers mortos por OOM", "por rodada"),
     "disk_util_pct": ("Disco ocupado (%util)", "%"), "iowait_pct": ("iowait", "% da CPU"),
     "disk_mb_s": ("Disco (leitura + escrita)", "MB/s"),
+    "p95_over_noload": ("p95 ÷ tempo sem carga do cenário (efeito de fila)", "×"),
 }
 
 # Painéis extras do gráfico por cenário e métrica extra do comparativo de recursos, por app
@@ -110,6 +111,52 @@ def summarize(reps: pd.DataFrame):
     median = g[["p50_ms", "p95_ms", "p99_ms"]].median().add_suffix("_median")
     out = pd.concat([g[["rate_rps", "vcpus", "ram_mb"]].first(), g.size().rename("n"), mean, ci, median, totals], axis=1)
     return out.reset_index()
+
+
+def add_noload(summ):
+    """Tempo sem carga por cenário (calibration/noload.json, p50 a 1 req/s) e p95 ÷ esse tempo (efeito de fila)."""
+    f = APP_DIR / "calibration" / "noload.json"
+    if not f.exists():
+        return None
+    nl = json.loads(f.read_text())
+    summ["noload_p50_ms"] = summ.scenario.map(lambda s: nl.get(s, {}).get("p50_ms", np.nan))
+    for c in ("p95_ms", "p95_ms_median"):
+        summ[c.replace("p95_ms", "p95_over_noload")] = summ[c] / summ.noload_p50_ms
+    # IC da razão: o tempo sem carga é uma constante por cenário
+    summ["p95_over_noload_ci95"] = summ.p95_ms_ci95 / summ.noload_p50_ms
+    return nl
+
+
+def plot_queue(summ, scen, nl, out):
+    """(a) tempo sem carga por cenário (efeito do limite no tempo de serviço);
+    (b) p95 sob carga ÷ tempo sem carga do mesmo cenário (efeito de fila)."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11.5, 4.6), constrained_layout=True)
+    names = [s["name"] for s in scen]
+    vals = [nl.get(s["id"], {}).get("p50_ms", np.nan) for s in scen]
+    bars = a1.bar(range(len(scen)), vals, color=SERIES[:len(scen)], width=0.6, edgecolor="white", linewidth=2)
+    for b, v in zip(bars, vals):
+        a1.annotate(f"{v:.0f} ms", (b.get_x() + b.get_width() / 2, v), xytext=(0, 3), textcoords="offset points",
+                    ha="center", fontsize=8, color=INK2)
+    a1.set_xticks(range(len(scen)))
+    a1.set_xticklabels([f"{n}\n{s.get('disk_bw', '')}" for n, s in zip(names, scen)], fontsize=8)
+    style(a1, "(a) Tempo sem carga por cenário (p50 a 1 req/s)", "ms")
+    a1.grid(axis="x", visible=False)
+    for i, s in enumerate(scen):
+        d = summ[summ.scenario == s["id"]].sort_values("level_pct")
+        if len(d):
+            line(a2, d, "p95_over_noload", SERIES[i], MARKERS[i], s["name"])
+            a2.plot(d.rate_rps, d.p95_over_noload_median, linestyle=":", linewidth=1.5, color=SERIES[i],
+                    marker=MARKERS[i], markersize=6, markerfacecolor="white", markeredgewidth=1.5)
+    a2.axhline(2, color=INK2, linestyle="--", linewidth=1)
+    a2.annotate("2× (critério)", (a2.get_xlim()[0], 2), xytext=(4, 3), textcoords="offset points", fontsize=8, color=INK2)
+    log_y(a2)
+    style(a2, "(b) p95 ÷ tempo sem carga do mesmo cenário", "× (escala log)")
+    demand_axis(a2, summ)
+    a2.margins(x=0.12)
+    place_direct_labels(a2)
+    fig.suptitle(f"{APP_DIR.name} · tempo de serviço × fila · (b) média ± IC 95% e mediana (pontilhada)",
+                 x=0.01, ha="left", fontsize=12, color=INK)
+    fig.savefig(out, dpi=130); plt.close(fig)
 
 
 def log_y(ax):
@@ -254,6 +301,7 @@ def main(app_dir):
         raise SystemExit(f"nenhum resultado em {res}")
     reps = pd.DataFrame(reps)
     summ = summarize(reps)
+    nl = add_noload(summ)
     out = res / "analysis"
     out.mkdir(exist_ok=True)
     reps.to_csv(out / "reps.csv", index=False, float_format="%.3f")
@@ -264,6 +312,8 @@ def main(app_dir):
             plot_scenario(summ, s["id"], s["name"], out / f"cenario_{s['id']}.png")
     plot_compare(summ, scen, ["p50_ms", "p95_ms", "p99_ms"], "Latência × demanda", out / "comparacao_latencia.png",
                  logy=("p50_ms", "p95_ms", "p99_ms"), medians=True)
+    if nl:
+        plot_queue(summ, scen, nl, out / "comparacao_fila.png")
     extra_cmp = EXTRA.get(APP_DIR.name, {}).get("compare", [])
     plot_compare(summ, scen, ["throughput_rps", "vm_cpu_pct", "vm_mem_used_mb"] + extra_cmp,
                  "Vazão e recursos × demanda", out / "comparacao_recursos.png")
@@ -276,6 +326,8 @@ def main(app_dir):
                  "worker_deaths_healthcheck_total", "worker_deaths_oom_total", "service_restarts_total"]
     elif APP_DIR.name == "io-bound":
         cols += ["disk_mb_s", "disk_util_pct", "iowait_pct"]
+        if nl:
+            cols += ["noload_p50_ms", "p95_over_noload", "p95_over_noload_median"]
     with pd.option_context("display.width", 200, "display.max_rows", 200):
         print(summ[cols].round(1).to_string(index=False))
     print(f"\nArquivos em {out}")

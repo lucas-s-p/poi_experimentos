@@ -1,0 +1,15 @@
+[2026-10-13 18:54:04] === Calibração io-bound (size_kb=1024), 2 vCPU, 1024 MB
+[2026-10-13 18:54:05] Energia ok: perfil performance, na tomada
+[2026-10-13 18:54:05] Desligando poi-vm
+[2026-10-13 18:54:10] RAM do host ok: 12227 MB disponíveis (necessário 2560 MB)
+[2026-10-13 18:54:10] Recursos: 2 vCPU, 1024 MB RAM, disco sem limite
+[2026-10-13 18:54:12] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 18:54:13] Aguardando SSH (até 180s)
+[2026-10-13 18:54:28] SSH ok (4s)
+[2026-10-13 18:54:28] Deploy de io-bound
+[2026-10-13 18:54:30] /health ok ({"status":"ok","app":"io-bound","pid":1046,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 18:55:53] [noload-sem-limite] 1 req/s: reqs=61 vazão=1.0/s falhas=0.0% drop=0 p50=23ms p95=33ms p99=35ms | vm_cpu=1% app_cpu=2% mem_used=611MB swap=0MB iowait=1% disk_util=3% disk=2.3MB/s
+[2026-10-13 18:55:53] Busca da carga-alvo (disco sem limite): taxas 3 5 8 12 req/s, 3 × 60 s cada
+[2026-10-13 18:57:52] [search-3-r1] 3 req/s: reqs=181 vazão=3.0/s falhas=0.0% drop=0 p50=21ms p95=56ms p99=72ms | vm_cpu=1% app_cpu=2% mem_used=596MB swap=0MB iowait=3% disk_util=8% disk=5.9MB/s
+[2026-10-13 18:59:49] [search-3-r2] 3 req/s: reqs=180 vazão=3.0/s falhas=0.0% drop=0 p50=24ms p95=78ms p99=91ms | vm_cpu=1% app_cpu=2% mem_used=597MB swap=0MB iowait=4% disk_util=9% disk=6.0MB/s
+[2026-10-13 19:01:46] [search-3-r3] 3 req/s: reqs=181 vazão=3.0/s falhas=0.0% drop=0 p50=24ms p95=82ms p99=89ms | vm_cpu=1% app_cpu=2% mem_used=593MB swap=0MB iowait=5% disk_util=11% disk=5.9MB/s
