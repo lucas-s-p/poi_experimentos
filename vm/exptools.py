@@ -47,6 +47,7 @@ def cmd_config(a):
         "WARMUP_S": dem["warmup_s"], "DURATION_S": dem["duration_s"], "REPS": dem["reps"],
         "PAUSE_S": dem["pause_s"], "MAX_VUS": dem["max_vus"],
         "RESET": int(bool(dem.get("reset_between_reps", False))),
+        "RESET_EXTRA": dem.get("reset_extra") or "",
     }
     for k, v in out.items():
         print(f"{k}={shlex.quote(str(v))}")

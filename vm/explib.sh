@@ -165,12 +165,13 @@ run_measure() {
     [[ -s "$dir/k6_summary.json" ]] || die "k6 não gerou resumo em $dir"
 }
 
-# vm_reset_state: estado limpo antes de uma rodada (reset_between_reps no demand.yaml): reinicia o
-# serviço (libera a memória da app), esvazia o swap, descarta o page cache e espera o /health.
-# Sem isso, o thrashing de uma rodada contamina a seguinte.
+# vm_reset_state: estado limpo antes de uma rodada (reset_between_reps no demand.yaml): para o serviço
+# (libera a memória da app), roda reset_extra (ex.: apaga os arquivos da io-bound), esvazia o swap,
+# descarta o page cache, inicia o serviço e espera o /health.
+# Sem isso, o thrashing ou os arquivos de uma rodada contaminam a seguinte.
 vm_reset_state() {
-    vm_ssh "sudo systemctl restart $SERVICE && sudo swapoff -a && sudo swapon -a && sync \
-            && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null"
+    vm_ssh "sudo systemctl stop $SERVICE ${RESET_EXTRA:+&& $RESET_EXTRA} && sudo swapoff -a && sudo swapon -a \
+            && sync && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null && sudo systemctl start $SERVICE"
     local i
     for i in $(seq 1 60); do
         if curl -fs "$BASE_URL/health" >/dev/null; then
@@ -200,7 +201,10 @@ vm_brief() {
     "$HOST_PY" - "$1" <<'EOF'
 import sys, pandas as pd
 d = pd.read_csv(sys.argv[1])
-print(f"vm_cpu={d.cpu_pct.mean():.0f}% app_cpu={d.app_cpu_pct.mean():.0f}% mem_used={d.mem_used_mb.mean():.0f}MB swap={d.swap_used_mb.max():.0f}MB")
+extra = ""
+if "disk_util_pct" in d:
+    extra = f" iowait={d.cpu_iowait_pct.mean():.0f}% disk_util={d.disk_util_pct.mean():.0f}% disk={d.disk_read_mb_s.mean()+d.disk_write_mb_s.mean():.1f}MB/s"
+print(f"vm_cpu={d.cpu_pct.mean():.0f}% app_cpu={d.app_cpu_pct.mean():.0f}% mem_used={d.mem_used_mb.mean():.0f}MB swap={d.swap_used_mb.max():.0f}MB{extra}")
 EOF
 }
 

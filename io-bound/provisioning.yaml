@@ -1,0 +1,14 @@
+# Cenários de provisionamento da io-bound: varia só o limite de banda do disco (VBoxManage bandwidthctl),
+# com vCPU e RAM fixos e RAM baixa (1 GB) para o page cache ajudar menos. Valores definidos pela calibração.
+app: io-bound
+service: poi-io
+port: 8003
+fixed:
+  vcpus: 2
+  ram_mb: 1024
+scenarios:
+  - {id: s1-sub,         name: Sub,                 disk_bw: 8M}
+  - {id: s2-sub-adeq,    name: Sub→Adequada,        disk_bw: 16M}
+  - {id: s3-adequada,    name: Adequada,            disk_bw: 24M}
+  - {id: s4-adeq-super,  name: Adequada→Super,      disk_bw: 48M}
+  - {id: s5-super,       name: Super,               disk_bw: 96M}
