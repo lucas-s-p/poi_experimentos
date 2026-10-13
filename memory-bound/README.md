@@ -51,3 +51,7 @@ Por rodada, `meta.json` registra OOM kills (kernel), workers mortos e reiniciado
 ## Arquivos
 
 Mesma estrutura da cpu-bound: `app/`, `load/` (k6 e `demand.yaml`), `metrics/` (links para `../common/`), `calibration/`, `results/<cenário>/L<nível>/r<rep>/`, `results/analysis/`.
+
+## Resultados: rodadas anômalas a 125% (Adequada r3 e Super r3)
+
+Duas rodadas a 125% (27,5 req/s) com RAM folgada tiveram p50 de 1691 ms (Adequada, r3) e 1008 ms (Super, r3), sem swap e com ~40% de CPU; as outras 13 rodadas a 125% nesses cenários ficaram em ~406 ms. Nelas havia 34,7 e 22,7 requisições em andamento (lei de Little), acima das 16 vagas (`MAX_INFLIGHT=8` × 2 workers), contra ~11 nas demais. As conexões keep-alive do k6 se dividem de forma desigual entre os 2 workers; quando um worker enche suas 8 vagas, forma-se fila, o k6 abre mais conexões e o efeito se realimenta. É o limite de concorrência, não a memória (o mesmo desbalanceamento entre workers visto na cpu-bound). Essas rodadas dominam a média e o IC desses pontos; a análise mostra também a mediana das 3 repetições (`*_median` no `summary.csv` e linha pontilhada nos gráficos comparativos), que reflete o comportamento típico. As rodadas não foram refeitas.

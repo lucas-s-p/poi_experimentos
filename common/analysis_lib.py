@@ -106,7 +106,9 @@ def summarize(reps: pd.DataFrame):
     ci = g[cols].agg(ci95).add_suffix("_ci95")
     events = [c for c in ("oom_kills", "worker_deaths_healthcheck", "worker_deaths_oom", "service_restarts") if c in reps]
     totals = g[events].sum(min_count=1).add_suffix("_total")   # contagens somadas nas repetições
-    out = pd.concat([g[["rate_rps", "vcpus", "ram_mb"]].first(), g.size().rename("n"), mean, ci, totals], axis=1)
+    # mediana das repetições: comportamento típico quando uma rodada isolada domina a média e o IC
+    median = g[["p50_ms", "p95_ms", "p99_ms"]].median().add_suffix("_median")
+    out = pd.concat([g[["rate_rps", "vcpus", "ram_mb"]].first(), g.size().rename("n"), mean, ci, median, totals], axis=1)
     return out.reset_index()
 
 
@@ -211,7 +213,7 @@ def plot_scenario(summ, sid, name, out):
     fig.savefig(out, dpi=130); plt.close(fig)
 
 
-def plot_compare(summ, scen, cols, title, out, logy=()):
+def plot_compare(summ, scen, cols, title, out, logy=(), medians=False):
     fig, axes = plt.subplots(1, len(cols), figsize=(5.2 * len(cols), 4.6), constrained_layout=True)
     for ax, col in zip(np.atleast_1d(axes), cols):
         label, unit = METRICS[col]
@@ -221,10 +223,15 @@ def plot_compare(summ, scen, cols, title, out, logy=()):
             d = summ[summ.scenario == s["id"]].sort_values("level_pct")
             if len(d):
                 line(ax, d, col, SERIES[i], MARKERS[i], s["name"])
+                if medians and f"{col}_median" in d:
+                    ax.plot(d.rate_rps, d[f"{col}_median"], linestyle=":", linewidth=1.5, color=SERIES[i],
+                            marker=MARKERS[i], markersize=6, markerfacecolor="white", markeredgewidth=1.5)
         style(ax, label, unit)
         demand_axis(ax, summ)
     np.atleast_1d(axes)[0].legend(frameon=False, fontsize=8)
-    fig.suptitle(f"{APP_DIR.name} · {title} · média ± IC 95%", x=0.01, ha="left", fontsize=12, color=INK)
+    subtitle = "média ± IC 95% (linha cheia) e mediana das repetições (pontilhada, marcador vazado)" if medians \
+        else "média ± IC 95%"
+    fig.suptitle(f"{APP_DIR.name} · {title} · {subtitle}", x=0.01, ha="left", fontsize=12, color=INK)
     for ax in np.atleast_1d(axes):
         ax.margins(x=0.12)
         place_direct_labels(ax)
@@ -256,12 +263,13 @@ def main(app_dir):
         if (summ.scenario == s["id"]).any():
             plot_scenario(summ, s["id"], s["name"], out / f"cenario_{s['id']}.png")
     plot_compare(summ, scen, ["p50_ms", "p95_ms", "p99_ms"], "Latência × demanda", out / "comparacao_latencia.png",
-                 logy=("p50_ms", "p95_ms", "p99_ms"))
+                 logy=("p50_ms", "p95_ms", "p99_ms"), medians=True)
     extra_cmp = EXTRA.get(APP_DIR.name, {}).get("compare", [])
     plot_compare(summ, scen, ["throughput_rps", "vm_cpu_pct", "vm_mem_used_mb"] + extra_cmp,
                  "Vazão e recursos × demanda", out / "comparacao_recursos.png")
 
-    cols = ["scenario", "level_pct", "rate_rps", "n", "throughput_rps", "p50_ms", "p95_ms", "p95_ms_ci95", "p99_ms",
+    cols = ["scenario", "level_pct", "rate_rps", "n", "throughput_rps", "p50_ms", "p50_ms_median", "p95_ms",
+            "p95_ms_ci95", "p95_ms_median", "p99_ms", "p99_ms_median",
             "failed_rate", "vm_cpu_pct", "vm_mem_used_mb", "host_cpu_max"]
     if APP_DIR.name == "memory-bound":
         cols += ["swap_after_reset_mb", "swap_at_measure_start_mb", "swap_max_mb", "swap_io_pg_s", "pgmajfault_s", "oom_kills_total",
