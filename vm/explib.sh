@@ -108,6 +108,27 @@ run_k6() {
         "$APP_DIR/load/k6_work.js" >/dev/null 2>&1 || true   # k6 sai ≠0 se thresholds falham; não é erro aqui
 }
 
+# host_wait_idle: 10 s com outros processos do host (fora a VM) < IDLE_MAX_PCT de 1 núcleo.
+# Se falhar, espera 30 s e tenta de novo, por até 10 min; depois aborta.
+# Define IDLE_JSON (para o meta.json). Docker rodando só gera aviso.
+IDLE_MAX_PCT=50
+host_wait_idle() {
+    local tag="$1" start=$SECONDS attempt=0 other top docker
+    while :; do
+        attempt=$((attempt + 1))
+        read -r other top docker < <("$HOST_PY" "$EXPTOOLS" idlecheck --exclude "VBoxHeadless --startvm $VM_NAME" --seconds 10)
+        (( docker == 1 )) && log "AVISO [$tag]: Docker (dockerd/containerd) está rodando no host"
+        if (( $(echo "$other < $IDLE_MAX_PCT" | bc -l) )); then
+            (( attempt > 1 )) && log "[$tag] host ocioso após $attempt tentativas (outros ${other}% de 1 núcleo)"
+            IDLE_JSON="{\"attempts\": $attempt, \"other_pct_1core\": $other, \"top\": \"$top\", \"threshold_pct_1core\": $IDLE_MAX_PCT}"
+            return 0
+        fi
+        log "[$tag] host ocupado: outros ${other}% de 1 núcleo (maior: $top); tentativa $attempt, nova checagem em 30 s"
+        (( SECONDS - start >= 600 )) && { log "ERRO [$tag]: host não ficou ocioso em 10 min"; return 1; }
+        sleep 30
+    done
+}
+
 # Coletores: VM (psutil via SSH) e host (mesmo script, para CPU do host e do k6)
 collectors_start() {
     COL_REMOTE="/tmp/poi_${APP_NAME}_metrics.csv"
@@ -213,14 +234,16 @@ experiment_main() {
                 local rdir="$ldir/r$rep"
                 [[ -f "$rdir/meta.json" ]] && continue
                 rm -rf "$rdir"
-                sleep "$PAUSE_S"
+                # a checagem de host ocioso (10 s) faz parte da pausa entre repetições
+                (( PAUSE_S > 10 )) && sleep $((PAUSE_S - 10))
+                host_wait_idle "$id L$lvl r$rep" || exit 1
                 run_measure "$rdir" "$rate" "$DURATION_S"
                 "$HOST_PY" "$EXPTOOLS" meta --out "$rdir/meta.json" --app "$APP_NAME" --scenario "$id" \
                     --level "$lvl" --rep "$rep" --target-rps "$TARGET_RPS" --rate "$rate" --query "$QUERY" \
                     --duration "$DURATION_S" --vm-config "$vmcfg" --commit "$commit" \
                     --t-start "$T_START" --t-end "$T_END" \
                     --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" \
-                    --host-metrics "$rdir/host_metrics.csv" ${quick:+--quick}
+                    --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" ${quick:+--quick}
                 read -r hmean hmax hover omax oover otop < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
                 log "[$id L$lvl r$rep] $(k6_brief "$rdir/k6_summary.json") | $(vm_brief "$rdir/vm_metrics.csv") | host_cpu=${hmean}% (máx ${hmax}%)"
                 if (( hover > 0 )); then

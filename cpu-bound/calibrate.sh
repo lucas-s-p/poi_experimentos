@@ -5,7 +5,9 @@
 #
 # 1. Cenário Super: tempo sem carga (1 req/s) e custo de CPU por requisição (2 taxas, 30% e 50% da capacidade estimada).
 # 2. Carga-alvo = 70% da capacidade da Adequada (cenário do meio): target = 0,70 × vCPU_adequada / (CPU-s/req).
-# 3. Validação na Adequada com a carga-alvo: p95 ≤ 2 × p50 sem carga; se falhar, reduz 10% (até 3 vezes).
+# 3. Validação na Adequada com a carga-alvo (warm-up = warmup_s do demand.yaml): p95 ≤ 2 × p50 sem carga
+#    (medido na mesma calibração, portanto no mesmo perfil de energia); se falhar, reduz 10% (até 3 vezes).
+# Antes de cada rodada espera o host ficar ocioso (host_wait_idle).
 set -euo pipefail
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$APP_DIR/../vm/explib.sh"
@@ -34,12 +36,14 @@ ALL_CPUS="$(printf '%s\n' "${SCEN[@]}" | awk '{print $2}' | paste -sd' ')"
 # calib_run <nome> <rate> <duração> [warm-up]
 calib_run() {
     local name="$1" rate="$2" dur="$3" warm="${4:-0}" dir="$CAL/runs/$1"
+    host_wait_idle "calib $name" || exit 1
     (( warm > 0 )) && run_k6 "$rate" "$warm"
     run_measure "$dir" "$rate" "$dur"
     "$HOST_PY" "$EXPTOOLS" meta --out "$dir/meta.json" --app "$APP_NAME" --scenario "calib-$name" \
         --level 0 --rep 1 --target-rps 0 --rate "$rate" --query "$QUERY" --duration "$dur" \
         --vm-config "$(vm_config_json)" --commit "$COMMIT" --t-start "$T_START" --t-end "$T_END" \
-        --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" --host-metrics "$dir/host_metrics.csv"
+        --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" --host-metrics "$dir/host_metrics.csv" \
+        --idle "$IDLE_JSON"
     log "[$name] $rate req/s: $(k6_brief "$dir/k6_summary.json") | $(vm_brief "$dir/vm_metrics.csv")"
 }
 jget() { "$HOST_PY" -c 'import json,sys;print(json.loads(sys.argv[1])[sys.argv[2]])' "$1" "$2"; }
@@ -69,7 +73,7 @@ calib_run adequada-noload 1 20 5
 LIMIT=$(echo "2 * $S0" | bc -l)
 VALID=""
 for try in 1 2 3; do
-    calib_run "adequada-$try" "$TARGET" 60 15
+    calib_run "adequada-$try" "$TARGET" 60 "$WARMUP_S"
     M=$($CALIB measure "$CAL/runs/adequada-$try")
     P95=$(jget "$M" p95_ms); UTIL=$(jget "$M" vm_util)
     if (( $(echo "$P95 <= $LIMIT" | bc -l) )); then

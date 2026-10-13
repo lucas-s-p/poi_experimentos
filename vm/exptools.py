@@ -3,6 +3,8 @@
   scenarios <provisioning.yaml> [--only ID]   linhas "id vcpus ram_mb disk_bw unit_extra" (disk_bw/unit_extra '-' se vazio)
   config <provisioning.yaml> <demand.yaml> [--quick]   atribuições shell (eval) com app, porta e demanda
   hoststats <host_metrics.csv>                 "mean max n_over_85" da CPU total do host
+  idlecheck --exclude PADRÃO [--seconds 10]   "outros_pct_1núcleo top docker(0/1)": CPU de todos os
+                                               processos do host fora a VM (e este script) numa janela
   meta --out ... [opções]                      grava meta.json
 """
 import argparse
@@ -99,6 +101,40 @@ def host_power():
             "epp_cpu4": read("/sys/devices/system/cpu/cpu4/cpufreq/energy_performance_preference")}
 
 
+def docker_running():
+    import psutil
+    return any(p.info["name"] in ("dockerd", "containerd") for p in psutil.process_iter(["name"]))
+
+
+def cmd_idlecheck(a):
+    import os
+    import time
+
+    import psutil
+    me = os.getpid()
+
+    def snapshot():
+        snap = {}
+        for p in psutil.process_iter(["name", "cmdline", "cpu_times"]):
+            if p.pid == me or a.exclude in " ".join(p.info["cmdline"] or []):
+                continue
+            t = p.info["cpu_times"]
+            if t is not None:
+                snap[p.pid] = (p.info["name"], t.user + t.system)
+        return snap
+
+    s0 = snapshot()
+    time.sleep(a.seconds)
+    s1 = snapshot()
+    per = {}
+    for pid, (name, cpu) in s1.items():
+        if pid in s0:
+            per[name] = per.get(name, 0.0) + (cpu - s0[pid][1]) / a.seconds * 100
+    total = sum(per.values())
+    top = max(per.items(), key=lambda kv: kv[1]) if per else ("-", 0.0)
+    print(f"{total:.1f} {top[0]}:{top[1]:.0f} {int(docker_running())}")
+
+
 def cmd_meta(a):
     meta = {
         "app": a.app, "scenario": a.scenario, "level_pct": a.level, "rep": a.rep,
@@ -112,6 +148,8 @@ def cmd_meta(a):
         "host_cpu_pct": host_stats(a.host_metrics),
         "host_metrics_file": "host_metrics.csv",
         "host_power": host_power(),
+        "host_idle_check": json.loads(a.idle) if a.idle else None,
+        "docker_running": docker_running(),
     }
     with open(a.out, "w") as f:
         json.dump(meta, f, indent=2)
@@ -132,8 +170,12 @@ def main():
     for k in ("target_rps", "rate", "duration", "t_start", "t_end", "clock_offset", "clock_rtt"):
         p.add_argument("--" + k.replace("_", "-"), dest=k, type=float, required=True)
     p.add_argument("--quick", action="store_true")
+    p.add_argument("--idle", help="JSON da checagem de host ocioso antes da rodada")
+    p = sub.add_parser("idlecheck"); p.add_argument("--exclude", required=True)
+    p.add_argument("--seconds", type=float, default=10)
     a = ap.parse_args()
-    {"scenarios": cmd_scenarios, "config": cmd_config, "hoststats": cmd_hoststats, "meta": cmd_meta}[a.cmd](a)
+    {"scenarios": cmd_scenarios, "config": cmd_config, "hoststats": cmd_hoststats, "meta": cmd_meta,
+     "idlecheck": cmd_idlecheck}[a.cmd](a)
 
 
 if __name__ == "__main__":
