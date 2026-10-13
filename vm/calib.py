@@ -2,6 +2,7 @@
 
   measure <dir>        métricas de uma rodada (JSON): vazão, latência, utilização da VM, custos por requisição
   propose-cpu ...      carga-alvo e "adequada" da cpu-bound a partir do custo de CPU por requisição
+  confirm ...          maior taxa com p95 ≤ limite em todas as rodadas de confirmação (atualiza proposal.json)
 """
 import argparse
 import json
@@ -71,16 +72,44 @@ def cmd_propose_cpu(a):
     print(json.dumps(out))
 
 
+def cmd_confirm(a):
+    """Escolhe a maior taxa com p95 ≤ limite (e sem descartes) em todas as rodadas; atualiza proposal.json."""
+    prop = json.load(open(a.proposal))
+    limit = prop["p95_limit_ms"]
+    table, best = [], None
+    print(f"\n{'taxa':>6} {'rep':>3} {'vazão':>6} {'util':>5} {'p50':>5} {'p95':>6} {'p99':>6} {'drop':>4}  ok")
+    for r in a.rates.split():
+        rows = [measure(f"{a.runs}/confirm-{r}-r{k}") for k in range(1, a.reps + 1)]
+        oks = [m["p95_ms"] <= limit and m["dropped"] == 0 for m in rows]
+        for k, (m, ok) in enumerate(zip(rows, oks), 1):
+            print(f"{r:>6} {k:>3} {m['throughput_rps']:6.1f} {m['vm_util']:5.0%} {m['p50_ms']:5.0f} "
+                  f"{m['p95_ms']:6.0f} {m['p99_ms']:6.0f} {m['dropped']:4d}  {'ok' if ok else 'FALHA'}")
+            table.append({"rate_rps": float(r), "rep": k, "ok": ok,
+                          **{x: round(m[x], 3) for x in ("throughput_rps", "vm_util", "p50_ms", "p95_ms", "p99_ms", "dropped")}})
+        if all(oks):
+            best = float(r)
+    prop["confirmation"] = {"limit_p95_ms": limit, "reps": a.reps, "runs": table, "chosen_rps": best}
+    if best is not None:
+        prop.setdefault("target_rps_single_validation", prop["target_rps"])
+        prop["target_rps"] = best
+    json.dump(prop, open(a.proposal, "w"), indent=2)
+    print(f"\nMaior taxa com p95 ≤ {limit} ms em todas as {a.reps} rodadas: {best if best is not None else 'nenhuma'}")
+    return 0 if best is not None else 1
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("measure"); p.add_argument("dir")
+    p = sub.add_parser("confirm")
+    p.add_argument("--proposal", required=True); p.add_argument("--runs", required=True)
+    p.add_argument("--rates", required=True); p.add_argument("--reps", type=int, default=3)
     p = sub.add_parser("propose-cpu")
     p.add_argument("--noload", required=True); p.add_argument("--cost", nargs="+", required=True)
     p.add_argument("--adequada-vcpus", type=int, required=True); p.add_argument("--util", type=float, default=0.70)
     p.add_argument("--levels", required=True); p.add_argument("--scenarios", required=True)
     a = ap.parse_args()
-    {"measure": cmd_measure, "propose-cpu": cmd_propose_cpu}[a.cmd](a)
+    return {"measure": cmd_measure, "propose-cpu": cmd_propose_cpu, "confirm": cmd_confirm}[a.cmd](a)
 
 
 if __name__ == "__main__":

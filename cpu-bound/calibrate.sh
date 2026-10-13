@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Calibração da cpu-bound.
 #   ./calibrate.sh          mede e grava a proposta em calibration/proposal.json (não altera a configuração)
+#   ./calibrate.sh --confirm "45 48 50.5" [reps=3]
+#                           confirma na Adequada: reps rodadas de 60 s por taxa; a carga-alvo passa a ser a
+#                           maior taxa com p95 ≤ limite em TODAS as rodadas (atualiza proposal.json)
 #   ./calibrate.sh --apply  grava o target_rps da proposta em load/demand.yaml
 #
 # 1. Cenário Super: tempo sem carga (1 req/s) e custo de CPU por requisição (2 taxas, 30% e 50% da capacidade estimada).
@@ -24,8 +27,15 @@ if [[ "${1:-}" == "--apply" ]]; then
 fi
 
 exp_config --calib
-mkdir -p "$CAL"; rm -rf "$CAL/runs"
-exec > >(tee "$CAL/calibrate.log") 2>&1
+CONFIRM=""
+if [[ "${1:-}" == "--confirm" ]]; then
+    CONFIRM="${2:?uso: ./calibrate.sh --confirm \"taxa1 taxa2 ...\" [reps]}"; CONFIRM_REPS="${3:-3}"
+    [[ -f "$PROPOSAL" ]] || die "rode ./calibrate.sh antes"
+    exec > >(tee "$CAL/confirm.log") 2>&1
+else
+    mkdir -p "$CAL"; rm -rf "$CAL/runs"
+    exec > >(tee "$CAL/calibrate.log") 2>&1
+fi
 COMMIT="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
 
 mapfile -t SCEN < <(exp_scenarios)
@@ -47,6 +57,20 @@ calib_run() {
     log "[$name] $rate req/s: $(k6_brief "$dir/k6_summary.json") | $(vm_brief "$dir/vm_metrics.csv")"
 }
 jget() { "$HOST_PY" -c 'import json,sys;print(json.loads(sys.argv[1])[sys.argv[2]])' "$1" "$2"; }
+
+if [[ -n "$CONFIRM" ]]; then
+    log "=== Confirmação $APP_NAME na Adequada ($ADQ_CPUS vCPU): taxas $CONFIRM; $CONFIRM_REPS × 60 s cada"
+    host_check_power || exit 1
+    apply_scenario "$ADQ_CPUS" "$ADQ_MEM" "$ADQ_BW" "$ADQ_EXTRA"
+    for rate in $CONFIRM; do
+        for rep in $(seq 1 "$CONFIRM_REPS"); do
+            warm=0; (( rep == 1 )) && warm="$WARMUP_S"
+            calib_run "confirm-$rate-r$rep" "$rate" 60 "$warm"
+        done
+    done
+    $CALIB confirm --proposal "$PROPOSAL" --runs "$CAL/runs" --rates "$CONFIRM" --reps "$CONFIRM_REPS"
+    exit $?
+fi
 
 log "=== Calibração $APP_NAME ($QUERY)"
 host_check_power || exit 1
