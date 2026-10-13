@@ -1,0 +1,1 @@
+{"oom_kills": 0, "oom_victims": [], "worker_deaths": 0, "worker_deaths_oom": 0, "worker_deaths_healthcheck": 0, "swap_used_at_start_mb": 1779.1, "service_restarts": 0, "main_pid_changed": false, "workers_before": [1605, 1606, 1607], "workers_after": [1605, 1606, 1607], "kernel_oom_lines": []}
