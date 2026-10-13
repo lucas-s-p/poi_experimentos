@@ -181,7 +181,39 @@ print(f"vm_cpu={d.cpu_pct.mean():.0f}% app_cpu={d.app_cpu_pct.mean():.0f}% mem_u
 EOF
 }
 
-# experiment_main [--quick <cenario>]: experimento completo da app (idempotente, retomável)
+# _run_rep <base> <id> <lvl> <rep> <rate> <vmcfg> <commit> <quick>: uma repetição completa (roda em subshell)
+_run_rep() {
+    local base="$1" id="$2" lvl="$3" rep="$4" rate="$5" vmcfg="$6" commit="$7" quick="$8"
+    local rdir="$base/$id/$(printf 'L%03d' "$lvl")/r$rep"
+    rm -rf "$rdir"
+    # a checagem de host ocioso (10 s) faz parte da pausa entre repetições
+    (( PAUSE_S > 10 )) && sleep $((PAUSE_S - 10))
+    host_wait_idle "$id L$lvl r$rep" || exit 3   # 3 = host não ficou ocioso (aborta o experimento)
+    run_measure "$rdir" "$rate" "$DURATION_S"
+    "$HOST_PY" "$EXPTOOLS" meta --out "$rdir/meta.json" --app "$APP_NAME" --scenario "$id" \
+        --level "$lvl" --rep "$rep" --target-rps "$TARGET_RPS" --rate "$rate" --query "$QUERY" \
+        --duration "$DURATION_S" --vm-config "$vmcfg" --commit "$commit" \
+        --t-start "$T_START" --t-end "$T_END" \
+        --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" \
+        --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" ${quick:+--quick}
+    local hmean hmax hover omax oover otop
+    read -r hmean hmax hover omax oover otop < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
+    log "[$id L$lvl r$rep] $(k6_brief "$rdir/k6_summary.json") | $(vm_brief "$rdir/vm_metrics.csv") | host_cpu=${hmean}% (máx ${hmax}%)"
+    if (( hover > 0 )); then
+        log "AVISO [$id L$lvl r$rep]: CPU do host passou de 85% em $hover amostra(s) (máx ${hmax}%); medição pode estar contaminada"
+    fi
+    if (( oover > 0 )); then
+        log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam os E-cores com a VM"
+    fi
+}
+
+# Isolamento de falhas: o passo roda num subshell em segundo plano, iniciado FORA de qualquer if/||
+# (nesse contexto o bash desligaria o set -e dentro do subshell); só o "wait" fica no "||".
+#   ( passo ... ) & pid=$!; rc=0; wait "$pid" || rc=$?
+
+# experiment_main [--quick <cenario>]: experimento completo da app (idempotente, retomável).
+# Falha numa repetição ou na preparação de um cenário: registra FALHA e segue. Abortam o experimento:
+# energia fora do exigido e host que não fica ocioso em 10 min.
 experiment_main() {
     local quick="" only=""
     if [[ "${1:-}" == "--quick" ]]; then
@@ -200,8 +232,10 @@ experiment_main() {
     local commit; commit="$(git -C "$REPO_ROOT" rev-parse --short HEAD)$(git -C "$REPO_ROOT" diff --quiet HEAD -- "$APP_DIR" || echo '-dirty')"
     log "=== $APP_NAME: experimento ${quick:+(quick $only) }commit $commit; alvo $TARGET_RPS req/s; níveis $LEVELS %; $REPS × ${DURATION_S}s"
     host_check_power || exit 1
+    [[ "$(systemctl is-active unattended-upgrades.service 2>/dev/null)" == "active" ]] \
+        && log "AVISO: unattended-upgrades ativo no host (registrado no meta.json)"
 
-    local scen=() line
+    local scen=() line fails=() rc pid
     mapfile -t scen < <(exp_scenarios ${only:+--only "$only"})
     (( ${#scen[@]} )) || die "cenário não encontrado: $only"
 
@@ -218,7 +252,12 @@ experiment_main() {
 
         log "[$id] cenário: ${cpus} vCPU, ${mem} MB, disco ${bw}"
         host_check_power || exit 1
-        apply_scenario "$cpus" "$mem" "$bw" "$extra"
+        ( apply_scenario "$cpus" "$mem" "$bw" "$extra" ) & pid=$!
+        rc=0; wait "$pid" || rc=$?
+        if (( rc != 0 )); then
+            log "FALHA [$id]: preparação do cenário (código $rc); pulando o cenário"
+            fails+=("$id (preparação do cenário)"); continue
+        fi
         local vmcfg; vmcfg="$(vm_config_json)"
 
         for lvl in $LEVELS; do
@@ -231,29 +270,22 @@ experiment_main() {
             log "[$id L$lvl] warm-up ${WARMUP_S}s a $rate req/s"
             run_k6 "$rate" "$WARMUP_S"
             for rep in $(seq 1 "$REPS"); do
-                local rdir="$ldir/r$rep"
-                [[ -f "$rdir/meta.json" ]] && continue
-                rm -rf "$rdir"
-                # a checagem de host ocioso (10 s) faz parte da pausa entre repetições
-                (( PAUSE_S > 10 )) && sleep $((PAUSE_S - 10))
-                host_wait_idle "$id L$lvl r$rep" || exit 1
-                run_measure "$rdir" "$rate" "$DURATION_S"
-                "$HOST_PY" "$EXPTOOLS" meta --out "$rdir/meta.json" --app "$APP_NAME" --scenario "$id" \
-                    --level "$lvl" --rep "$rep" --target-rps "$TARGET_RPS" --rate "$rate" --query "$QUERY" \
-                    --duration "$DURATION_S" --vm-config "$vmcfg" --commit "$commit" \
-                    --t-start "$T_START" --t-end "$T_END" \
-                    --clock-offset "${CLOCK% *}" --clock-rtt "${CLOCK#* }" \
-                    --host-metrics "$rdir/host_metrics.csv" --idle "$IDLE_JSON" ${quick:+--quick}
-                read -r hmean hmax hover omax oover otop < <("$HOST_PY" "$EXPTOOLS" hoststats "$rdir/host_metrics.csv")
-                log "[$id L$lvl r$rep] $(k6_brief "$rdir/k6_summary.json") | $(vm_brief "$rdir/vm_metrics.csv") | host_cpu=${hmean}% (máx ${hmax}%)"
-                if (( hover > 0 )); then
-                    log "AVISO [$id L$lvl r$rep]: CPU do host passou de 85% em $hover amostra(s) (máx ${hmax}%); medição pode estar contaminada"
-                fi
-                if (( oover > 0 )); then
-                    log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam os E-cores com a VM"
+                [[ -f "$ldir/r$rep/meta.json" ]] && continue
+                ( _run_rep "$base" "$id" "$lvl" "$rep" "$rate" "$vmcfg" "$commit" "$quick" ) & pid=$!
+                rc=0; wait "$pid" || rc=$?
+                (( rc == 3 )) && { log "ERRO: host não ficou ocioso em 10 min; abortando"; exit 1; }
+                if (( rc != 0 )); then
+                    log "FALHA [$id L$lvl r$rep] (código $rc); seguindo"
+                    fails+=("$id L$lvl r$rep")
+                    curl -fs "$BASE_URL/health" >/dev/null || log "aviso: /health não responde após a falha"
                 fi
             done
         done
     done
-    log "=== $APP_NAME: concluído. Resultados em $base"
+    if (( ${#fails[@]} )); then
+        log "=== $APP_NAME: concluído com ${#fails[@]} falha(s): ${fails[*]}"
+        log "Rode de novo o mesmo comando para refazer só as combinações que faltaram."
+    else
+        log "=== $APP_NAME: concluído sem falhas. Resultados em $base"
+    fi
 }

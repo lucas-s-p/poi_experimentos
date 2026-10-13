@@ -96,7 +96,23 @@ def host_power():
     except (OSError, subprocess.SubprocessError):
         profile = None
     ac = [read(p) for p in glob.glob("/sys/class/power_supply/A*/online")]
+    def active(unit):
+        try:
+            return subprocess.run(["systemctl", "is-active", unit], capture_output=True, text=True,
+                                  timeout=5).stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            return None
+    try:
+        snap = subprocess.run(["snap", "refresh", "--time"], capture_output=True, text=True, timeout=10).stdout
+        snap_hold = next((l.split(":", 1)[1].strip() for l in snap.splitlines() if l.startswith("hold:")),
+                         "não visível sem sudo")
+    except (OSError, subprocess.SubprocessError):
+        snap_hold = None
     return {"power_profile": profile, "ac_online": ac[0] == "1" if ac else None,
+            "unattended_upgrades": active("unattended-upgrades.service"),
+            "apt_daily_timer": active("apt-daily.timer"),
+            "apt_daily_upgrade_timer": active("apt-daily-upgrade.timer"),
+            "snap_refresh_hold": snap_hold,
             "governor_cpu4": read("/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor"),
             "epp_cpu4": read("/sys/devices/system/cpu/cpu4/cpufreq/energy_performance_preference")}
 
