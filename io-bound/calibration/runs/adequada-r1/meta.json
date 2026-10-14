@@ -4,7 +4,7 @@
   "level_pct": 0,
   "rep": 1,
   "target_rps": 0.0,
-  "rate_rps": 12.0,
+  "rate_rps": 24.0,
   "query": "size_kb=1024",
   "duration_s": 60.0,
   "quick": false,
@@ -12,30 +12,30 @@
     "vcpus": 2,
     "ram_mb": 1024,
     "disk_bw_group": "io_limit",
-    "disk_bw_bytes_per_sec": 36700160,
+    "disk_bw_bytes_per_sec": 72351744,
     "vm_affinity": "4-11",
     "k6_affinity": "0-3"
   },
-  "git_commit": "5271d0a",
-  "t_start": 1791931139.4515178,
-  "t_end": 1791931199.4944904,
-  "clock_offset_s": -0.022111,
-  "clock_rtt_s": 0.009686,
+  "git_commit": "9adccd5",
+  "t_start": 1791940050.0156493,
+  "t_end": 1791940110.1043985,
+  "clock_offset_s": 0.018878,
+  "clock_rtt_s": 0.009952,
   "clock_note": "offset = rel\u00f3gio_VM - rel\u00f3gio_host (amostra de menor RTT via SSH)",
   "host_cpu_pct": {
-    "mean": 1.5,
-    "max": 2.2,
+    "mean": 2.0,
+    "max": 3.7,
     "n_over_85": 0,
     "n": 105,
-    "other_procs_mean_pct1core": 4.4,
-    "other_procs_max_pct1core": 13.8,
+    "other_procs_mean_pct1core": 5.2,
+    "other_procs_max_pct1core": 24.2,
     "n_other_over_100": 0,
     "top_other_peaks": {
-      "claude": 3.0,
+      "claude": 18.0,
+      "irq/168-rtw89_pci": 3.0,
       "2.1.296": 2.0,
-      "irq/9-acpi": 1.0,
-      "rcu_preempt": 1.0,
-      "kworker/2:1H-kblockd": 1.0
+      "gnome-shell": 2.0,
+      "Xorg": 2.0
     }
   },
   "host_metrics_file": "host_metrics.csv",
@@ -51,8 +51,8 @@
   },
   "host_idle_check": {
     "attempts": 1,
-    "other_pct_1core": 3.4,
-    "top": "2.1.296:1",
+    "other_pct_1core": 6.2,
+    "top": "claude:3",
     "threshold_pct_1core": 50
   },
   "vm_events": {
@@ -65,21 +65,21 @@
     "service_restarts": 0,
     "main_pid_changed": false,
     "workers_before": [
+      1136,
       1137,
-      1138,
-      1139
+      1138
     ],
     "workers_after": [
+      1136,
       1137,
-      1138,
-      1139
+      1138
     ],
     "kernel_oom_lines": []
   },
   "swap_after_reset_mb": 0.0,
   "vm_disk_written": {
-    "measure_mb": 743.7,
-    "with_warmup_mb": 1240.4
+    "measure_mb": 1486.1,
+    "with_warmup_mb": 2476.1
   },
   "docker_running": false
 }

@@ -4,7 +4,7 @@
   "level_pct": 0,
   "rep": 1,
   "target_rps": 0.0,
-  "rate_rps": 15.0,
+  "rate_rps": 30.0,
   "query": "size_kb=1024",
   "duration_s": 60.0,
   "quick": false,
@@ -12,30 +12,30 @@
     "vcpus": 2,
     "ram_mb": 1024,
     "disk_bw_group": "io_limit",
-    "disk_bw_bytes_per_sec": 15728640,
+    "disk_bw_bytes_per_sec": 30408704,
     "vm_affinity": "4-11",
     "k6_affinity": "0-3"
   },
-  "git_commit": "5271d0a",
-  "t_start": 1791931644.4924035,
-  "t_end": 1791931734.511313,
-  "clock_offset_s": -0.020223,
-  "clock_rtt_s": 0.009943,
+  "git_commit": "9adccd5",
+  "t_start": 1791940539.746577,
+  "t_end": 1791940629.7396245,
+  "clock_offset_s": -0.009915,
+  "clock_rtt_s": 0.009724,
   "clock_note": "offset = rel\u00f3gio_VM - rel\u00f3gio_host (amostra de menor RTT via SSH)",
   "host_cpu_pct": {
-    "mean": 1.7,
-    "max": 5.5,
+    "mean": 2.0,
+    "max": 3.3,
     "n_over_85": 0,
-    "n": 154,
+    "n": 156,
     "other_procs_mean_pct1core": 7.0,
-    "other_procs_max_pct1core": 52.0,
+    "other_procs_max_pct1core": 21.6,
     "n_other_over_100": 0,
     "top_other_peaks": {
-      "claude": 36.0,
+      "claude": 16.0,
       "2.1.296": 2.0,
-      "irq/168-rtw89_pci": 1.0,
-      "jbd2/nvme0n1p3-8": 1.0,
-      "kworker/2:1H-kblockd": 1.0
+      "gnome-shell": 2.0,
+      "Xorg": 2.0,
+      "irq/9-acpi": 1.0
     }
   },
   "host_metrics_file": "host_metrics.csv",
@@ -51,8 +51,8 @@
   },
   "host_idle_check": {
     "attempts": 1,
-    "other_pct_1core": 3.1,
-    "top": "claude:1",
+    "other_pct_1core": 5.8,
+    "top": "claude:2",
     "threshold_pct_1core": 50
   },
   "vm_events": {
@@ -78,8 +78,8 @@
   },
   "swap_after_reset_mb": 0.0,
   "vm_disk_written": {
-    "measure_mb": 693.6,
-    "with_warmup_mb": 1174.5
+    "measure_mb": 1336.3,
+    "with_warmup_mb": 2284.7
   },
   "docker_running": false
 }

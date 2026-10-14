@@ -4,7 +4,7 @@
   "level_pct": 0,
   "rep": 1,
   "target_rps": 0.0,
-  "rate_rps": 12.0,
+  "rate_rps": 24.0,
   "query": "size_kb=1024",
   "duration_s": 60.0,
   "quick": false,
@@ -12,30 +12,30 @@
     "vcpus": 2,
     "ram_mb": 1024,
     "disk_bw_group": "io_limit",
-    "disk_bw_bytes_per_sec": 36700160,
+    "disk_bw_bytes_per_sec": 72351744,
     "vm_affinity": "4-11",
     "k6_affinity": "0-3"
   },
-  "git_commit": "5271d0a",
-  "t_start": 1791931257.9213674,
-  "t_end": 1791931317.9807324,
-  "clock_offset_s": -0.059236,
-  "clock_rtt_s": 0.010105,
+  "git_commit": "9adccd5",
+  "t_start": 1791940168.49512,
+  "t_end": 1791940228.59308,
+  "clock_offset_s": 0.043842,
+  "clock_rtt_s": 0.009833,
   "clock_note": "offset = rel\u00f3gio_VM - rel\u00f3gio_host (amostra de menor RTT via SSH)",
   "host_cpu_pct": {
-    "mean": 1.6,
-    "max": 2.8,
+    "mean": 2.0,
+    "max": 3.2,
     "n_over_85": 0,
     "n": 105,
-    "other_procs_mean_pct1core": 5.1,
-    "other_procs_max_pct1core": 16.2,
+    "other_procs_mean_pct1core": 4.4,
+    "other_procs_max_pct1core": 16.3,
     "n_other_over_100": 0,
     "top_other_peaks": {
-      "claude": 13.0,
-      "irq/168-rtw89_pci": 3.0,
+      "claude": 16.0,
       "2.1.296": 2.0,
-      "gnome-shell": 2.0,
-      "jbd2/nvme0n1p3-8": 1.0
+      "irq/168-rtw89_pci": 1.0,
+      "rcu_preempt": 1.0,
+      "kworker/11:1H-kblockd": 1.0
     }
   },
   "host_metrics_file": "host_metrics.csv",
@@ -51,8 +51,8 @@
   },
   "host_idle_check": {
     "attempts": 1,
-    "other_pct_1core": 10.0,
-    "top": "claude:6",
+    "other_pct_1core": 7.9,
+    "top": "claude:5",
     "threshold_pct_1core": 50
   },
   "vm_events": {
@@ -65,21 +65,21 @@
     "service_restarts": 0,
     "main_pid_changed": false,
     "workers_before": [
-      1192,
-      1193,
-      1194
+      1196,
+      1197,
+      1198
     ],
     "workers_after": [
-      1192,
-      1193,
-      1194
+      1196,
+      1197,
+      1198
     ],
     "kernel_oom_lines": []
   },
   "swap_after_reset_mb": 0.0,
   "vm_disk_written": {
-    "measure_mb": 744.5,
-    "with_warmup_mb": 1241.3
+    "measure_mb": 1484.7,
+    "with_warmup_mb": 2475.1
   },
   "docker_running": false
 }

@@ -1,0 +1,239 @@
+{
+  "query": "size_kb=1024",
+  "search_noload_p50_ms": 22.9,
+  "search_p95_limit_ms": 45.8,
+  "search": [
+    {
+      "rate_rps": 3.0,
+      "mean_p95_ms": 72.2,
+      "ok": true,
+      "criterion": "m\u00e9dia do p50 \u2264 45.8 ms",
+      "mean_crit_ms": 23.1,
+      "p50_ms": [
+        21,
+        24,
+        24
+      ],
+      "p95_ms": [
+        56,
+        78,
+        82
+      ],
+      "vm_util": 0.009,
+      "mem_used_p95_mb": 606,
+      "app_rss_p95_mb": 452,
+      "inflight": 0.1,
+      "disk_mb_s": 6.04,
+      "disk_mb_per_req": 2.009
+    },
+    {
+      "rate_rps": 5.0,
+      "mean_p95_ms": 97.4,
+      "ok": true,
+      "criterion": "m\u00e9dia do p50 \u2264 45.8 ms",
+      "mean_crit_ms": 33.1,
+      "p50_ms": [
+        34,
+        38,
+        27
+      ],
+      "p95_ms": [
+        88,
+        100,
+        104
+      ],
+      "vm_util": 0.015,
+      "mem_used_p95_mb": 603,
+      "app_rss_p95_mb": 452,
+      "inflight": 0.21,
+      "disk_mb_s": 9.99,
+      "disk_mb_per_req": 1.995
+    },
+    {
+      "rate_rps": 8.0,
+      "mean_p95_ms": 100.0,
+      "ok": true,
+      "criterion": "m\u00e9dia do p50 \u2264 45.8 ms",
+      "mean_crit_ms": 37.1,
+      "p50_ms": [
+        31,
+        38,
+        42
+      ],
+      "p95_ms": [
+        90,
+        100,
+        109
+      ],
+      "vm_util": 0.022,
+      "mem_used_p95_mb": 611,
+      "app_rss_p95_mb": 455,
+      "inflight": 0.37,
+      "disk_mb_s": 16.07,
+      "disk_mb_per_req": 2.007
+    },
+    {
+      "rate_rps": 12.0,
+      "mean_p95_ms": 98.8,
+      "ok": true,
+      "criterion": "m\u00e9dia do p50 \u2264 45.8 ms",
+      "mean_crit_ms": 34.3,
+      "p50_ms": [
+        33,
+        34,
+        35
+      ],
+      "p95_ms": [
+        104,
+        89,
+        103
+      ],
+      "vm_util": 0.031,
+      "mem_used_p95_mb": 604,
+      "app_rss_p95_mb": 456,
+      "inflight": 0.52,
+      "disk_mb_s": 23.96,
+      "disk_mb_per_req": 1.996
+    }
+  ],
+  "target_rps": 12.0,
+  "disk_mb_s_at_target": 23.96,
+  "disk_bw": {
+    "s1-sub": 15,
+    "s2-sub-adeq": 25,
+    "s3-adequada": 35,
+    "s4-adeq-super": 73,
+    "s5-super": 110
+  },
+  "noload_by_scenario": {
+    "sem-limite": {
+      "p50_ms": 22.9,
+      "p95_ms": 33.2,
+      "reqs": 61
+    },
+    "s1-sub": {
+      "p50_ms": 20.3,
+      "p95_ms": 31.3,
+      "reqs": 60
+    },
+    "s2-sub-adeq": {
+      "p50_ms": 18.6,
+      "p95_ms": 30.9,
+      "reqs": 61
+    },
+    "s3-adequada": {
+      "p50_ms": 18.5,
+      "p95_ms": 33.2,
+      "reqs": 61
+    },
+    "s4-adeq-super": {
+      "p50_ms": 19.1,
+      "p95_ms": 35.4,
+      "reqs": 61
+    },
+    "s5-super": {
+      "p50_ms": 20.4,
+      "p95_ms": 32.2,
+      "reqs": 60
+    }
+  },
+  "criterion": "m\u00e9dia do p50 de 3 rodadas \u2264 2 \u00d7 p50 sem carga (cauda do fsync impede o crit\u00e9rio pelo p95)",
+  "adequada_validation": [
+    {
+      "rate_rps": 12.0,
+      "throughput_rps": 12.008,
+      "p50_ms": 34.686,
+      "p95_ms": 106.548,
+      "p99_ms": 133.426,
+      "failed_rate": 0,
+      "dropped": 0,
+      "vm_util": 0.023,
+      "disk_mb_per_req": 1.994,
+      "oom_kills": 0,
+      "worker_deaths_healthcheck": 0,
+      "worker_deaths_oom": 0,
+      "disk_mb_s": 24.36,
+      "disk_util_pct": 40.4,
+      "iowait_pct": 22.9,
+      "vm_disk_written_mb": 1240.4
+    },
+    {
+      "rate_rps": 12.0,
+      "throughput_rps": 12.005,
+      "p50_ms": 33.814,
+      "p95_ms": 76.833,
+      "p99_ms": 112.308,
+      "failed_rate": 0,
+      "dropped": 0,
+      "vm_util": 0.024,
+      "disk_mb_per_req": 2.01,
+      "oom_kills": 0,
+      "worker_deaths_healthcheck": 0,
+      "worker_deaths_oom": 0,
+      "disk_mb_s": 24.56,
+      "disk_util_pct": 46.0,
+      "iowait_pct": 21.7,
+      "vm_disk_written_mb": 1241.3
+    },
+    {
+      "rate_rps": 12.0,
+      "throughput_rps": 12.007,
+      "p50_ms": 30.693,
+      "p95_ms": 96.276,
+      "p99_ms": 130.595,
+      "failed_rate": 0,
+      "dropped": 0,
+      "vm_util": 0.022,
+      "disk_mb_per_req": 1.995,
+      "oom_kills": 0,
+      "worker_deaths_healthcheck": 0,
+      "worker_deaths_oom": 0,
+      "disk_mb_s": 24.38,
+      "disk_util_pct": 41.5,
+      "iowait_pct": 21.7,
+      "vm_disk_written_mb": 1239.4
+    }
+  ],
+  "adequada_p50_limit_ms": 37.0,
+  "adequada_mean_p50_ms": 33.1,
+  "adequada_mean_p95_ms": 93.2,
+  "adequada_ok": true,
+  "sub_125pct": {
+    "rate_rps": 15.0,
+    "throughput_rps": 7.654,
+    "p50_ms": 16327.631,
+    "p95_ms": 30000.52,
+    "p99_ms": 30001.02,
+    "failed_rate": 0.08,
+    "dropped": 211,
+    "vm_util": 0.017,
+    "disk_mb_per_req": 1.954,
+    "oom_kills": 0,
+    "worker_deaths_healthcheck": 0,
+    "worker_deaths_oom": 0,
+    "disk_mb_s": 15.13,
+    "disk_util_pct": 87.7,
+    "iowait_pct": 91.7,
+    "vm_disk_written_mb": 1174.5
+  },
+  "super_125pct": {
+    "rate_rps": 15.0,
+    "throughput_rps": 15.006,
+    "p50_ms": 34.345,
+    "p95_ms": 94.064,
+    "p99_ms": 107.614,
+    "failed_rate": 0,
+    "dropped": 0,
+    "vm_util": 0.032,
+    "disk_mb_per_req": 1.994,
+    "oom_kills": 0,
+    "worker_deaths_healthcheck": 0,
+    "worker_deaths_oom": 0,
+    "disk_mb_s": 30.45,
+    "disk_util_pct": 49.5,
+    "iowait_pct": 27.0,
+    "vm_disk_written_mb": 1549.5
+  },
+  "super_p50_over_noload": 1.68,
+  "super_p95_over_noload": 4.6
+}

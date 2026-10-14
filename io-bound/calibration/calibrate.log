@@ -122,3 +122,131 @@ Super (110 MiB/s) a 125% (15.0 req/s): vazão 15.006, p50 34 / p95 94 / p99 108 
 Super a 125% ÷ tempo sem carga do Super: p50 1.68×, p95 4.6×
 
 Para aplicar: ./calibrate.sh --apply
+[2026-10-13 21:45:12] === Calibração io-bound (size_kb=1024), 2 vCPU, 1024 MB
+[2026-10-13 21:45:12] Energia ok: perfil performance, na tomada
+[2026-10-13 21:45:12] Desligando poi-vm
+[2026-10-13 21:45:19] RAM do host ok: 13050 MB disponíveis (necessário 2560 MB)
+[2026-10-13 21:45:19] Recursos: 2 vCPU, 1024 MB RAM, disco sem limite
+[2026-10-13 21:45:21] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 21:45:32] === Calibração io-bound (size_kb=1024), 2 vCPU, 1024 MB
+[2026-10-13 21:45:32] Energia ok: perfil performance, na tomada
+[2026-10-13 21:45:32] Desligando poi-vm
+[2026-10-13 21:46:34] Desligamento ACPI expirou; forçando poweroff
+[2026-10-13 21:46:38] RAM do host ok: 13082 MB disponíveis (necessário 2560 MB)
+[2026-10-13 21:46:38] Recursos: 2 vCPU, 1024 MB RAM, disco sem limite
+[2026-10-13 21:46:40] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 21:46:41] Aguardando SSH (até 180s)
+[2026-10-13 21:46:56] SSH ok (4s)
+[2026-10-13 21:46:56] Deploy de io-bound
+[2026-10-13 21:46:58] /health ok ({"status":"ok","app":"io-bound","pid":1061,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 21:46:58] [noload-sem-limite] já medida; reaproveitando
+[2026-10-13 21:46:58] Busca da carga-alvo (disco sem limite): taxas 3 5 8 12 16 20 24 req/s, 3 × 60 s cada
+[2026-10-13 21:46:58] [search-3-r1] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-3-r2] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-3-r3] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-5-r1] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-5-r2] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-5-r3] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-8-r1] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-8-r2] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-8-r3] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-12-r1] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-12-r2] já medida; reaproveitando
+[2026-10-13 21:46:58] [search-12-r3] já medida; reaproveitando
+[2026-10-13 21:48:56] [search-16-r1] 16 req/s: reqs=961 vazão=16.0/s falhas=0.0% drop=0 p50=39ms p95=105ms p99=133ms | vm_cpu=4% app_cpu=4% mem_used=615MB swap=0MB iowait=28% disk_util=43% disk=31.6MB/s
+[2026-10-13 21:50:55] [search-16-r2] 16 req/s: reqs=960 vazão=16.0/s falhas=0.0% drop=0 p50=33ms p95=103ms p99=139ms | vm_cpu=3% app_cpu=5% mem_used=601MB swap=0MB iowait=28% disk_util=44% disk=31.3MB/s
+[2026-10-13 21:52:53] [search-16-r3] 16 req/s: reqs=961 vazão=16.0/s falhas=0.0% drop=0 p50=32ms p95=105ms p99=156ms | vm_cpu=3% app_cpu=4% mem_used=600MB swap=0MB iowait=26% disk_util=44% disk=31.4MB/s
+[2026-10-13 21:54:52] [search-20-r1] 20 req/s: reqs=1201 vazão=20.0/s falhas=0.0% drop=0 p50=32ms p95=86ms p99=133ms | vm_cpu=4% app_cpu=5% mem_used=601MB swap=0MB iowait=30% disk_util=50% disk=39.1MB/s
+[2026-10-13 21:56:51] [search-20-r2] 20 req/s: reqs=1201 vazão=20.0/s falhas=0.0% drop=0 p50=32ms p95=88ms p99=122ms | vm_cpu=3% app_cpu=5% mem_used=608MB swap=0MB iowait=33% disk_util=48% disk=39.1MB/s
+[2026-10-13 21:58:50] [search-20-r3] 20 req/s: reqs=1200 vazão=20.0/s falhas=0.0% drop=0 p50=32ms p95=101ms p99=136ms | vm_cpu=4% app_cpu=5% mem_used=606MB swap=0MB iowait=32% disk_util=46% disk=39.1MB/s
+[2026-10-13 22:00:48] [search-24-r1] 24 req/s: reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=31ms p95=93ms p99=130ms | vm_cpu=4% app_cpu=6% mem_used=603MB swap=0MB iowait=33% disk_util=50% disk=46.9MB/s
+[2026-10-13 22:02:47] [search-24-r2] 24 req/s: reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=30ms p95=98ms p99=146ms | vm_cpu=4% app_cpu=6% mem_used=605MB swap=0MB iowait=35% disk_util=48% disk=46.9MB/s
+[2026-10-13 22:04:46] [search-24-r3] 24 req/s: reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=32ms p95=97ms p99=150ms | vm_cpu=5% app_cpu=6% mem_used=607MB swap=0MB iowait=35% disk_util=47% disk=46.9MB/s
+[2026-10-13 22:04:46] Carga-alvo = 24.0 req/s; banda B = 47.87 MiB/s → Sub 29, Sub→Adeq 49, Adequada 69, Adeq→Super 140, Super 210 MiB/s
+[2026-10-13 22:04:46] Desligando poi-vm
+[2026-10-13 22:04:51] RAM do host ok: 12990 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:04:51] Recursos: 2 vCPU, 1024 MB RAM, disco 69M
+[2026-10-13 22:04:54] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:04:55] Aguardando SSH (até 180s)
+[2026-10-13 22:05:10] SSH ok (4s)
+[2026-10-13 22:05:10] Deploy de io-bound
+[2026-10-13 22:05:12] /health ok ({"status":"ok","app":"io-bound","pid":1057,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 22:06:34] [noload-s3-adequada] 1 req/s: reqs=61 vazão=1.0/s falhas=0.0% drop=0 p50=16ms p95=26ms p99=30ms | vm_cpu=1% app_cpu=1% mem_used=609MB swap=0MB iowait=1% disk_util=2% disk=2.1MB/s
+[2026-10-13 22:08:33] [adequada-r1] 24.0 req/s: reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=34ms p95=103ms p99=128ms | vm_cpu=5% app_cpu=6% mem_used=604MB swap=0MB iowait=36% disk_util=44% disk=46.9MB/s
+[2026-10-13 22:10:32] [adequada-r2] 24.0 req/s: reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=30ms p95=109ms p99=159ms | vm_cpu=5% app_cpu=6% mem_used=605MB swap=0MB iowait=35% disk_util=43% disk=47.0MB/s
+[2026-10-13 22:12:30] [adequada-r3] 24.0 req/s: reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=34ms p95=107ms p99=142ms | vm_cpu=5% app_cpu=6% mem_used=605MB swap=0MB iowait=35% disk_util=46% disk=46.9MB/s
+[2026-10-13 22:12:30] Desligando poi-vm
+[2026-10-13 22:12:35] RAM do host ok: 13016 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:12:35] Recursos: 2 vCPU, 1024 MB RAM, disco 29M
+[2026-10-13 22:12:37] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:12:38] Aguardando SSH (até 180s)
+[2026-10-13 22:12:56] SSH ok (4s)
+[2026-10-13 22:12:56] Deploy de io-bound
+[2026-10-13 22:12:59] /health ok ({"status":"ok","app":"io-bound","pid":1057,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 22:14:23] [noload-s1-sub] 1 req/s: reqs=61 vazão=1.0/s falhas=0.0% drop=0 p50=22ms p95=48ms p99=61ms | vm_cpu=1% app_cpu=2% mem_used=609MB swap=0MB iowait=1% disk_util=4% disk=3.5MB/s
+[2026-10-13 22:17:14] [sub-125] 30.00 req/s: reqs=1360 vazão=15.1/s falhas=12.6% drop=440 p50=17927ms p95=30001ms p99=30001ms | vm_cpu=3% app_cpu=5% mem_used=629MB swap=0MB iowait=92% disk_util=90% disk=29.3MB/s
+[2026-10-13 22:17:14] Desligando poi-vm
+[2026-10-13 22:17:19] RAM do host ok: 13036 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:17:19] Recursos: 2 vCPU, 1024 MB RAM, disco 49M
+[2026-10-13 22:17:21] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:17:23] Aguardando SSH (até 180s)
+[2026-10-13 22:17:38] SSH ok (4s)
+[2026-10-13 22:17:38] Deploy de io-bound
+[2026-10-13 22:17:40] /health ok ({"status":"ok","app":"io-bound","pid":1057,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 22:19:02] [noload-s2-sub-adeq] 1 req/s: reqs=61 vazão=1.0/s falhas=0.0% drop=0 p50=21ms p95=38ms p99=47ms | vm_cpu=2% app_cpu=1% mem_used=601MB swap=0MB iowait=1% disk_util=2% disk=2.0MB/s
+[2026-10-13 22:19:02] Desligando poi-vm
+[2026-10-13 22:19:07] RAM do host ok: 13020 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:19:07] Recursos: 2 vCPU, 1024 MB RAM, disco 140M
+[2026-10-13 22:19:09] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:19:10] Aguardando SSH (até 180s)
+[2026-10-13 22:19:25] SSH ok (4s)
+[2026-10-13 22:19:25] Deploy de io-bound
+[2026-10-13 22:19:27] /health ok ({"status":"ok","app":"io-bound","pid":1060,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 22:20:50] [noload-s4-adeq-super] 1 req/s: reqs=60 vazão=1.0/s falhas=0.0% drop=0 p50=16ms p95=30ms p99=41ms | vm_cpu=1% app_cpu=1% mem_used=610MB swap=0MB iowait=1% disk_util=2% disk=1.9MB/s
+[2026-10-13 22:20:51] Desligando poi-vm
+[2026-10-13 22:20:55] RAM do host ok: 13039 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:20:55] Recursos: 2 vCPU, 1024 MB RAM, disco 210M
+[2026-10-13 22:20:57] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:20:58] Aguardando SSH (até 180s)
+[2026-10-13 22:21:13] SSH ok (4s)
+[2026-10-13 22:21:13] Deploy de io-bound
+[2026-10-13 22:21:15] /health ok ({"status":"ok","app":"io-bound","pid":1063,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 22:22:39] [noload-s5-super] 1 req/s: reqs=61 vazão=1.0/s falhas=0.0% drop=0 p50=22ms p95=35ms p99=42ms | vm_cpu=1% app_cpu=1% mem_used=610MB swap=0MB iowait=1% disk_util=3% disk=2.3MB/s
+[2026-10-13 22:24:37] [super-125] 30.00 req/s: reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=30ms p95=93ms p99=131ms | vm_cpu=5% app_cpu=8% mem_used=607MB swap=0MB iowait=38% disk_util=48% disk=58.5MB/s
+
+================ PROPOSTA (não aplicada) ================
+Intensidade: size_kb=1024
+Critério: média do p50 de 3 rodadas ≤ 2 × p50 sem carga (cauda do fsync impede o critério pelo p95)
+Disco sem limite: tempo sem carga p50 22.9 ms → limite (p50) 45.8 ms
+  taxa   p50 (r1/r2/r3) média p50   p95 (r1/r2/r3) média p95 disco MiB/s  MiB/req em andamento  ok
+   3.0         21/24/24      23.1         56/78/82      72.2        6.04    2.009          0.1  OK
+   5.0         34/38/27      33.1       88/100/104      97.4        9.99    1.995         0.21  OK
+   8.0         31/38/42      37.1       90/100/109     100.0       16.07    2.007         0.37  OK
+  12.0         33/34/35      34.3       104/89/103      98.8       23.96    1.996         0.52  OK
+  16.0         39/33/32      34.6      105/103/105     104.4       31.98    1.998          0.7  OK
+  20.0         32/32/32      32.2        86/88/101      91.8       39.91    1.996          0.8  OK
+  24.0         31/30/32      31.3         93/98/97      95.9       47.87    1.995         0.96  OK
+
+Carga-alvo: 24.0 req/s | banda de disco na carga-alvo (B): 47.9 MiB/s
+Limites (MiB/s): s1-sub 29, s2-sub-adeq 49, s3-adequada 69, s4-adeq-super 140, s5-super 210
+
+Tempo sem carga por cenário (p50 / p95 de ~60 req a 1 req/s):
+  sem-limite        22.9 /    33.2 ms
+  s1-sub            21.8 /    48.2 ms
+  s2-sub-adeq       21.2 /    37.6 ms
+  s3-adequada       15.9 /    25.8 ms
+  s4-adeq-super     16.5 /    30.1 ms
+  s5-super          22.5 /    35.2 ms
+
+Validação da Adequada (69 MiB/s) a 24.0 req/s, limite (média do p50) = 2 × 15.9 = 31.9 ms:
+  r1: vazão 23.981, p50 34 / p95 103 / p99 128 ms, disco 48.7 MiB/s (71% do limite), %util 45.9, iowait 38.0%
+  r2: vazão 23.978, p50 30 / p95 109 / p99 159 ms, disco 48.85 MiB/s (71% do limite), %util 43.6, iowait 36.3%
+  r3: vazão 23.998, p50 34 / p95 107 / p99 142 ms, disco 48.74 MiB/s (71% do limite), %util 46.6, iowait 37.8%
+  média do p50 = 32.5 ms → FALHA (média do p95 = 106.2 ms, reportada)
+
+Sub (29 MiB/s) a 125% (30.0 req/s): vazão 15.112, p50 17927 / p95 30001 / p99 30001 ms, falhas 12.6%, descartadas 440, disco 29.15 MiB/s (101% do limite), %util 93.7, iowait 93.9%, mortes healthcheck/OOM 0/0
+
+Super (210 MiB/s) a 125% (30.0 req/s): vazão 29.995, p50 30 / p95 93 / p99 131 ms, falhas 0.0%, descartadas 0, disco 60.86 MiB/s (29% do limite), %util 52.0, iowait 38.2%, mortes healthcheck/OOM 0/0
+Super a 125% ÷ tempo sem carga do Super: p50 1.33×, p95 4.12×
+
+Para aplicar: ./calibrate.sh --apply
