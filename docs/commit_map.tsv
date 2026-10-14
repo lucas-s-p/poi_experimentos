@@ -1,0 +1,34 @@
+hash_antigo	hash_novo	assunto
+7bb9d90	1a92496	Adiciona .gitignore, .env.example e roteiro da atividade
+d09bd57	31c798b	vm: cria a VM única (clone do VDI, NAT, chave SSH, Miniforge) e funções de controle
+b44752f	f1d9333	cpu-bound: app FastAPI (SHA-256 iterado), coletor psutil, script k6 e smoke test local
+b8e3946	94c9f77	vm: reteste do limite de disco (bandwidthctl) com fio, hostiocache on/off
+975205a	2f484a5	Experimento compartilhado (deploy, coletores, k6, meta.json) e calibração/análise da cpu-bound
+6e48a65	0d6710c	meta.json: registra perfil de energia e fonte do host
+f5d1bc3	f2ce731	Checa energia (performance + AC) e mede ruído do host em cada rodada
+67bd5a5	3567912	Checagem de host ocioso antes de cada rodada e warm-up de 40 s
+8b44b29	74509d6	calibrate.sh --confirm: n rodadas por taxa na Adequada; escolhe a maior com p95 ≤ limite em todas
+42fe451	f38cf57	cpu-bound: calibração aplicada (Adequada 3 vCPU, carga-alvo 45 req/s)
+8d29218	ca655d0	SSH multiplexado (offset de relógio com RTT ~10 ms) e rótulos legíveis no eixo log
+a1708d2	68a3b7d	Experimento segue após falha numa rodada ou cenário e lista as falhas no fim
+546ef71	060a6ed	cpu-bound: resultados do experimento completo (5 cenários × 5 níveis × 3 rep) e análise
+5427140	0937c8b	Infra comum: coletor, eventos da VM e análise em common/; VM iniciada com setsid
+b1d6165	5f20093	memory-bound: app (buffer numpy, acesso aleatório, sort; concorrência limitada por worker), configs e calibração
+5632783	8d77198	memory-bound: working set ativo (passes distribuídos na retenção, sem sort), MAX_INFLIGHT=8, calibração por concorrência
+e68ce4b	36d82a5	memory-bound: calibração aplicada (22 req/s; RAM 1152/1920/2560/3584/4608 MB), reset entre rodadas, mortes healthcheck × OOM
+1503985	363f3cd	Swap registrado logo após o reset (swap_after_reset_mb) e aviso baseado nele; quick da memory-bound
+1e0a3d5	f60b16e	Checa energia (performance + tomada) antes de cada rodada, não só de cada cenário
+8cfeef5	5d619b0	memory-bound: resultados do experimento completo (5 cenários × 5 níveis × 3 rep) e análise
+fcb3c1a	093f4f7	Análise: mediana das repetições (p50/p95/p99) na tabela e nos comparativos; nota das rodadas anômalas a 125%
+de265b5	051025c	io-bound: app (escrita aleatória + fsync, DONTNEED, leitura do disco), configs; reset com stop/reset_extra/start; iowait e %util no run.log
+3c81c4e	9f63cff	io-bound: calibração (carga-alvo sem limite; Adequada = B/0,70 validada contra o próprio tempo sem carga; Super finito ~3×; tempo sem carga nos 5 cenários); bytes gravados na VM por rodada
+15f3462	97e803d	io-bound: calibração interrompida (cauda do fsync torna p95 ≤ 2× p50 inalcançável) e diagnóstico; análise com tempo sem carga por cenário e p95 ÷ tempo sem carga
+5271d0a	f164d66	io-bound: critério da calibração pelo p50 (média de 3 rodadas ≤ 2× p50 sem carga); --resume reaproveita rodadas
+9adccd5	ecaee4d	io-bound: calibração (critério p50): carga-alvo 12 req/s, B 24 MiB/s, limites 15/25/35/73/110 MiB/s (não aplicada)
+0aa1347	67947ef	io-bound: busca estendida (16/20/24 req/s, todas passam); carga-alvo 24 req/s, limites 29/49/69/140/210 MiB/s; validação da Adequada reprovou por 0,6 ms (não aplicada)
+a5ec48d	60eea6c	io-bound: calibração aplicada (24 req/s; 29/49/69/140/210 MiB/s); validação da Adequada pela mediana do tempo sem carga das 6 medições; README
+65a1fae	f79e9f7	io-bound: quick na Adequada e no Sub; gráfico tempo de serviço × fila sem a linha de critério (que usa o p50)
+90dd858	b23a2df	io-bound README: limite do bandwidthctl é teto sob saturação (excede até ~25% com chegadas espaçadas)
+ceffcc7	c33dd9c	io-bound: resultados do experimento completo (5 cenários × 5 níveis × 3 rep) e análise
+90fec74	0c29fe2	README da raiz: pré-requisitos, preparação da VM, como rodar, resultados e comparação das três apps
+fd68951	fda7c99	.gitignore: ignora exit_code das sessões tmux; remove regra sem uso
