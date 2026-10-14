@@ -1,6 +1,6 @@
 # Demanda do experimento. target_rps e a intensidade são definidos pela calibração (calibrate.sh).
-query: size_kb=1024          # intensidade fixa de cada requisição (provisória; ver calibração)
-target_rps: null             # carga-alvo (nível 100%)
+query: size_kb=1024          # intensidade fixa: 1 MiB escrito (fsync) + 1 MiB lido do disco por requisição
+target_rps: 24.0             # calibrate.sh 2026-10-13
 levels_pct: [25, 50, 75, 100, 125]
 reset_between_reps: true     # antes de cada rodada: reinicia o serviço, swapoff/swapon, drop_caches, apaga arquivos da app
 reset_extra: rm -rf /var/tmp/poi-io   # arquivos deixados por requisições interrompidas

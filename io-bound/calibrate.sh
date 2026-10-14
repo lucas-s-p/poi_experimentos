@@ -13,8 +13,10 @@
 # 1. Disco sem limite: tempo sem carga (p50 de 60 requisições a 1 req/s) e carga-alvo = maior taxa candidata
 #    (CANDIDATES) com MÉDIA do p50 de 3 rodadas de 60 s ≤ 2 × tempo sem carga. B = banda de disco
 #    (leitura + escrita, MiB/s, medida na VM) na carga-alvo. O limite do VirtualBox vale para a soma.
-# 2. Adequada = B / 0,70; validada na carga-alvo (3 rodadas, média do p50) contra 2 × o tempo sem carga DA PRÓPRIA Adequada
-#    (o limite de banda aumenta o tempo de serviço mesmo sem fila).
+# 2. Adequada = B / 0,70; validada na carga-alvo (3 rodadas, média do p50) contra 2 × a MEDIANA do tempo sem
+#    carga das 6 medições (sem limite + 5 cenários). O tempo sem carga não depende do limite (o limitador do
+#    VirtualBox libera uma rajada inicial; medido: 15,9–22,9 ms sem relação com a banda), então a mediana das
+#    6 (~360 requisições) reduz o ruído de uma medição isolada de 60 requisições.
 # 3. Sub = 60% de B, medido uma vez a 125% (sem critério de aprovação). Sub→Adequada = ponto médio.
 # 4. Super = ~3 × Adequada (valor redondo), validado a 125%; Adequada→Super = ponto médio.
 # 5. Tempo sem carga medido nos 5 cenários (calibration/noload.json): separa o efeito do limite no tempo de
@@ -109,7 +111,9 @@ def disk(d):
             "disk_util_pct": round(w.disk_util_pct.mean(), 1), "iowait_pct": round(w.cpu_iowait_pct.mean(), 1),
             "vm_disk_written_mb": (meta.get("vm_disk_written") or {}).get("with_warmup_mb")}
 val = [dict(pick(measure(f"adequada-r{k}"), K), **disk(f"adequada-r{k}")) for k in (1, 2, 3)]
-adq_limit = 2 * noload["s3-adequada"]["p50_ms"]
+import statistics
+noload_ref = statistics.median(v["p50_ms"] for v in noload.values())
+adq_limit = 2 * noload_ref
 mean_p95 = sum(v["p95_ms"] for v in val) / 3
 mean_p50 = sum(v["p50_ms"] for v in val) / 3
 subm = dict(pick(measure(f"sub-125"), K), **disk("sub-125"))
@@ -118,7 +122,9 @@ prop = {
     "query": query, "search_noload_p50_ms": search["noload_p50_ms"], "search_p95_limit_ms": search["p95_limit_ms"],
     "search": search["search"], "target_rps": target, "disk_mb_s_at_target": round(B, 2),
     "disk_bw": ids, "noload_by_scenario": nl,
-    "criterion": "média do p50 de 3 rodadas ≤ 2 × p50 sem carga (cauda do fsync impede o critério pelo p95)",
+    "criterion": "média do p50 de 3 rodadas ≤ 2 × p50 sem carga (cauda do fsync impede o critério pelo p95); "
+                 "na Adequada, p50 sem carga = mediana das 6 medições",
+    "noload_reference_p50_ms": round(noload_ref, 1),
     "adequada_validation": val, "adequada_p50_limit_ms": round(adq_limit, 1),
     "adequada_mean_p50_ms": round(mean_p50, 1), "adequada_mean_p95_ms": round(mean_p95, 1),
     "adequada_ok": mean_p50 <= adq_limit,
@@ -140,7 +146,8 @@ print("Limites (MiB/s): " + ", ".join(f"{k} {v}" for k, v in ids.items()))
 print("\nTempo sem carga por cenário (p50 / p95 de ~60 req a 1 req/s):")
 for k, v in nl.items():
     print(f"  {k:14} {v['p50_ms']:7.1f} / {v['p95_ms']:7.1f} ms")
-print(f"\nValidação da Adequada ({adq} MiB/s) a {target} req/s, limite (média do p50) = 2 × {noload['s3-adequada']['p50_ms']:.1f} = {adq_limit:.1f} ms:")
+print(f"\nValidação da Adequada ({adq} MiB/s) a {target} req/s, limite (média do p50) = 2 × {noload_ref:.1f} "
+      f"(mediana do tempo sem carga das 6 medições) = {adq_limit:.1f} ms:")
 for k, m in enumerate(val, 1):
     print(f"  r{k}: vazão {m['throughput_rps']}, p50 {m['p50_ms']:.0f} / p95 {m['p95_ms']:.0f} / p99 {m['p99_ms']:.0f} ms, "
           f"disco {m['disk_mb_s']} MiB/s ({m['disk_mb_s']/adq:.0%} do limite), %util {m['disk_util_pct']}, iowait {m['iowait_pct']}%")

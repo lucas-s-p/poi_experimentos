@@ -1,0 +1,37 @@
+
+================ PROPOSTA (não aplicada) ================
+Intensidade: size_kb=1024
+Critério: média do p50 de 3 rodadas ≤ 2 × p50 sem carga (cauda do fsync impede o critério pelo p95); na Adequada, p50 sem carga = mediana das 6 medições
+Disco sem limite: tempo sem carga p50 22.9 ms → limite (p50) 45.8 ms
+  taxa   p50 (r1/r2/r3) média p50   p95 (r1/r2/r3) média p95 disco MiB/s  MiB/req em andamento  ok
+   3.0         21/24/24      23.1         56/78/82      72.2        6.04    2.009          0.1  OK
+   5.0         34/38/27      33.1       88/100/104      97.4        9.99    1.995         0.21  OK
+   8.0         31/38/42      37.1       90/100/109     100.0       16.07    2.007         0.37  OK
+  12.0         33/34/35      34.3       104/89/103      98.8       23.96    1.996         0.52  OK
+  16.0         39/33/32      34.6      105/103/105     104.4       31.98    1.998          0.7  OK
+  20.0         32/32/32      32.2        86/88/101      91.8       39.91    1.996          0.8  OK
+  24.0         31/30/32      31.3         93/98/97      95.9       47.87    1.995         0.96  OK
+
+Carga-alvo: 24.0 req/s | banda de disco na carga-alvo (B): 47.9 MiB/s
+Limites (MiB/s): s1-sub 29, s2-sub-adeq 49, s3-adequada 69, s4-adeq-super 140, s5-super 210
+
+Tempo sem carga por cenário (p50 / p95 de ~60 req a 1 req/s):
+  sem-limite        22.9 /    33.2 ms
+  s1-sub            21.8 /    48.2 ms
+  s2-sub-adeq       21.2 /    37.6 ms
+  s3-adequada       15.9 /    25.8 ms
+  s4-adeq-super     16.5 /    30.1 ms
+  s5-super          22.5 /    35.2 ms
+
+Validação da Adequada (69 MiB/s) a 24.0 req/s, limite (média do p50) = 2 × 21.5 (mediana do tempo sem carga das 6 medições) = 43.1 ms:
+  r1: vazão 23.981, p50 34 / p95 103 / p99 128 ms, disco 48.7 MiB/s (71% do limite), %util 45.9, iowait 38.0%
+  r2: vazão 23.978, p50 30 / p95 109 / p99 159 ms, disco 48.85 MiB/s (71% do limite), %util 43.6, iowait 36.3%
+  r3: vazão 23.998, p50 34 / p95 107 / p99 142 ms, disco 48.74 MiB/s (71% do limite), %util 46.6, iowait 37.8%
+  média do p50 = 32.5 ms → OK (média do p95 = 106.2 ms, reportada)
+
+Sub (29 MiB/s) a 125% (30.0 req/s): vazão 15.112, p50 17927 / p95 30001 / p99 30001 ms, falhas 12.6%, descartadas 440, disco 29.15 MiB/s (101% do limite), %util 93.7, iowait 93.9%, mortes healthcheck/OOM 0/0
+
+Super (210 MiB/s) a 125% (30.0 req/s): vazão 29.995, p50 30 / p95 93 / p99 131 ms, falhas 0.0%, descartadas 0, disco 60.86 MiB/s (29% do limite), %util 52.0, iowait 38.2%, mortes healthcheck/OOM 0/0
+Super a 125% ÷ tempo sem carga do Super: p50 1.33×, p95 4.12×
+
+Para aplicar: ./calibrate.sh --apply

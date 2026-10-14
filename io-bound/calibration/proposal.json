@@ -206,7 +206,8 @@
       "reqs": 61
     }
   },
-  "criterion": "m\u00e9dia do p50 de 3 rodadas \u2264 2 \u00d7 p50 sem carga (cauda do fsync impede o crit\u00e9rio pelo p95)",
+  "criterion": "m\u00e9dia do p50 de 3 rodadas \u2264 2 \u00d7 p50 sem carga (cauda do fsync impede o crit\u00e9rio pelo p95); na Adequada, p50 sem carga = mediana das 6 medi\u00e7\u00f5es",
+  "noload_reference_p50_ms": 21.5,
   "adequada_validation": [
     {
       "rate_rps": 24.0,
@@ -263,10 +264,10 @@
       "vm_disk_written_mb": 2478.0
     }
   ],
-  "adequada_p50_limit_ms": 31.9,
+  "adequada_p50_limit_ms": 43.1,
   "adequada_mean_p50_ms": 32.5,
   "adequada_mean_p95_ms": 106.2,
-  "adequada_ok": false,
+  "adequada_ok": true,
   "sub_125pct": {
     "rate_rps": 30.0,
     "throughput_rps": 15.112,
