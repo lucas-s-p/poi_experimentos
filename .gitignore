@@ -8,5 +8,5 @@
 envs/
 __pycache__/
 *.pyc
-# Saídas temporárias
-*.log.tmp
+# Marcador de término gravado pelas sessões tmux (run_experiment.sh / calibrate.sh)
+exit_code
