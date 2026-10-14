@@ -59,4 +59,15 @@ No experimento, o limite configurado só foi respeitado com fila no disco. No Su
 
 Com chegadas espaçadas (open model, poucas requisições em andamento), o limitador do VirtualBox deixa passar até ~25% acima do valor nominal; quando a demanda excede bem o limite e o disco fica continuamente ocupado, a banda trava no valor configurado. (No teste com fio, fluxo contínuo de requisições sem intervalos, o limite foi respeitado: `../vm/disk_limit_test.sh`.) Um "balde de créditos" acumulado nas pausas entre rodadas não explica sozinho o efeito: as 3 rodadas a 75% excederam ~755 MiB cada, mais que o crédito da pausa anterior (~500 MiB), sem esgotar.
 
-Consequência: o colapso do Sub aparece entre 75% e 100% da carga-alvo, e não logo acima de ~60% como os 29 MiB/s nominais indicariam. As medições valem como "o que o `bandwidthctl` do VirtualBox entrega"; a análise mostra a banda efetiva medida por rodada ao lado do limite nominal. A alternativa (limitar dentro da VM com `io.max` do cgroup v2, mais preciso) foi considerada e não usada.
+O mesmo ocorreu no Sub→Adequada (49 MiB/s): a 125% passaram **60,9 MiB/s (124% do limite)** nas 3 rodadas, sem fila (p50 ~32 ms). Nos cenários de 69 MiB/s para cima a demanda máxima (61 MiB/s) ficou abaixo do limite.
+
+Consequência: só o Sub satura. O colapso do Sub aparece entre 75% e 100% da carga-alvo, e não logo acima de ~60% como os 29 MiB/s nominais indicariam. As medições valem como "o que o `bandwidthctl` do VirtualBox entrega"; a análise mostra a banda efetiva medida por rodada ao lado do limite nominal. A alternativa (limitar dentro da VM com `io.max` do cgroup v2, mais preciso) foi considerada e não usada.
+
+## Resultados: resumo
+
+- **Sub (29 MiB/s):** até 75% sem fila; a 100% e 125% a banda trava em ~29–30 MiB/s, a vazão em 13–15 req/s (= banda / 2 MiB), p50 de 10–17 s, iowait ~90%, 245–435 requisições descartadas por rodada e 11% de timeouts a 125%.
+- **Sub→Adequada, Adequada, Adequada→Super, Super:** indistinguíveis — p50 ~30–38 ms e p95 ~85–135 ms em todos os níveis, vazão = demanda. Os limites ≥ 49 MiB/s não chegaram a frear a carga (ver acima).
+- **Nenhuma morte de worker** (healthcheck ou OOM) e nenhum OOM kill em todo o experimento.
+- **Tempo sem carga** (painel (a) de `comparacao_fila.png`): 16–22 ms em todos os cenários, sem relação com o limite. No painel (b), a razão p95 ÷ tempo sem carga fica em 4–8× sem fila (cauda do fsync; a variação entre cenários vem do ruído na medição do tempo sem carga: Adequada e Adeq→Super mediram 16 ms) e salta para ~900–1400× no Sub saturado.
+- **Rodadas refeitas:** 2 rodadas da Adequada (100% r3, 125% r1) tiveram outros processos do host acima de 1 núcleo (atualização automática do Ubuntu: `unattended-upgrades`/`apt` e `update-manager`, à meia-noite); foram movidas para `results/_descartadas_ruido/` e refeitas.
+- **Gravado no disco da VM:** 132,5 GB nas 75 rodadas válidas (com warm-up).

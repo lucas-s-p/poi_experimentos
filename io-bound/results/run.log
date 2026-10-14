@@ -1,0 +1,183 @@
+[2026-10-13 22:59:32] === io-bound: experimento commit 65a1fae; alvo 24.0 req/s; níveis 25 50 75 100 125 %; 3 × 60s
+[2026-10-13 22:59:33] Energia ok: perfil performance, na tomada
+[2026-10-13 22:59:33] AVISO: unattended-upgrades ativo no host (registrado no meta.json)
+[2026-10-13 22:59:33] [s1-sub] cenário: 2 vCPU, 1024 MB, disco 29M
+[2026-10-13 22:59:33] Energia ok: perfil performance, na tomada
+[2026-10-13 22:59:33] Desligando poi-vm
+[2026-10-13 22:59:37] RAM do host ok: 13033 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:59:37] Recursos: 2 vCPU, 1024 MB RAM, disco 29M
+[2026-10-13 22:59:39] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:59:40] Aguardando SSH (até 180s)
+[2026-10-13 22:59:59] SSH ok (6s)
+[2026-10-13 22:59:59] Deploy de io-bound
+[2026-10-13 23:00:02] /health ok ({"status":"ok","app":"io-bound","pid":1059,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 23:00:02] [s1-sub L25] 6.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:02:01] [s1-sub L25 r1] reqs=360 vazão=6.0/s falhas=0.0% drop=0 p50=31ms p95=92ms p99=129ms | vm_cpu=2% app_cpu=2% mem_used=601MB swap=0MB iowait=10% disk_util=23% disk=11.5MB/s | host_cpu=1.2% (máx 2.3%)
+[2026-10-13 23:03:59] [s1-sub L25 r2] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=37ms p95=87ms p99=98ms | vm_cpu=2% app_cpu=2% mem_used=595MB swap=0MB iowait=11% disk_util=24% disk=11.8MB/s | host_cpu=1.2% (máx 1.8%)
+[2026-10-13 23:05:57] [s1-sub L25 r3] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=29ms p95=88ms p99=97ms | vm_cpu=2% app_cpu=2% mem_used=598MB swap=0MB iowait=9% disk_util=22% disk=12.0MB/s | host_cpu=1.1% (máx 2.4%)
+[2026-10-13 23:05:57] [s1-sub L50] 12.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:07:54] [s1-sub L50 r1] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=34ms p95=87ms p99=110ms | vm_cpu=3% app_cpu=4% mem_used=596MB swap=0MB iowait=21% disk_util=40% disk=23.5MB/s | host_cpu=1.4% (máx 2.1%)
+[2026-10-13 23:09:52] [s1-sub L50 r2] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=32ms p95=99ms p99=126ms | vm_cpu=2% app_cpu=4% mem_used=597MB swap=0MB iowait=21% disk_util=40% disk=23.5MB/s | host_cpu=1.4% (máx 2.2%)
+[2026-10-13 23:11:49] [s1-sub L50 r3] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=34ms p95=112ms p99=137ms | vm_cpu=3% app_cpu=4% mem_used=600MB swap=0MB iowait=21% disk_util=40% disk=23.7MB/s | host_cpu=1.4% (máx 2.2%)
+[2026-10-13 23:11:49] [s1-sub L75] 18.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:13:48] [s1-sub L75 r1] reqs=1080 vazão=18.0/s falhas=0.0% drop=0 p50=32ms p95=97ms p99=119ms | vm_cpu=3% app_cpu=5% mem_used=598MB swap=0MB iowait=29% disk_util=46% disk=35.2MB/s | host_cpu=1.6% (máx 2.5%)
+[2026-10-13 23:15:46] [s1-sub L75 r2] reqs=1080 vazão=18.0/s falhas=0.0% drop=0 p50=33ms p95=107ms p99=141ms | vm_cpu=4% app_cpu=5% mem_used=603MB swap=0MB iowait=30% disk_util=47% disk=35.2MB/s | host_cpu=1.7% (máx 2.8%)
+[2026-10-13 23:17:45] [s1-sub L75 r3] reqs=1080 vazão=18.0/s falhas=0.0% drop=0 p50=33ms p95=109ms p99=154ms | vm_cpu=3% app_cpu=5% mem_used=602MB swap=0MB iowait=30% disk_util=48% disk=35.2MB/s | host_cpu=1.5% (máx 2.0%)
+[2026-10-13 23:17:45] [s1-sub L100] 24.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:20:05] [s1-sub L100 r1] reqs=1242 vazão=16.2/s falhas=0.0% drop=199 p50=6306ms p95=16156ms p99=17500ms | vm_cpu=4% app_cpu=5% mem_used=614MB swap=0MB iowait=70% disk_util=73% disk=35.1MB/s | host_cpu=1.7% (máx 2.9%)
+[2026-10-13 23:22:36] [s1-sub L100 r2] reqs=1175 vazão=14.5/s falhas=0.0% drop=265 p50=10901ms p95=22042ms p99=22937ms | vm_cpu=3% app_cpu=5% mem_used=624MB swap=0MB iowait=88% disk_util=90% disk=29.1MB/s | host_cpu=1.6% (máx 2.7%)
+[2026-10-13 23:25:06] [s1-sub L100 r3] reqs=1169 vazão=14.4/s falhas=0.0% drop=272 p50=11516ms p95=21563ms p99=22539ms | vm_cpu=3% app_cpu=5% mem_used=625MB swap=0MB iowait=87% disk_util=71% disk=29.6MB/s | host_cpu=1.6% (máx 2.7%)
+[2026-10-13 23:25:07] [s1-sub L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:27:58] [s1-sub L125 r1] reqs=1361 vazão=15.1/s falhas=12.6% drop=439 p50=17863ms p95=30001ms p99=30001ms | vm_cpu=3% app_cpu=5% mem_used=629MB swap=0MB iowait=91% disk_util=89% disk=29.1MB/s | host_cpu=1.6% (máx 3.1%)
+[2026-10-13 23:30:49] [s1-sub L125 r2] reqs=1377 vazão=15.3/s falhas=9.3% drop=423 p50=16585ms p95=30001ms p99=30001ms | vm_cpu=3% app_cpu=5% mem_used=625MB swap=0MB iowait=90% disk_util=90% disk=29.5MB/s | host_cpu=1.8% (máx 4.7%)
+[2026-10-13 23:33:41] [s1-sub L125 r3] reqs=1356 vazão=15.1/s falhas=11.9% drop=444 p50=18002ms p95=30001ms p99=30001ms | vm_cpu=3% app_cpu=5% mem_used=628MB swap=0MB iowait=92% disk_util=90% disk=29.2MB/s | host_cpu=1.6% (máx 3.2%)
+[2026-10-13 23:33:41] [s2-sub-adeq] cenário: 2 vCPU, 1024 MB, disco 49M
+[2026-10-13 23:33:41] Energia ok: perfil performance, na tomada
+[2026-10-13 23:33:41] Desligando poi-vm
+[2026-10-13 23:33:47] RAM do host ok: 13029 MB disponíveis (necessário 2560 MB)
+[2026-10-13 23:33:47] Recursos: 2 vCPU, 1024 MB RAM, disco 49M
+[2026-10-13 23:33:49] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 23:33:50] Aguardando SSH (até 180s)
+[2026-10-13 23:34:05] SSH ok (4s)
+[2026-10-13 23:34:05] Deploy de io-bound
+[2026-10-13 23:34:07] /health ok ({"status":"ok","app":"io-bound","pid":1059,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 23:34:08] [s2-sub-adeq L25] 6.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:36:06] [s2-sub-adeq L25 r1] reqs=360 vazão=6.0/s falhas=0.0% drop=0 p50=26ms p95=91ms p99=124ms | vm_cpu=2% app_cpu=3% mem_used=607MB swap=0MB iowait=8% disk_util=19% disk=11.5MB/s | host_cpu=1.5% (máx 3.2%)
+[2026-10-13 23:38:05] [s2-sub-adeq L25 r2] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=35ms p95=83ms p99=130ms | vm_cpu=1% app_cpu=2% mem_used=594MB swap=0MB iowait=8% disk_util=20% disk=11.8MB/s | host_cpu=1.3% (máx 2.7%)
+[2026-10-13 23:40:04] [s2-sub-adeq L25 r3] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=32ms p95=87ms p99=111ms | vm_cpu=1% app_cpu=2% mem_used=599MB swap=0MB iowait=12% disk_util=26% disk=11.9MB/s | host_cpu=1.3% (máx 2.7%)
+[2026-10-13 23:40:04] [s2-sub-adeq L50] 12.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:42:02] [s2-sub-adeq L50 r1] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=31ms p95=88ms p99=136ms | vm_cpu=2% app_cpu=3% mem_used=596MB swap=0MB iowait=19% disk_util=39% disk=23.5MB/s | host_cpu=1.5% (máx 2.3%)
+[2026-10-13 23:44:01] [s2-sub-adeq L50 r2] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=35ms p95=115ms p99=149ms | vm_cpu=2% app_cpu=3% mem_used=597MB swap=0MB iowait=23% disk_util=41% disk=23.5MB/s | host_cpu=1.5% (máx 2.2%)
+[2026-10-13 23:45:58] [s2-sub-adeq L50 r3] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=34ms p95=110ms p99=143ms | vm_cpu=2% app_cpu=3% mem_used=597MB swap=0MB iowait=22% disk_util=40% disk=23.5MB/s | host_cpu=1.5% (máx 3.0%)
+[2026-10-13 23:45:58] [s2-sub-adeq L75] 18.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:47:57] [s2-sub-adeq L75 r1] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=38ms p95=135ms p99=191ms | vm_cpu=3% app_cpu=5% mem_used=604MB swap=0MB iowait=34% disk_util=40% disk=35.2MB/s | host_cpu=1.7% (máx 2.4%)
+[2026-10-13 23:49:56] [s2-sub-adeq L75 r2] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=33ms p95=132ms p99=208ms | vm_cpu=3% app_cpu=5% mem_used=603MB swap=0MB iowait=31% disk_util=46% disk=35.2MB/s | host_cpu=1.8% (máx 2.6%)
+[2026-10-13 23:51:54] [s2-sub-adeq L75 r3] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=37ms p95=137ms p99=197ms | vm_cpu=3% app_cpu=5% mem_used=597MB swap=0MB iowait=31% disk_util=45% disk=35.2MB/s | host_cpu=1.6% (máx 3.0%)
+[2026-10-13 23:51:54] [s2-sub-adeq L100] 24.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:53:53] [s2-sub-adeq L100 r1] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=36ms p95=140ms p99=199ms | vm_cpu=4% app_cpu=6% mem_used=608MB swap=0MB iowait=39% disk_util=44% disk=46.9MB/s | host_cpu=2.1% (máx 3.4%)
+[2026-10-13 23:55:52] [s2-sub-adeq L100 r2] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=31ms p95=90ms p99=123ms | vm_cpu=4% app_cpu=6% mem_used=600MB swap=0MB iowait=33% disk_util=50% disk=46.9MB/s | host_cpu=1.9% (máx 3.1%)
+[2026-10-13 23:57:50] [s2-sub-adeq L100 r3] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=37ms p95=114ms p99=153ms | vm_cpu=4% app_cpu=6% mem_used=602MB swap=0MB iowait=38% disk_util=45% disk=46.9MB/s | host_cpu=1.9% (máx 3.1%)
+[2026-10-13 23:57:50] [s2-sub-adeq L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 23:59:48] [s2-sub-adeq L125 r1] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=31ms p95=104ms p99=136ms | vm_cpu=5% app_cpu=7% mem_used=611MB swap=0MB iowait=39% disk_util=44% disk=58.6MB/s | host_cpu=2.2% (máx 3.1%)
+[2026-10-14 00:01:47] [s2-sub-adeq L125 r2] reqs=1800 vazão=30.0/s falhas=0.0% drop=0 p50=35ms p95=119ms p99=177ms | vm_cpu=5% app_cpu=8% mem_used=604MB swap=0MB iowait=40% disk_util=47% disk=58.6MB/s | host_cpu=2.7% (máx 7.2%)
+[2026-10-14 00:03:45] [s2-sub-adeq L125 r3] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=29ms p95=93ms p99=125ms | vm_cpu=5% app_cpu=7% mem_used=604MB swap=0MB iowait=39% disk_util=49% disk=58.6MB/s | host_cpu=2.2% (máx 3.7%)
+[2026-10-14 00:03:45] [s3-adequada] cenário: 2 vCPU, 1024 MB, disco 69M
+[2026-10-14 00:03:46] Energia ok: perfil performance, na tomada
+[2026-10-14 00:03:46] Desligando poi-vm
+[2026-10-14 00:03:51] RAM do host ok: 13011 MB disponíveis (necessário 2560 MB)
+[2026-10-14 00:03:51] Recursos: 2 vCPU, 1024 MB RAM, disco 69M
+[2026-10-14 00:03:53] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-14 00:03:54] Aguardando SSH (até 180s)
+[2026-10-14 00:04:09] SSH ok (4s)
+[2026-10-14 00:04:09] Deploy de io-bound
+[2026-10-14 00:04:11] /health ok ({"status":"ok","app":"io-bound","pid":1059,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-14 00:04:12] [s3-adequada L25] 6.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:06:09] [s3-adequada L25 r1] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=31ms p95=95ms p99=111ms | vm_cpu=2% app_cpu=2% mem_used=609MB swap=0MB iowait=10% disk_util=23% disk=11.5MB/s | host_cpu=1.4% (máx 2.7%)
+[2026-10-14 00:08:08] [s3-adequada L25 r2] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=34ms p95=107ms p99=127ms | vm_cpu=1% app_cpu=2% mem_used=601MB swap=0MB iowait=11% disk_util=24% disk=11.8MB/s | host_cpu=1.3% (máx 2.0%)
+[2026-10-14 00:10:06] [s3-adequada L25 r3] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=34ms p95=95ms p99=124ms | vm_cpu=1% app_cpu=2% mem_used=612MB swap=0MB iowait=10% disk_util=23% disk=11.8MB/s | host_cpu=1.3% (máx 2.7%)
+[2026-10-14 00:10:06] [s3-adequada L50] 12.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:12:05] [s3-adequada L50 r1] reqs=720 vazão=12.0/s falhas=0.0% drop=0 p50=33ms p95=100ms p99=124ms | vm_cpu=2% app_cpu=3% mem_used=601MB swap=0MB iowait=22% disk_util=42% disk=23.5MB/s | host_cpu=1.5% (máx 2.5%)
+[2026-10-14 00:14:03] [s3-adequada L50 r2] reqs=720 vazão=12.0/s falhas=0.0% drop=0 p50=43ms p95=116ms p99=149ms | vm_cpu=2% app_cpu=4% mem_used=597MB swap=0MB iowait=24% disk_util=40% disk=23.5MB/s | host_cpu=1.5% (máx 2.9%)
+[2026-10-14 00:16:02] [s3-adequada L50 r3] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=38ms p95=122ms p99=200ms | vm_cpu=2% app_cpu=3% mem_used=595MB swap=0MB iowait=24% disk_util=41% disk=23.5MB/s | host_cpu=1.5% (máx 2.5%)
+[2026-10-14 00:16:02] [s3-adequada L75] 18.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:18:01] [s3-adequada L75 r1] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=35ms p95=132ms p99=203ms | vm_cpu=3% app_cpu=5% mem_used=603MB swap=0MB iowait=33% disk_util=44% disk=35.2MB/s | host_cpu=1.7% (máx 2.6%)
+[2026-10-14 00:19:59] [s3-adequada L75 r2] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=36ms p95=132ms p99=265ms | vm_cpu=3% app_cpu=5% mem_used=600MB swap=0MB iowait=33% disk_util=46% disk=35.2MB/s | host_cpu=1.7% (máx 2.7%)
+[2026-10-14 00:21:58] [s3-adequada L75 r3] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=39ms p95=141ms p99=192ms | vm_cpu=3% app_cpu=5% mem_used=606MB swap=0MB iowait=34% disk_util=46% disk=35.2MB/s | host_cpu=1.7% (máx 2.4%)
+[2026-10-14 00:21:58] [s3-adequada L100] 24.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:23:57] [s3-adequada L100 r1] reqs=1440 vazão=24.0/s falhas=0.0% drop=0 p50=33ms p95=112ms p99=150ms | vm_cpu=4% app_cpu=6% mem_used=602MB swap=0MB iowait=36% disk_util=45% disk=46.9MB/s | host_cpu=1.9% (máx 2.9%)
+[2026-10-14 00:25:56] [s3-adequada L100 r2] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=36ms p95=145ms p99=230ms | vm_cpu=4% app_cpu=6% mem_used=605MB swap=0MB iowait=38% disk_util=46% disk=46.9MB/s | host_cpu=1.9% (máx 2.9%)
+[2026-10-14 00:27:54] [s3-adequada L100 r3] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=41ms p95=158ms p99=243ms | vm_cpu=4% app_cpu=6% mem_used=605MB swap=0MB iowait=38% disk_util=44% disk=46.8MB/s | host_cpu=3.4% (máx 25.4%)
+[2026-10-14 00:27:54] AVISO [s3-adequada L100 r3]: outros processos do host passaram de 1 núcleo em 10 s (máx 284.2%; unattended-upgr:100,apt-check:78,apt-get:55); disputam os E-cores com a VM
+[2026-10-14 00:27:54] [s3-adequada L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:29:53] [s3-adequada L125 r1] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=36ms p95=117ms p99=203ms | vm_cpu=5% app_cpu=8% mem_used=614MB swap=0MB iowait=41% disk_util=46% disk=58.5MB/s | host_cpu=8.0% (máx 12.3%)
+[2026-10-14 00:29:53] AVISO [s3-adequada L125 r1]: outros processos do host passaram de 1 núcleo em 50 s (máx 125.6%; update-manager:100,gnome-shell:10,claude:4); disputam os E-cores com a VM
+[2026-10-14 00:31:51] [s3-adequada L125 r2] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=29ms p95=105ms p99=141ms | vm_cpu=5% app_cpu=7% mem_used=604MB swap=0MB iowait=36% disk_util=50% disk=58.6MB/s | host_cpu=2.2% (máx 4.5%)
+[2026-10-14 00:33:50] [s3-adequada L125 r3] reqs=1800 vazão=30.0/s falhas=0.0% drop=0 p50=29ms p95=105ms p99=183ms | vm_cpu=4% app_cpu=7% mem_used=606MB swap=0MB iowait=36% disk_util=50% disk=58.6MB/s | host_cpu=2.1% (máx 3.3%)
+[2026-10-14 00:33:50] [s4-adeq-super] cenário: 2 vCPU, 1024 MB, disco 140M
+[2026-10-14 00:33:50] Energia ok: perfil performance, na tomada
+[2026-10-14 00:33:50] Desligando poi-vm
+[2026-10-14 00:33:56] RAM do host ok: 12902 MB disponíveis (necessário 2560 MB)
+[2026-10-14 00:33:56] Recursos: 2 vCPU, 1024 MB RAM, disco 140M
+[2026-10-14 00:33:58] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-14 00:33:59] Aguardando SSH (até 180s)
+[2026-10-14 00:34:14] SSH ok (4s)
+[2026-10-14 00:34:14] Deploy de io-bound
+[2026-10-14 00:34:16] /health ok ({"status":"ok","app":"io-bound","pid":1055,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-14 00:34:16] [s4-adeq-super L25] 6.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:36:15] [s4-adeq-super L25 r1] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=31ms p95=96ms p99=142ms | vm_cpu=1% app_cpu=2% mem_used=599MB swap=0MB iowait=10% disk_util=22% disk=11.6MB/s | host_cpu=1.3% (máx 2.1%)
+[2026-10-14 00:38:14] [s4-adeq-super L25 r2] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=33ms p95=97ms p99=120ms | vm_cpu=1% app_cpu=2% mem_used=595MB swap=0MB iowait=11% disk_util=25% disk=11.8MB/s | host_cpu=1.3% (máx 2.0%)
+[2026-10-14 00:40:12] [s4-adeq-super L25 r3] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=33ms p95=96ms p99=132ms | vm_cpu=1% app_cpu=2% mem_used=606MB swap=0MB iowait=9% disk_util=22% disk=11.9MB/s | host_cpu=1.3% (máx 2.9%)
+[2026-10-14 00:40:12] [s4-adeq-super L50] 12.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:42:10] [s4-adeq-super L50 r1] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=37ms p95=121ms p99=174ms | vm_cpu=2% app_cpu=4% mem_used=598MB swap=0MB iowait=23% disk_util=41% disk=23.5MB/s | host_cpu=1.5% (máx 2.3%)
+[2026-10-14 00:44:09] [s4-adeq-super L50 r2] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=29ms p95=100ms p99=128ms | vm_cpu=2% app_cpu=4% mem_used=594MB swap=0MB iowait=20% disk_util=39% disk=23.5MB/s | host_cpu=1.5% (máx 2.4%)
+[2026-10-14 00:46:08] [s4-adeq-super L50 r3] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=27ms p95=92ms p99=126ms | vm_cpu=2% app_cpu=3% mem_used=596MB swap=0MB iowait=19% disk_util=36% disk=23.5MB/s | host_cpu=1.5% (máx 2.5%)
+[2026-10-14 00:46:08] [s4-adeq-super L75] 18.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:48:07] [s4-adeq-super L75 r1] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=31ms p95=97ms p99=134ms | vm_cpu=3% app_cpu=5% mem_used=596MB swap=0MB iowait=27% disk_util=48% disk=35.2MB/s | host_cpu=2.0% (máx 6.9%)
+[2026-10-14 00:50:05] [s4-adeq-super L75 r2] reqs=1080 vazão=18.0/s falhas=0.0% drop=0 p50=41ms p95=125ms p99=181ms | vm_cpu=3% app_cpu=5% mem_used=604MB swap=0MB iowait=34% disk_util=42% disk=35.2MB/s | host_cpu=1.7% (máx 2.7%)
+[2026-10-14 00:52:04] [s4-adeq-super L75 r3] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=38ms p95=138ms p99=211ms | vm_cpu=3% app_cpu=5% mem_used=600MB swap=0MB iowait=33% disk_util=44% disk=35.2MB/s | host_cpu=1.7% (máx 2.6%)
+[2026-10-14 00:52:04] [s4-adeq-super L100] 24.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:54:03] [s4-adeq-super L100 r1] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=34ms p95=117ms p99=174ms | vm_cpu=4% app_cpu=6% mem_used=602MB swap=0MB iowait=36% disk_util=48% disk=46.9MB/s | host_cpu=1.9% (máx 2.9%)
+[2026-10-14 00:56:02] [s4-adeq-super L100 r2] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=34ms p95=110ms p99=143ms | vm_cpu=4% app_cpu=6% mem_used=607MB swap=0MB iowait=39% disk_util=45% disk=47.0MB/s | host_cpu=2.0% (máx 3.6%)
+[2026-10-14 00:58:01] [s4-adeq-super L100 r3] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=31ms p95=102ms p99=143ms | vm_cpu=4% app_cpu=6% mem_used=600MB swap=0MB iowait=35% disk_util=48% disk=46.9MB/s | host_cpu=2.0% (máx 3.1%)
+[2026-10-14 00:58:01] [s4-adeq-super L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 00:59:59] [s4-adeq-super L125 r1] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=29ms p95=106ms p99=151ms | vm_cpu=5% app_cpu=7% mem_used=610MB swap=0MB iowait=37% disk_util=50% disk=58.6MB/s | host_cpu=2.1% (máx 3.4%)
+[2026-10-14 01:01:58] [s4-adeq-super L125 r2] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=35ms p95=132ms p99=191ms | vm_cpu=5% app_cpu=7% mem_used=606MB swap=0MB iowait=41% disk_util=48% disk=58.6MB/s | host_cpu=2.3% (máx 5.8%)
+[2026-10-14 01:03:57] [s4-adeq-super L125 r3] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=32ms p95=117ms p99=160ms | vm_cpu=5% app_cpu=7% mem_used=609MB swap=0MB iowait=42% disk_util=46% disk=58.6MB/s | host_cpu=2.2% (máx 3.5%)
+[2026-10-14 01:03:57] [s5-super] cenário: 2 vCPU, 1024 MB, disco 210M
+[2026-10-14 01:03:57] Energia ok: perfil performance, na tomada
+[2026-10-14 01:03:57] Desligando poi-vm
+[2026-10-14 01:04:02] RAM do host ok: 12929 MB disponíveis (necessário 2560 MB)
+[2026-10-14 01:04:02] Recursos: 2 vCPU, 1024 MB RAM, disco 210M
+[2026-10-14 01:04:04] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-14 01:04:05] Aguardando SSH (até 180s)
+[2026-10-14 01:04:21] SSH ok (4s)
+[2026-10-14 01:04:21] Deploy de io-bound
+[2026-10-14 01:04:22] /health ok ({"status":"ok","app":"io-bound","pid":1059,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-14 01:04:23] [s5-super L25] 6.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 01:06:20] [s5-super L25 r1] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=33ms p95=99ms p99=116ms | vm_cpu=1% app_cpu=2% mem_used=608MB swap=0MB iowait=10% disk_util=23% disk=11.7MB/s | host_cpu=1.3% (máx 2.4%)
+[2026-10-14 01:08:19] [s5-super L25 r2] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=32ms p95=80ms p99=98ms | vm_cpu=1% app_cpu=2% mem_used=597MB swap=0MB iowait=8% disk_util=20% disk=11.8MB/s | host_cpu=1.3% (máx 2.3%)
+[2026-10-14 01:10:17] [s5-super L25 r3] reqs=361 vazão=6.0/s falhas=0.0% drop=0 p50=32ms p95=72ms p99=88ms | vm_cpu=1% app_cpu=2% mem_used=596MB swap=0MB iowait=10% disk_util=23% disk=11.9MB/s | host_cpu=1.3% (máx 2.8%)
+[2026-10-14 01:10:17] [s5-super L50] 12.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 01:12:15] [s5-super L50 r1] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=35ms p95=107ms p99=139ms | vm_cpu=2% app_cpu=3% mem_used=596MB swap=0MB iowait=21% disk_util=38% disk=23.5MB/s | host_cpu=1.5% (máx 2.5%)
+[2026-10-14 01:14:14] [s5-super L50 r2] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=33ms p95=111ms p99=138ms | vm_cpu=2% app_cpu=4% mem_used=604MB swap=0MB iowait=22% disk_util=38% disk=23.5MB/s | host_cpu=1.5% (máx 2.2%)
+[2026-10-14 01:16:13] [s5-super L50 r3] reqs=721 vazão=12.0/s falhas=0.0% drop=0 p50=36ms p95=94ms p99=141ms | vm_cpu=2% app_cpu=3% mem_used=601MB swap=0MB iowait=22% disk_util=43% disk=23.5MB/s | host_cpu=1.5% (máx 2.3%)
+[2026-10-14 01:16:13] [s5-super L75] 18.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 01:18:11] [s5-super L75 r1] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=38ms p95=121ms p99=159ms | vm_cpu=3% app_cpu=5% mem_used=599MB swap=0MB iowait=32% disk_util=46% disk=35.2MB/s | host_cpu=1.7% (máx 2.8%)
+[2026-10-14 01:20:09] [s5-super L75 r2] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=34ms p95=115ms p99=147ms | vm_cpu=3% app_cpu=5% mem_used=603MB swap=0MB iowait=31% disk_util=45% disk=35.3MB/s | host_cpu=1.7% (máx 3.5%)
+[2026-10-14 01:22:08] [s5-super L75 r3] reqs=1081 vazão=18.0/s falhas=0.0% drop=0 p50=37ms p95=112ms p99=168ms | vm_cpu=3% app_cpu=5% mem_used=600MB swap=0MB iowait=33% disk_util=43% disk=35.2MB/s | host_cpu=1.7% (máx 2.6%)
+[2026-10-14 01:22:08] [s5-super L100] 24.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 01:24:06] [s5-super L100 r1] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=33ms p95=117ms p99=169ms | vm_cpu=4% app_cpu=6% mem_used=609MB swap=0MB iowait=39% disk_util=44% disk=46.9MB/s | host_cpu=1.9% (máx 2.9%)
+[2026-10-14 01:26:05] [s5-super L100 r2] reqs=1440 vazão=24.0/s falhas=0.0% drop=0 p50=39ms p95=148ms p99=188ms | vm_cpu=4% app_cpu=6% mem_used=602MB swap=0MB iowait=39% disk_util=44% disk=46.9MB/s | host_cpu=1.9% (máx 2.9%)
+[2026-10-14 01:28:04] [s5-super L100 r3] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=29ms p95=91ms p99=130ms | vm_cpu=4% app_cpu=6% mem_used=603MB swap=0MB iowait=35% disk_util=49% disk=46.9MB/s | host_cpu=2.2% (máx 2.8%)
+[2026-10-14 01:28:04] [s5-super L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 01:30:02] [s5-super L125 r1] reqs=1800 vazão=30.0/s falhas=0.0% drop=0 p50=29ms p95=100ms p99=148ms | vm_cpu=5% app_cpu=7% mem_used=604MB swap=0MB iowait=36% disk_util=51% disk=58.6MB/s | host_cpu=2.1% (máx 3.4%)
+[2026-10-14 01:32:01] [s5-super L125 r2] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=31ms p95=131ms p99=181ms | vm_cpu=5% app_cpu=8% mem_used=606MB swap=0MB iowait=40% disk_util=49% disk=58.6MB/s | host_cpu=2.9% (máx 5.0%)
+[2026-10-14 01:34:00] [s5-super L125 r3] reqs=1800 vazão=30.0/s falhas=0.0% drop=0 p50=34ms p95=109ms p99=170ms | vm_cpu=5% app_cpu=8% mem_used=614MB swap=0MB iowait=40% disk_util=48% disk=58.6MB/s | host_cpu=2.7% (máx 4.2%)
+[2026-10-14 01:34:00] Gravado no disco da VM (soma das rodadas, com warm-up): 132.5 GB
+[2026-10-14 01:34:00] === io-bound: concluído sem falhas. Resultados em /home/joaoramalho/poi/poi_experimentos/io-bound/results
+[2026-10-14 01:34:16] === io-bound: experimento commit 90dd858; alvo 24.0 req/s; níveis 25 50 75 100 125 %; 3 × 60s
+[2026-10-14 01:34:16] Energia ok: perfil performance, na tomada
+[2026-10-14 01:34:16] AVISO: unattended-upgrades ativo no host (registrado no meta.json)
+[2026-10-14 01:34:17] [s1-sub] já concluído; pulando
+[2026-10-14 01:34:17] [s2-sub-adeq] já concluído; pulando
+[2026-10-14 01:34:17] [s3-adequada] cenário: 2 vCPU, 1024 MB, disco 69M
+[2026-10-14 01:34:17] Energia ok: perfil performance, na tomada
+[2026-10-14 01:34:17] Desligando poi-vm
+[2026-10-14 01:34:22] RAM do host ok: 12901 MB disponíveis (necessário 2560 MB)
+[2026-10-14 01:34:22] Recursos: 2 vCPU, 1024 MB RAM, disco 69M
+[2026-10-14 01:34:24] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-14 01:34:25] Aguardando SSH (até 180s)
+[2026-10-14 01:34:40] SSH ok (4s)
+[2026-10-14 01:34:40] Deploy de io-bound
+[2026-10-14 01:34:42] /health ok ({"status":"ok","app":"io-bound","pid":1053,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-14 01:34:43] [s3-adequada L25] já concluído
+[2026-10-14 01:34:43] [s3-adequada L50] já concluído
+[2026-10-14 01:34:43] [s3-adequada L75] já concluído
+[2026-10-14 01:34:43] [s3-adequada L100] 24.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 01:36:40] [s3-adequada L100 r3] reqs=1441 vazão=24.0/s falhas=0.0% drop=0 p50=30ms p95=105ms p99=160ms | vm_cpu=5% app_cpu=6% mem_used=614MB swap=0MB iowait=36% disk_util=47% disk=47.6MB/s | host_cpu=2.5% (máx 4.0%)
+[2026-10-14 01:36:41] [s3-adequada L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-14 01:38:39] [s3-adequada L125 r1] reqs=1801 vazão=30.0/s falhas=0.0% drop=0 p50=32ms p95=135ms p99=170ms | vm_cpu=5% app_cpu=8% mem_used=606MB swap=0MB iowait=42% disk_util=48% disk=58.6MB/s | host_cpu=2.7% (máx 5.4%)
+[2026-10-14 01:38:39] [s4-adeq-super] já concluído; pulando
+[2026-10-14 01:38:39] [s5-super] já concluído; pulando
+[2026-10-14 01:38:39] Gravado no disco da VM (soma das rodadas, com warm-up): 132.5 GB
+[2026-10-14 01:38:39] === io-bound: concluído sem falhas. Resultados em /home/joaoramalho/poi/poi_experimentos/io-bound/results

@@ -1,0 +1,1 @@
+Rodadas com outros processos do host acima de 1 núcleo (unattended-upgrades/apt às 00:27; update-manager às 00:29 de 2026-10-14); refeitas na retomada.
