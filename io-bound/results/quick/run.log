@@ -1,0 +1,38 @@
+[2026-10-13 22:51:03] === io-bound: experimento (quick s3-adequada) commit a5ec48d; alvo 24.0 req/s; níveis 50 125 %; 1 × 20s
+[2026-10-13 22:51:03] Energia ok: perfil performance, na tomada
+[2026-10-13 22:51:03] AVISO: unattended-upgrades ativo no host (registrado no meta.json)
+[2026-10-13 22:51:03] [s3-adequada] cenário: 2 vCPU, 1024 MB, disco 69M
+[2026-10-13 22:51:03] Energia ok: perfil performance, na tomada
+[2026-10-13 22:51:04] Desligando poi-vm
+[2026-10-13 22:51:09] RAM do host ok: 13062 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:51:09] Recursos: 2 vCPU, 1024 MB RAM, disco 69M
+[2026-10-13 22:51:11] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:51:12] Aguardando SSH (até 180s)
+[2026-10-13 22:51:27] SSH ok (4s)
+[2026-10-13 22:51:27] Deploy de io-bound
+[2026-10-13 22:51:29] /health ok ({"status":"ok","app":"io-bound","pid":1055,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 22:51:29] [s3-adequada L50] 12.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 22:52:47] [s3-adequada L50 r1] reqs=241 vazão=12.0/s falhas=0.0% drop=0 p50=34ms p95=120ms p99=138ms | vm_cpu=3% app_cpu=4% mem_used=607MB swap=0MB iowait=20% disk_util=40% disk=23.9MB/s | host_cpu=1.9% (máx 3.4%)
+[2026-10-13 22:52:47] [s3-adequada L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 22:54:05] [s3-adequada L125 r1] reqs=600 vazão=30.0/s falhas=0.0% drop=0 p50=25ms p95=60ms p99=92ms | vm_cpu=5% app_cpu=8% mem_used=606MB swap=0MB iowait=36% disk_util=53% disk=57.1MB/s | host_cpu=2.6% (máx 3.5%)
+[2026-10-13 22:54:05] Gravado no disco da VM (soma das rodadas, com warm-up): 2.5 GB
+[2026-10-13 22:54:05] === io-bound: concluído sem falhas. Resultados em /home/joaoramalho/poi/poi_experimentos/io-bound/results/quick
+[2026-10-13 22:54:05] === io-bound: experimento (quick s1-sub) commit a5ec48d; alvo 24.0 req/s; níveis 50 125 %; 1 × 20s
+[2026-10-13 22:54:05] Energia ok: perfil performance, na tomada
+[2026-10-13 22:54:05] AVISO: unattended-upgrades ativo no host (registrado no meta.json)
+[2026-10-13 22:54:05] [s1-sub] cenário: 2 vCPU, 1024 MB, disco 29M
+[2026-10-13 22:54:05] Energia ok: perfil performance, na tomada
+[2026-10-13 22:54:06] Desligando poi-vm
+[2026-10-13 22:54:11] RAM do host ok: 13041 MB disponíveis (necessário 2560 MB)
+[2026-10-13 22:54:11] Recursos: 2 vCPU, 1024 MB RAM, disco 29M
+[2026-10-13 22:54:13] Ligando poi-vm (headless, afinidade 4-11)
+[2026-10-13 22:54:14] Aguardando SSH (até 180s)
+[2026-10-13 22:54:32] SSH ok (4s)
+[2026-10-13 22:54:32] Deploy de io-bound
+[2026-10-13 22:54:35] /health ok ({"status":"ok","app":"io-bound","pid":1058,"cpus":2,"max_inflight_per_worker":8,"data_dir":"/var/tmp/poi-io"})
+[2026-10-13 22:54:35] [s1-sub L50] 12.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 22:55:54] [s1-sub L50 r1] reqs=241 vazão=12.0/s falhas=0.0% drop=0 p50=28ms p95=100ms p99=133ms | vm_cpu=3% app_cpu=4% mem_used=610MB swap=0MB iowait=19% disk_util=37% disk=23.2MB/s | host_cpu=2.0% (máx 2.7%)
+[2026-10-13 22:55:54] [s1-sub L125] 30.000 req/s (reset + warm-up de 40s antes de cada rodada)
+[2026-10-13 22:57:47] [s1-sub L125 r1] reqs=472 vazão=14.8/s falhas=0.0% drop=128 p50=6822ms p95=11965ms p99=12639ms | vm_cpu=3% app_cpu=5% mem_used=627MB swap=0MB iowait=82% disk_util=86% disk=28.7MB/s | host_cpu=2.2% (máx 3.2%)
+[2026-10-13 22:57:47] Gravado no disco da VM (soma das rodadas, com warm-up): 4.7 GB
+[2026-10-13 22:57:47] === io-bound: concluído sem falhas. Resultados em /home/joaoramalho/poi/poi_experimentos/io-bound/results/quick

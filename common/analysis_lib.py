@@ -147,8 +147,9 @@ def plot_queue(summ, scen, nl, out):
             line(a2, d, "p95_over_noload", SERIES[i], MARKERS[i], s["name"])
             a2.plot(d.rate_rps, d.p95_over_noload_median, linestyle=":", linewidth=1.5, color=SERIES[i],
                     marker=MARKERS[i], markersize=6, markerfacecolor="white", markeredgewidth=1.5)
-    a2.axhline(2, color=INK2, linestyle="--", linewidth=1)
-    a2.annotate("2× (critério)", (a2.get_xlim()[0], 2), xytext=(4, 3), textcoords="offset points", fontsize=8, color=INK2)
+    # sem linha de critério: o critério da io-bound usa o p50; a cauda do fsync deixa p95 ≈ 3–4× o p50 mesmo sem fila
+    a2.annotate("p95 ≈ 3–4× o p50 mesmo sem fila (cauda do fsync)", xy=(0.02, 0.97), xycoords="axes fraction",
+                va="top", fontsize=8, color=INK2)
     log_y(a2)
     style(a2, "(b) p95 ÷ tempo sem carga do mesmo cenário", "× (escala log)")
     demand_axis(a2, summ)
