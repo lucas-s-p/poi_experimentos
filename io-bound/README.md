@@ -45,3 +45,18 @@ Antes de cada rodada: para o serviço, apaga os arquivos da app (`/var/tmp/poi-i
 ./run_experiment.sh --quick s3-adequada
 conda run -n poi-analysis python analysis/analyze.py
 ```
+
+## Resultados: o limite do `bandwidthctl` é um teto sob saturação, não um limite rígido
+
+No experimento, o limite configurado só foi respeitado com fila no disco. No Sub (29 MiB/s), banda medida na VM (leitura + escrita, média da janela de 60 s):
+
+| Nível | Demanda | Medido | Observação |
+|---|---|---|---|
+| 25–50% | 12–24 MiB/s | 12–24 MiB/s | abaixo do limite |
+| 75% | 36,6 MiB/s | **36,6 MiB/s** nas 3 rodadas, estável | 1,26 × o limite, sem throttling e sem fila (~0,6 requisição em andamento) |
+| 100% (r1) | 48,8 MiB/s | 40,4 → 29,1 → 28,5 (terços da janela) | excede no início e então trava no limite |
+| 100% (r2, r3), 125% | 48,8 / 61 MiB/s | 29,0–29,7 MiB/s | exatamente o limite; fila de segundos, iowait > 80% |
+
+Com chegadas espaçadas (open model, poucas requisições em andamento), o limitador do VirtualBox deixa passar até ~25% acima do valor nominal; quando a demanda excede bem o limite e o disco fica continuamente ocupado, a banda trava no valor configurado. (No teste com fio, fluxo contínuo de requisições sem intervalos, o limite foi respeitado: `../vm/disk_limit_test.sh`.) Um "balde de créditos" acumulado nas pausas entre rodadas não explica sozinho o efeito: as 3 rodadas a 75% excederam ~755 MiB cada, mais que o crédito da pausa anterior (~500 MiB), sem esgotar.
+
+Consequência: o colapso do Sub aparece entre 75% e 100% da carga-alvo, e não logo acima de ~60% como os 29 MiB/s nominais indicariam. As medições valem como "o que o `bandwidthctl` do VirtualBox entrega"; a análise mostra a banda efetiva medida por rodada ao lado do limite nominal. A alternativa (limitar dentro da VM com `io.max` do cgroup v2, mais preciso) foi considerada e não usada.
