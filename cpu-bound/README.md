@@ -45,4 +45,4 @@ conda run -n poi-analysis python analysis/analyze.py
 | `calibration/` | saída da calibração (`proposal.json`, `calibrate.log`, rodadas) |
 | `results/<cenário>/L<nível>/r<rep>/` | `k6_summary.json`, `k6_raw.csv.gz`, `vm_metrics.csv`, `host_metrics.csv`, `meta.json` |
 | `results/run.log` | log do experimento (inclui avisos de CPU do host > 85%) |
-| `results/analysis/` | `summary.csv` (média e IC 95%), gráficos por cenário e comparativos |
+| `results/analysis/` | `summary.csv` (média e IC 95%); gráficos por cenário e comparativos gerados pelo `analysis/analyze.py` (não versionados) |

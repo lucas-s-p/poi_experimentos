@@ -37,7 +37,7 @@ Condições exigidas (checadas antes de cada rodada; o experimento aborta ou esp
 
 ## Resultados
 
-`<app>/results/<cenário>/L<nível>/r<rep>/`: `k6_summary.json`, `k6_raw.csv.gz`, `vm_metrics.csv` (psutil 1 s na VM), `host_metrics.csv`, `vm_events.json` (OOM, workers mortos, reinícios) e `meta.json` (config da VM, afinidade, commit, offset de relógio host↔VM, energia, checagem de ociosidade, swap após reset, bytes gravados). `<app>/results/analysis/`: `summary.csv` (média, IC 95% t-Student n=3, mediana) e gráficos por cenário e comparativos. Calibração em `<app>/calibration/`. Detalhes de cada app no README dela.
+`<app>/results/<cenário>/L<nível>/r<rep>/`: `k6_summary.json`, `k6_raw.csv.gz`, `vm_metrics.csv` (psutil 1 s na VM), `host_metrics.csv`, `vm_events.json` (OOM, workers mortos, reinícios) e `meta.json` (config da VM, afinidade, commit, offset de relógio host↔VM, energia, checagem de ociosidade, swap após reset, bytes gravados). `<app>/results/analysis/`: `summary.csv` (média, IC 95% t-Student n=3, mediana); os gráficos por cenário e comparativos (PNG) são gerados ali pelo `analysis/analyze.py` e não são versionados. Calibração em `<app>/calibration/`. Detalhes de cada app no README dela.
 
 Estrutura comum: `vm/` (VM, experimento, calibração), `common/` (coletor, eventos da VM, análise; os `metrics/` das apps são links para cá).
 
