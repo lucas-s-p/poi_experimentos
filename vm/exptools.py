@@ -86,8 +86,10 @@ def cmd_hoststats(a):
 
 
 def host_power():
-    """Perfil de energia e fonte (afetam a frequência dos núcleos do host)."""
+    """Fonte, perfil de energia e cpufreq (afetam a frequência dos núcleos do host).
+    Tudo opcional: o que não existir neste host fica None (sem bateria, sem powerprofilesctl, sem cpufreq)."""
     import glob
+    import os
     import subprocess
     def read(path):
         try:
@@ -98,7 +100,13 @@ def host_power():
         profile = subprocess.run(["powerprofilesctl", "get"], capture_output=True, text=True, timeout=5).stdout.strip()
     except (OSError, subprocess.SubprocessError):
         profile = None
-    ac = [read(p) for p in glob.glob("/sys/class/power_supply/A*/online")]
+    psu = os.environ.get("PSU_DIR", "/sys/class/power_supply")
+    supplies = [(read(f"{d}/type"), read(f"{d}/online"), read(f"{d}/status")) for d in glob.glob(f"{psu}/*")]
+    bats = [st for t, _, st in supplies if t == "Battery"]
+    mains = [on for t, on, _ in supplies if t == "Mains"]
+    usb_on = any(t == "USB" and on == "1" for t, on, _ in supplies)
+    ac = (any(on == "1" for on in mains) or usb_on) if (mains or usb_on) else None
+    on_battery = bool(bats) and (ac is False or (ac is None and "Discharging" in bats))
     def active(unit):
         try:
             return subprocess.run(["systemctl", "is-active", unit], capture_output=True, text=True,
@@ -111,13 +119,17 @@ def host_power():
                          "não visível sem sudo")
     except (OSError, subprocess.SubprocessError):
         snap_hold = None
-    return {"power_profile": profile, "ac_online": ac[0] == "1" if ac else None,
+    # cpufreq da primeira CPU da VM (VM_CPUSET) ou da cpu0, se a VM não tiver afinidade
+    first = (os.environ.get("VM_CPUSET") or "0").split(",")[0].split("-")[0]
+    cf = f"/sys/devices/system/cpu/cpu{first}/cpufreq"
+    return {"power_profile": profile, "ac_online": ac, "battery_present": bool(bats), "on_battery": on_battery,
             "unattended_upgrades": active("unattended-upgrades.service"),
             "apt_daily_timer": active("apt-daily.timer"),
             "apt_daily_upgrade_timer": active("apt-daily-upgrade.timer"),
             "snap_refresh_hold": snap_hold,
-            "governor_cpu4": read("/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor"),
-            "epp_cpu4": read("/sys/devices/system/cpu/cpu4/cpufreq/energy_performance_preference")}
+            "cpufreq_cpu": int(first) if first.isdigit() else None,
+            "governor": read(f"{cf}/scaling_governor"),
+            "epp": read(f"{cf}/energy_performance_preference")}
 
 
 def docker_running():

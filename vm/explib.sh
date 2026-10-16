@@ -6,8 +6,10 @@ source "$CONDA_ROOT/etc/profile.d/conda.sh"
 
 HOST_PY="$CONDA_ROOT/envs/poi-analysis/bin/python"
 EXPTOOLS="$REPO_ROOT/vm/exptools.py"
-[[ -x "$HOST_PY" ]] || die "env poi-analysis ausente: conda env create -f $APP_DIR/analysis/environment.yml"
-command -v k6 >/dev/null || die "k6 não encontrado no PATH"
+[[ -x "$HOST_PY" ]] || die "env poi-analysis ausente em $CONDA_ROOT: rode ./bootstrap.sh na raiz do repositório"
+command -v k6 >/dev/null || die "k6 não encontrado (nem em ~/.local/bin): rode ./bootstrap.sh na raiz do repositório"
+cpuset_check VM_CPUSET "$VM_CPUSET"
+cpuset_check K6_CPUSET "$K6_CPUSET"
 
 ENV_NAME="$(sed -n 's/^name: *//p' "$APP_DIR/environment.yml")"
 APP_NAME="$(basename "$APP_DIR")"
@@ -97,12 +99,12 @@ clock_offset() {
     printf '%.6f %.6f\n' "$best_off" "$best_rtt"
 }
 
-# run_k6 <rate> <duração_s> [summary.json] [raw.csv.gz]: k6 fixado em K6_CPUSET
+# run_k6 <rate> <duração_s> [summary.json] [raw.csv.gz]: k6 fixado em K6_CPUSET (se definido)
 run_k6() {
     local rate="$1" dur="$2" summary="${3:-}" raw="${4:-}"
     local outs=()
     [[ -n "$raw" ]] && outs=(--out "csv=$raw")
-    taskset -c "$K6_CPUSET" k6 run -q --no-color --no-usage-report "${outs[@]}" \
+    "${K6_PIN[@]}" k6 run -q --no-color --no-usage-report "${outs[@]}" \
         -e BASE_URL="$BASE_URL" -e QUERY="$QUERY" -e RATE="$rate" -e DURATION="${dur}s" \
         -e MAX_VUS="$MAX_VUS" -e SUMMARY="$summary" \
         "$APP_DIR/load/k6_work.js" >/dev/null 2>&1 || true   # k6 sai ≠0 se thresholds falham; não é erro aqui
@@ -133,8 +135,8 @@ host_wait_idle() {
 collectors_start() {
     COL_REMOTE="/tmp/poi_${APP_NAME}_metrics.csv"
     COL_REMOTE_PID=$(vm_ssh "rm -f $COL_REMOTE; setsid nohup $REMOTE_PY $REMOTE_DIR/metrics/collector.py --out $COL_REMOTE --match '$APP_MATCH' >/dev/null 2>&1 < /dev/null & echo \$!")
-    # host: k6, processo da VM e o maior "outro" processo (ruído), fixado nos P-cores como o k6
-    taskset -c "$K6_CPUSET" "$HOST_PY" "$APP_DIR/metrics/collector.py" --out "$1/host_metrics.csv" \
+    # host: k6, processo da VM e o maior "outro" processo (ruído), com a mesma afinidade do k6
+    "${K6_PIN[@]}" "$HOST_PY" "$APP_DIR/metrics/collector.py" --out "$1/host_metrics.csv" \
         --match "k6 run" --group "vm=VBoxHeadless --startvm $VM_NAME" --top &
     COL_HOST_PID=$!
     sleep 2   # primeira amostra
@@ -244,7 +246,7 @@ _run_rep() {
     local ev; ev="$("$HOST_PY" "$EXPTOOLS" events "$rdir/vm_events.json")"
     [[ -n "$ev" ]] && log "AVISO [$id L$lvl r$rep]: eventos na VM: $ev"
     if (( oover > 0 )); then
-        log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam os E-cores com a VM"
+        log "AVISO [$id L$lvl r$rep]: outros processos do host passaram de 1 núcleo em $oover s (máx ${omax}%; $otop); disputam CPU com a VM"
     fi
 }
 
@@ -270,7 +272,7 @@ experiment_main() {
     mkdir -p "$base"
     RUN_LOG="$base/run.log"
     exec > >(tee -a "$RUN_LOG") 2>&1
-    local commit; commit="$(git -C "$REPO_ROOT" rev-parse --short HEAD)$(git -C "$REPO_ROOT" diff --quiet HEAD -- "$APP_DIR" || echo '-dirty')"
+    local commit; commit="$(repo_commit "$APP_DIR")"
     log "=== $APP_NAME: experimento ${quick:+(quick $only) }commit $commit; alvo $TARGET_RPS req/s; níveis $LEVELS %; $REPS × ${DURATION_S}s"
     host_check_power || exit 1
     [[ "$(systemctl is-active unattended-upgrades.service 2>/dev/null)" == "active" ]] \
@@ -278,11 +280,33 @@ experiment_main() {
 
     local scen=() line fails=() rc pid
     mapfile -t scen < <(exp_scenarios ${only:+--only "$only"})
-    (( ${#scen[@]} )) || die "cenário não encontrado: $only"
+    (( ${#scen[@]} )) || die "cenário não encontrado: $only (válidos: $(exp_scenarios | awk '{print $1}' | paste -sd' '))"
+
+    # cenários × hardware: vCPU ≤ CPUs disponíveis para a VM e RAM da VM + folga ≤ RAM disponível no host
+    local cap_cpus cap_mem nofit=() fitting=() all=() id cpus mem bw extra
+    read -r cap_cpus cap_mem < <(host_capacity)
+    log "Host: $cap_cpus CPU(s) para a VM, $((cap_mem + HOST_RAM_MARGIN_MB)) MB de RAM disponível (folga de ${HOST_RAM_MARGIN_MB} MB)"
+    mapfile -t all < <(exp_scenarios)
+    for line in "${all[@]}"; do
+        read -r id cpus mem _ <<<"$line"
+        if (( cpus > cap_cpus || mem > cap_mem )); then nofit+=("$id"); log "AVISO: $id não cabe neste host (${cpus} vCPU, ${mem} MB)"
+        else fitting+=("$id"); fi
+    done
+    if [[ -n "$quick" && " ${nofit[*]} " == *" $only "* ]]; then
+        (( ${#fitting[@]} )) || die "o cenário $only não cabe e nenhum outro cabe neste host; feche programas para liberar RAM"
+        local sug="${fitting[-1]}"
+        [[ " ${fitting[*]} " == *" s3-adequada "* ]] && sug="s3-adequada"
+        die "o cenário $only não cabe neste host. Cenários que cabem: ${fitting[*]}. Ex.: $0 --quick $sug"
+    fi
+    (( ${#nofit[@]} )) && [[ -z "$quick" ]] && log "AVISO: esses cenários serão pulados e listados como falha no final: ${nofit[*]}"
+    # --quick é demonstração: sempre refaz o cenário pedido (o results/quick/ do repositório vem com uma rodada antiga)
+    [[ -n "$quick" ]] && rm -rf "${base:?}/$only"
 
     for line in "${scen[@]}"; do
-        local id cpus mem bw extra
         read -r id cpus mem bw extra <<<"$line"
+        if [[ " ${nofit[*]} " == *" $id "* ]]; then
+            fails+=("$id (não cabe no host: ${cpus} vCPU, ${mem} MB)"); continue
+        fi
 
         # pula o cenário inteiro se tudo já foi concluído (evita reiniciar a VM)
         local pending=0 lvl rep
