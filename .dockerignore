@@ -1,0 +1,22 @@
+# Contexto de build = raiz do repositório (docker build -f <app>/Dockerfile .).
+# Whitelist: só entra o que as imagens usam; todo o resto (results/, calibração, vm/, docs/...) fica fora.
+*
+!docker/entrypoint.sh
+!cpu-bound/app/
+!cpu-bound/requirements.txt
+!memory-bound/app/
+!memory-bound/requirements.txt
+!io-bound/app/
+!io-bound/requirements.txt
+
+# Nunca, mesmo dentro do que foi liberado acima
+**/__pycache__
+**/*.pyc
+**/results
+**/.env
+**/*.vdi
+**/*.vmdk
+**/*.ova
+**/envs
+**/.conda
+.git
