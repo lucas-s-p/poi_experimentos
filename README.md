@@ -6,6 +6,8 @@ Três aplicações web só de backend (FastAPI + uvicorn), uma **cpu-bound**, um
 
 Para reproduzir em outra máquina a partir do `poi-vm.ova` (notebook Ubuntu ou LCC3), siga o [REPRODUZIR.md](REPRODUZIR.md).
 
+**Atividade 4 (Docker):** as três apps em containers (`lucassousapereira/poi-cpu`, `poi-mem`, `poi-io` no Docker Hub), com `docker-compose.yml` na raiz e deploy numa VM da Cloud do LSD atrás do balanceador `poi-atividades`. Como buildar, publicar, subir e testar: [DOCKER.md](DOCKER.md).
+
 ## Pré-requisitos (host Ubuntu)
 
 - VirtualBox 7.2: `sudo ./install_virtualbox.sh` (repositório da Oracle, já que o do Ubuntu não compila no kernel 6.17; grupo `vboxusers`; `options kvm enable_virt_at_load=0`; chave MOK + `vboxconfig` com Secure Boot).
