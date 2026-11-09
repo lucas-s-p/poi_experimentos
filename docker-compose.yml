@@ -1,0 +1,78 @@
+# Atividade 4: as três apps em containers (ver DOCKER.md).
+#
+#   docker compose pull && docker compose up -d     # imagens do Docker Hub
+#   docker compose up -d --build                    # build local (contexto = raiz do repositório)
+#
+# Variáveis (opcionais, no .env ao lado deste arquivo ou no ambiente):
+#   DOCKERHUB_USER (lucassousapereira), POI_TAG (latest)
+#   DOCKER_CPU_PORT / DOCKER_MEM_PORT / DOCKER_IO_PORT: porta no host (8001/8002/8003)
+#   CPU_WORKERS / MEM_WORKERS / IO_WORKERS: workers do uvicorn; vazio = CPUs disponíveis ao container
+
+name: poi
+
+x-app: &app
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "python", "-c", "import os, urllib.request as u; u.urlopen('http://127.0.0.1:%s/health' % os.environ['PORT'], timeout=4)"]
+    interval: 15s
+    timeout: 5s
+    start_period: 20s
+    retries: 3
+
+services:
+  cpu:
+    <<: *app
+    image: ${DOCKERHUB_USER:-lucassousapereira}/poi-cpu:${POI_TAG:-latest}
+    build:
+      context: .
+      dockerfile: cpu-bound/Dockerfile
+    ports:
+      - "${DOCKER_CPU_PORT:-8001}:8001"
+    environment:
+      WORKERS: ${CPU_WORKERS:-}
+    # Limites opcionais (o entrypoint ajusta os workers à cota de CPU):
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "2"
+    #       memory: 512m
+
+  mem:
+    <<: *app
+    image: ${DOCKERHUB_USER:-lucassousapereira}/poi-mem:${POI_TAG:-latest}
+    build:
+      context: .
+      dockerfile: memory-bound/Dockerfile
+    ports:
+      - "${DOCKER_MEM_PORT:-8002}:8002"
+    environment:
+      WORKERS: ${MEM_WORKERS:-}
+    # Pico de memória ≈ workers × MAX_INFLIGHT (8) × size_mb (128) = 1 GB por worker sob saturação.
+    # Com limite de memória, reduza os workers na mesma proporção (ex.: 2 workers → ~2,5 GB):
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "2"
+    #       memory: 2560m
+
+  io:
+    <<: *app
+    image: ${DOCKERHUB_USER:-lucassousapereira}/poi-io:${POI_TAG:-latest}
+    build:
+      context: .
+      dockerfile: io-bound/Dockerfile
+    ports:
+      - "${DOCKER_IO_PORT:-8003}:8003"
+    environment:
+      WORKERS: ${IO_WORKERS:-}
+    volumes:
+      # arquivos da io-bound no disco do host (fsync de verdade), não na camada overlay do container
+      - poi-io-data:/var/tmp/poi-io
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "2"
+    #       memory: 512m
+
+volumes:
+  poi-io-data:
