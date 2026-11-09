@@ -1,6 +1,7 @@
 # Discos de VM
 *.vdi
 *.vmdk
+*.ova
 # Configuração local
 .env
 # Ambientes conda / Python
