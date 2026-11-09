@@ -4,23 +4,24 @@ Atividade 2 (Demanda, Provisionamento e Desempenho). Grupo: João Henrique Simõ
 
 Três aplicações web só de backend (FastAPI + uvicorn), uma **cpu-bound**, uma **memory-bound** e uma **io-bound**, rodando numa VM do VirtualBox (roteiro em `docs/`). Para cada app, 5 cenários de provisionamento (Sub, Sub→Adequada, Adequada, Adequada→Super, Super) × 5 níveis de demanda (25–125% da carga-alvo) × 3 repetições, medindo tempo de resposta, vazão, CPU, memória e disco.
 
+Para reproduzir em outra máquina a partir do `poi-vm.ova` (notebook Ubuntu ou LCC3), siga o [REPRODUZIR.md](REPRODUZIR.md).
+
 ## Pré-requisitos (host Ubuntu)
 
-- VirtualBox 7.2 (repositório da Oracle; o do Ubuntu não compila no kernel 6.17), usuário no grupo `vboxusers`.
-- Secure Boot: chave MOK registrada (`sudo mokutil --import /var/lib/shim-signed/mok/MOK.der` + reboot) e `sudo /sbin/vboxconfig`.
-- KVM sem VMX ao carregar: `options kvm enable_virt_at_load=0` em `/etc/modprobe.d/`.
-- Miniforge (`~/miniforge3`), k6 (`~/.local/bin`), `sshpass`, `rsync`.
-- Ambiente de análise do host, usado pelas três apps: `conda env create -f cpu-bound/analysis/environment.yml` (`poi-analysis`).
-- Disco base `ubuntu_serve_2204_poi.vdi` fora do repositório; caminho em `.env` (`cp .env.example .env`).
+- VirtualBox 7.2: `sudo ./install_virtualbox.sh` (repositório da Oracle, já que o do Ubuntu não compila no kernel 6.17; grupo `vboxusers`; `options kvm enable_virt_at_load=0`; chave MOK + `vboxconfig` com Secure Boot).
+- O resto, sem sudo: `./bootstrap.sh`. Ele confere `rsync`, `bc`, `curl`, `util-linux`, `iproute2` e `git`; instala Miniforge (`~/miniforge3`) e k6 v2.3.0 (`~/.local/bin`); cria os envs `poi-analysis` (scripts e análise) e `poi-tools` (tmux); gera a chave SSH; e cria o `.env` a partir do `.env.example`.
+- Para criar a VM do zero: disco base `ubuntu_serve_2204_poi.vdi` fora do repositório, com o caminho em `BASE_VDI` no `.env`.
 
 ## Preparação da VM
 
 ```bash
-./vm/setup_vm.sh    # clona o VDI (o original não é alterado), cria a VM com NAT (2222→22, 8080→80, 8001–8003),
-                    # instala a chave SSH (senha usada uma vez), sudo sem senha, rsync/nginx/fio e Miniforge
+./vm/setup_vm.sh             # cria a VM a partir do BASE_VDI (clone; o original não é alterado)
+./vm/setup_vm.sh --existing  # ou usa a VM já existente (ex. importada do poi-vm.ova)
 ```
 
-`vm/vmctl.sh` liga a VM em headless com o processo fixado nos E-cores (CPUs 4–11; o k6 roda nos P-cores 0–3), aplica vCPU/RAM/limite de disco, espera SSH e checa RAM livre do host. `curl localhost:8080` mostra o nginx do roteiro.
+Nos dois casos, o script confere e corrige o NAT (2222→22, 8080→80, 8001–8003), o cache de I/O do host e o grupo `io_limit`. Também checa as portas do host e instala a chave SSH (a senha é usada uma vez, via `SSH_ASKPASS`), o sudo sem senha, rsync/nginx/fio e o Miniforge.
+
+`vm/vmctl.sh` liga a VM em headless e aplica vCPU/RAM/limite de disco no disco anexado à VM (lido do `showvminfo`). Depois espera o SSH e checa a RAM livre do host. A afinidade é opcional: `VM_CPUSET`/`K6_CPUSET` no `.env`, vazios por padrão. Nos experimentos oficiais, a VM ficou nos E-cores (`VM_CPUSET=4-11`) e o k6 nos P-cores (`K6_CPUSET=0-3`). `curl localhost:8080` mostra o nginx do roteiro.
 
 ## Como rodar (cada app)
 
@@ -33,7 +34,7 @@ cd cpu-bound          # ou memory-bound, io-bound
 conda run -n poi-analysis python analysis/analyze.py
 ```
 
-Condições exigidas (checadas antes de cada rodada; o experimento aborta ou espera): perfil de energia `performance`, notebook na tomada, host ocioso (outros processos < 0,5 núcleo por 10 s). Recomendado: Docker parado, Chrome fechado, rodar em `tmux` com `systemd-inhibit --what=sleep:idle:handle-lid-switch`. Avisos de ruído (outros processos > 1 núcleo durante a medição) vão para `results/run.log`.
+Antes de começar, o `run_experiment.sh` lista os cenários cuja vCPU ou RAM não cabem no host. No `--quick`, ele para e sugere um cenário que caiba. Antes de cada rodada, ele checa duas coisas: notebook na tomada (aborta se estiver na bateria) e host ocioso (outros processos < 0,5 núcleo por 10 s; espera até 10 min). Perfil de energia diferente de `performance`, falta do `powerprofilesctl` e ausência de bateria só geram aviso; o estado vai para o `meta.json`. Fora de um clone git, o commit é registrado como "sem commit". Recomendado: Docker parado, Chrome fechado, rodar em `tmux` com `systemd-inhibit --what=sleep:idle:handle-lid-switch`. Avisos de ruído (outros processos > 1 núcleo durante a medição) vão para `results/run.log`.
 
 ## Resultados
 
@@ -58,7 +59,7 @@ Em todas, o padrão é o mesmo: com recurso suficiente a latência fica no tempo
 
 ## Limitações conhecidas
 
-- CPU híbrida (2 P-cores + 8 E-cores, 15 W): a VM fica nos E-cores, que outros processos do host também usam; o custo por requisição varia com o perfil de energia e com o ruído do host (por isso as checagens de energia e de ociosidade).
+- CPU híbrida (2 P-cores + 8 E-cores, 15 W): nos experimentos oficiais a VM ficou nos E-cores, que outros processos do host também usam; o custo por requisição varia com o perfil de energia e com o ruído do host (por isso as checagens de energia e de ociosidade).
 - O k6 roda no mesmo host que a VM. A afinidade separa os núcleos, mas cache, memória e o limite de potência são compartilhados.
 - Só 3 repetições por combinação: o IC 95% fica largo nos pontos de transição (ex.: p95 da cpu-bound com 2 vCPUs a 100% variou de 269 a 748 ms).
 - `bandwidthctl`: blocos zerados não são gravados pelo VDI e escapam do limite (as apps escrevem dados aleatórios); com chegadas espaçadas o limite é excedido em até ~25% (`io-bound/README.md`).

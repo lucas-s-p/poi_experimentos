@@ -62,7 +62,7 @@ if [[ -z "$SUMMARY_ONLY" ]]; then
     mkdir -p "$CAL"; [[ -n "$RESUME" ]] || rm -rf "$CAL/runs"
     exec > >(tee -a "$CAL/calibrate.log") 2>&1
 fi
-COMMIT="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
+COMMIT="$(repo_commit)"
 read -r _ VCPUS RAM _ _ <<<"$(exp_scenarios | head -1)"
 
 # calib_run <nome> <rate> <duração> [warm-up]: reset → host ocioso → [warm-up] → medição

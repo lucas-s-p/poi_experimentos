@@ -50,7 +50,7 @@ if [[ -z "$SUMMARY_ONLY" ]]; then
     mkdir -p "$CAL"; rm -rf "$CAL/runs"
     exec > >(tee "$CAL/calibrate.log") 2>&1
 fi
-COMMIT="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
+COMMIT="$(repo_commit)"
 
 mapfile -t SCEN < <(exp_scenarios)
 read -r SUP_ID SUP_CPUS SUP_MEM _ _ <<<"${SCEN[-1]}"
